@@ -5,21 +5,25 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.workoutlog.data.local.dao.WorkoutEntryDao
+import com.workoutlog.data.local.dao.WorkoutGoalDao
 import com.workoutlog.data.local.dao.WorkoutTypeDao
 import com.workoutlog.data.local.entity.WorkoutEntryEntity
+import com.workoutlog.data.local.entity.WorkoutGoalEntity
 import com.workoutlog.data.local.entity.WorkoutTypeEntity
 
 @Database(
     entities = [
         WorkoutTypeEntity::class,
-        WorkoutEntryEntity::class
+        WorkoutEntryEntity::class,
+        WorkoutGoalEntity::class
     ],
-    version = 3,
+    version = 5,
     exportSchema = true
 )
 abstract class WorkoutDatabase : RoomDatabase() {
     abstract fun workoutTypeDao(): WorkoutTypeDao
     abstract fun workoutEntryDao(): WorkoutEntryDao
+    abstract fun workoutGoalDao(): WorkoutGoalDao
 
     companion object {
         const val DATABASE_NAME = "workout_log.db"
@@ -57,6 +61,28 @@ abstract class WorkoutDatabase : RoomDatabase() {
                 db.execSQL("CREATE INDEX index_workout_entries_date_workoutTypeId ON workout_entries_new (date, workoutTypeId)")
                 db.execSQL("DROP TABLE workout_entries")
                 db.execSQL("ALTER TABLE workout_entries_new RENAME TO workout_entries")
+            }
+        }
+
+        val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("""
+                    CREATE TABLE workout_goals (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        period TEXT NOT NULL,
+                        targetCount INTEGER NOT NULL,
+                        workoutTypeId INTEGER,
+                        isActive INTEGER NOT NULL DEFAULT 1,
+                        createdAt INTEGER NOT NULL DEFAULT 0
+                    )
+                """.trimIndent())
+            }
+        }
+
+        val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE workout_goals ADD COLUMN boundYear INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE workout_goals ADD COLUMN boundMonth INTEGER")
             }
         }
     }

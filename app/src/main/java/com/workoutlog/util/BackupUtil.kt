@@ -32,7 +32,8 @@ object BackupUtil {
                     name = type.name,
                     color = type.color,
                     icon = type.icon,
-                    isDefault = type.isDefault
+                    isDefault = type.isDefault,
+                    isRestDay = type.isRestDay
                 )
             },
             workoutEntries = entries.map { entry ->
@@ -87,7 +88,8 @@ object BackupUtil {
                 name = bt.name,
                 color = bt.color,
                 icon = bt.icon,
-                isDefault = bt.isDefault
+                isDefault = bt.isDefault,
+                isRestDay = bt.isRestDay
             )
         }
         typeRepository.insertAll(typeEntities)

@@ -16,12 +16,11 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -548,7 +547,7 @@ fun YearlyReportContent(state: ReportsUiState) {
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 88.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // 3×2 dash stat cards — equal height via IntrinsicSize.Min
+        // 3×2 dash stat cards
         item {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Row(
@@ -567,7 +566,7 @@ fun YearlyReportContent(state: ReportsUiState) {
                         accentColor = greenAccent,
                         label = "Workouts",
                         value = "$actualWorkouts / $daysElapsed",
-                        modifier = Modifier.weight(1f).fillMaxHeight().heightIn(min = 84.dp)
+                        modifier = Modifier.weight(1f).fillMaxHeight()
                     )
                     DashStatCard(
                         icon = {
@@ -581,7 +580,7 @@ fun YearlyReportContent(state: ReportsUiState) {
                         accentColor = blueAccent,
                         label = "Avg/Month Consistency",
                         value = "$consistencyPct%",
-                        modifier = Modifier.weight(1f).fillMaxHeight().heightIn(min = 84.dp)
+                        modifier = Modifier.weight(1f).fillMaxHeight()
                     )
                 }
                 Row(
@@ -600,7 +599,7 @@ fun YearlyReportContent(state: ReportsUiState) {
                         accentColor = violetAccent,
                         label = "Best Month",
                         value = bestMonthValue,
-                        modifier = Modifier.weight(1f).fillMaxHeight().heightIn(min = 84.dp)
+                        modifier = Modifier.weight(1f).fillMaxHeight()
                     )
                     DashStatCard(
                         icon = {
@@ -614,7 +613,7 @@ fun YearlyReportContent(state: ReportsUiState) {
                         accentColor = Color(0xFF29B6F6),
                         label = "Favourite",
                         value = favouriteWorkout,
-                        modifier = Modifier.weight(1f).fillMaxHeight().heightIn(min = 84.dp)
+                        modifier = Modifier.weight(1f).fillMaxHeight()
                     )
                 }
                 Row(
@@ -633,7 +632,7 @@ fun YearlyReportContent(state: ReportsUiState) {
                         accentColor = orangeAccent,
                         label = "Avg/Month Workouts",
                         value = if (avgPerMonth > 0) "$avgPerMonth" else "—",
-                        modifier = Modifier.weight(1f).fillMaxHeight().heightIn(min = 84.dp)
+                        modifier = Modifier.weight(1f).fillMaxHeight()
                     )
                     DashStatCard(
                         icon = {
@@ -647,7 +646,7 @@ fun YearlyReportContent(state: ReportsUiState) {
                         accentColor = tealAccent,
                         label = "Active Months",
                         value = "$activeMonths / $elapsedMonths",
-                        modifier = Modifier.weight(1f).fillMaxHeight().heightIn(min = 84.dp)
+                        modifier = Modifier.weight(1f).fillMaxHeight()
                     )
                 }
             }

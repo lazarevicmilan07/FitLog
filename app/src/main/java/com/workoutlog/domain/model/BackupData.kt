@@ -16,7 +16,8 @@ data class BackupWorkoutType(
     val name: String,
     val color: Long? = null,
     val icon: String? = null,
-    val isDefault: Boolean = false
+    val isDefault: Boolean = false,
+    val isRestDay: Boolean = false
 )
 
 @Serializable

@@ -28,7 +28,8 @@
       "Bash(tail:*)",
       "Bash(head:*)",
       "Bash(grep:*)",
-      "Bash(cd /c/ComData/Projekti/WorkoutLog && JAVA_HOME=\"/c/Program Files/Android/Android Studio/jbr\" ./gradlew assembleDebug 2>&1)"
+      "Bash(cd /c/ComData/Projekti/WorkoutLog && JAVA_HOME=\"/c/Program Files/Android/Android Studio/jbr\" ./gradlew assembleDebug 2>&1)",
+      "Bash(cd:*)"
     ]
   }
 }

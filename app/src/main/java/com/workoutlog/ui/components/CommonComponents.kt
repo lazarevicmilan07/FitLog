@@ -166,31 +166,31 @@ fun DashStatCard(
 ) {
     Column(
         modifier = modifier
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(14.dp))
             .background(accentColor.copy(alpha = 0.1f))
-            .padding(horizontal = 12.dp, vertical = 10.dp)
+            .padding(horizontal = 10.dp, vertical = 7.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
                 modifier = Modifier
-                    .size(28.dp)
-                    .clip(RoundedCornerShape(8.dp))
+                    .size(24.dp)
+                    .clip(RoundedCornerShape(7.dp))
                     .background(accentColor.copy(alpha = 0.22f)),
                 contentAlignment = Alignment.Center
             ) {
                 icon()
             }
-            Spacer(Modifier.width(8.dp))
+            Spacer(Modifier.width(7.dp))
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelMedium,
                 color = accentColor
             )
         }
-        Spacer(Modifier.height(6.dp))
+        Spacer(Modifier.height(4.dp))
         Text(
             text = value,
-            style = MaterialTheme.typography.titleLarge,
+            style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface
         )

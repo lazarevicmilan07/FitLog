@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.workoutlog.data.local.WorkoutDatabase
 import com.workoutlog.data.local.dao.WorkoutEntryDao
+import com.workoutlog.data.local.dao.WorkoutGoalDao
 import com.workoutlog.data.local.dao.WorkoutTypeDao
 import dagger.Module
 import dagger.Provides
@@ -24,7 +25,7 @@ object DatabaseModule {
             WorkoutDatabase::class.java,
             WorkoutDatabase.DATABASE_NAME
         )
-            .addMigrations(WorkoutDatabase.MIGRATION_1_2, WorkoutDatabase.MIGRATION_2_3)
+            .addMigrations(WorkoutDatabase.MIGRATION_1_2, WorkoutDatabase.MIGRATION_2_3, WorkoutDatabase.MIGRATION_3_4, WorkoutDatabase.MIGRATION_4_5)
             .build()
     }
 
@@ -36,5 +37,10 @@ object DatabaseModule {
     @Provides
     fun provideWorkoutEntryDao(database: WorkoutDatabase): WorkoutEntryDao {
         return database.workoutEntryDao()
+    }
+
+    @Provides
+    fun provideWorkoutGoalDao(database: WorkoutDatabase): WorkoutGoalDao {
+        return database.workoutGoalDao()
     }
 }

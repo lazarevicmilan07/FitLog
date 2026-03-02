@@ -21,9 +21,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
@@ -38,7 +38,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -70,90 +69,90 @@ fun WorkoutTypesScreen(
         showTypeSheet = true
     }
 
-    Scaffold(
-        contentWindowInsets = WindowInsets(0),
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = { openAddSheet() },
-                containerColor = Color(0xFF5E9260)
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "Add workout type")
-            }
-        }
-    ) { padding ->
-        if (state.isLoading) {
-            LoadingIndicator()
-            return@Scaffold
-        }
-
-        if (state.types.isEmpty()) {
-            EmptyState(
-                title = "No workout types",
-                subtitle = "Tap + to create your first workout type",
-                modifier = Modifier.padding(padding)
-            )
-            return@Scaffold
-        }
-
-        LazyColumn(
+    Scaffold(contentWindowInsets = WindowInsets(0)) { padding ->
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding),
-            contentPadding = PaddingValues(top = 0.dp, bottom = 88.dp)
+                .padding(padding)
         ) {
-            item {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.08f))
-                        .padding(start = 16.dp, top = 14.dp, end = 16.dp, bottom = 12.dp)
-                ) {
-                    Text(
-                        text = "Workout Types",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
+            // Header row — always visible
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.08f))
+                    .padding(start = 16.dp, top = 6.dp, end = 6.dp, bottom = 6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Workout Types",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+                IconButton(onClick = { openAddSheet() }) {
+                    Icon(
+                        Icons.Default.Add,
+                        contentDescription = "Add workout type",
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 }
             }
 
-            items(state.types, key = { it.id }) { type ->
-                Column(
+            if (state.isLoading) {
+                LoadingIndicator(modifier = Modifier.weight(1f))
+            } else if (state.types.isEmpty()) {
+                EmptyState(
+                    title = "No workout types",
+                    subtitle = "Tap + to create your first workout type",
+                    modifier = Modifier.weight(1f)
+                )
+            } else {
+                LazyColumn(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { openEditSheet(type.id) }
+                        .fillMaxSize()
+                        .weight(1f),
+                    contentPadding = PaddingValues(bottom = 88.dp)
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 10.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Box(
+                    items(state.types, key = { it.id }) { type ->
+                        Column(
                             modifier = Modifier
-                                .size(32.dp)
-                                .clip(CircleShape)
-                                .background(type.color.copy(alpha = 0.15f)),
-                            contentAlignment = Alignment.Center
+                                .fillMaxWidth()
+                                .clickable { openEditSheet(type.id) }
                         ) {
-                            Icon(
-                                imageVector = getWorkoutIcon(type.icon),
-                                contentDescription = null,
-                                tint = type.color,
-                                modifier = Modifier.size(16.dp)
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 10.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(32.dp)
+                                        .clip(CircleShape)
+                                        .background(type.color.copy(alpha = 0.15f)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = getWorkoutIcon(type.icon),
+                                        contentDescription = null,
+                                        tint = type.color,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
+                                Spacer(Modifier.width(12.dp))
+                                Text(
+                                    text = type.name,
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.Medium,
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
+                            HorizontalDivider(
+                                modifier = Modifier.padding(start = 60.dp),
+                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
                             )
                         }
-                        Spacer(Modifier.width(12.dp))
-                        Text(
-                            text = type.name,
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Medium,
-                            modifier = Modifier.weight(1f)
-                        )
                     }
-                    HorizontalDivider(
-                        modifier = Modifier.padding(start = 60.dp),
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-                    )
                 }
             }
         }

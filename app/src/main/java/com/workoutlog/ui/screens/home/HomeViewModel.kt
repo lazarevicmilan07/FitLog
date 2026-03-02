@@ -2,10 +2,16 @@ package com.workoutlog.ui.screens.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.workoutlog.data.local.entity.WorkoutGoalEntity
 import com.workoutlog.data.repository.WorkoutEntryRepository
+import com.workoutlog.data.repository.WorkoutGoalRepository
 import com.workoutlog.data.repository.WorkoutTypeRepository
+import com.workoutlog.domain.model.GoalPeriod
 import com.workoutlog.domain.model.WorkoutEntry
+import com.workoutlog.domain.model.WorkoutGoal
 import com.workoutlog.domain.model.WorkoutType
+import com.workoutlog.domain.model.getCurrentDateRange
+import com.workoutlog.domain.model.label
 import com.workoutlog.domain.model.toDomain
 import com.workoutlog.domain.model.toEpochMilli
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,10 +22,17 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.YearMonth
 import javax.inject.Inject
+
+data class GoalWithProgress(
+    val goal: WorkoutGoal,
+    val current: Int,
+    val periodLabel: String
+)
 
 data class HomeUiState(
     val isLoading: Boolean = true,
@@ -31,36 +44,74 @@ data class HomeUiState(
     val totalEntries: Int = 0,
     val daysElapsed: Int = 0,
     val workoutPercentage: Int = 0,
-    val selectedFilter: Long? = null
+    val selectedFilters: Set<Long> = emptySet(),
+    val goals: List<GoalWithProgress> = emptyList()
 )
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val entryRepository: WorkoutEntryRepository,
-    private val typeRepository: WorkoutTypeRepository
+    private val typeRepository: WorkoutTypeRepository,
+    private val goalRepository: WorkoutGoalRepository
 ) : ViewModel() {
 
     private val _currentMonth = MutableStateFlow(YearMonth.now())
-    private val _selectedFilter = MutableStateFlow<Long?>(null)
+    private val _selectedFilters = MutableStateFlow<Set<Long>>(emptySet())
+
+    // Covers the full current calendar year — used for goal progress calculation
+    private val _yearlyEntriesFlow = run {
+        val today = LocalDate.now()
+        val yearStart = LocalDate.of(today.year, 1, 1).toEpochMilli()
+        val yearEnd = LocalDate.of(today.year, 12, 31).toEpochMilli()
+        entryRepository.getEntriesBetweenDatesFlow(yearStart, yearEnd)
+    }
+
+    private val _goalProgressFlow = _currentMonth.flatMapLatest { month ->
+        combine(
+            goalRepository.getGoalsForMonthFlow(month.year, month.monthValue),
+            typeRepository.getAllFlow(),
+            _yearlyEntriesFlow
+        ) { goalEntities, typeEntities, yearlyEntries ->
+            val typeMap = typeEntities.associate { it.id to it.toDomain() }
+
+            goalEntities.map { goalEntity ->
+                val goal = goalEntity.toDomain(typeMap[goalEntity.workoutTypeId])
+                val (startMillis, endMillis) = goal.period.getCurrentDateRange()
+
+                val count = yearlyEntries.count { entry ->
+                    entry.date in startMillis..endMillis && when {
+                        goal.workoutTypeId != null -> entry.workoutTypeId == goal.workoutTypeId
+                        else -> typeMap[entry.workoutTypeId]?.isRestDay == false
+                    }
+                }
+
+                GoalWithProgress(
+                    goal = goal,
+                    current = count,
+                    periodLabel = goal.period.label()
+                )
+            }.sortedBy { it.goal.period.ordinal }
+        }
+    }
 
     val uiState: StateFlow<HomeUiState> = combine(
         _currentMonth,
-        _selectedFilter,
+        _selectedFilters,
         typeRepository.getAllFlow(),
         _currentMonth.flatMapLatest { month ->
             val startDate = month.atDay(1).toEpochMilli()
             val endDate = month.atEndOfMonth().toEpochMilli()
             entryRepository.getEntriesBetweenDatesFlow(startDate, endDate)
-        }
-    ) { month, filter, typesEntities, entryEntities ->
+        },
+        _goalProgressFlow
+    ) { month, filters, typesEntities, entryEntities, goalProgress ->
         val typeMap = typesEntities.associate { it.id to it.toDomain() }
         val types = typesEntities.map { it.toDomain() }
         val allEntries = entryEntities.map { it.toDomain(typeMap[it.workoutTypeId]) }
 
-        val filteredEntries = filter?.let { filterId ->
-            allEntries.filter { it.workoutTypeId == filterId }
-        } ?: allEntries
+        val filteredEntries = if (filters.isEmpty()) allEntries
+        else allEntries.filter { it.workoutTypeId in filters }
 
         val entriesByDate = filteredEntries.groupBy { it.date }
 
@@ -85,7 +136,8 @@ class HomeViewModel @Inject constructor(
             totalEntries = totalEntries,
             daysElapsed = daysElapsed,
             workoutPercentage = workoutPercentage,
-            selectedFilter = filter
+            selectedFilters = filters,
+            goals = goalProgress
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), HomeUiState())
 
@@ -101,8 +153,14 @@ class HomeViewModel @Inject constructor(
         _currentMonth.value = yearMonth
     }
 
-    fun setFilter(typeId: Long?) {
-        _selectedFilter.value = typeId
+    fun toggleFilter(typeId: Long) {
+        _selectedFilters.update { current ->
+            if (typeId in current) current - typeId else current + typeId
+        }
+    }
+
+    fun clearFilters() {
+        _selectedFilters.value = emptySet()
     }
 
     fun deleteEntry(entry: WorkoutEntry) {
@@ -111,4 +169,37 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    fun addGoal(period: GoalPeriod, targetCount: Int, workoutTypeId: Long?) {
+        viewModelScope.launch {
+            val month = _currentMonth.value
+            goalRepository.insert(
+                WorkoutGoalEntity(
+                    period = period.name,
+                    targetCount = targetCount,
+                    workoutTypeId = workoutTypeId,
+                    boundYear = month.year,
+                    boundMonth = if (period == GoalPeriod.YEARLY) null else month.monthValue
+                )
+            )
+        }
+    }
+
+    fun updateGoal(goalId: Long, period: GoalPeriod, targetCount: Int, workoutTypeId: Long?) {
+        viewModelScope.launch {
+            val existing = goalRepository.getById(goalId) ?: return@launch
+            goalRepository.update(
+                existing.copy(
+                    period = period.name,
+                    targetCount = targetCount,
+                    workoutTypeId = workoutTypeId
+                )
+            )
+        }
+    }
+
+    fun deleteGoal(goalId: Long) {
+        viewModelScope.launch {
+            goalRepository.deleteById(goalId)
+        }
+    }
 }
