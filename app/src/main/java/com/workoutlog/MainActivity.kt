@@ -1,7 +1,11 @@
 package com.workoutlog
 
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
 import android.os.Bundle
 import android.view.View
+import android.view.animation.AnticipateOvershootInterpolator
+import android.view.animation.DecelerateInterpolator
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -61,6 +65,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -98,7 +103,41 @@ import kotlinx.coroutines.delay
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        installSplashScreen()
+        val splashScreen = installSplashScreen()
+        splashScreen.setOnExitAnimationListener { splashScreenView ->
+            val iconView = splashScreenView.iconView
+
+            val iconScaleX = ObjectAnimator.ofFloat(iconView, View.SCALE_X, 1f, 1.5f)
+            val iconScaleY = ObjectAnimator.ofFloat(iconView, View.SCALE_Y, 1f, 1.5f)
+            val iconFade = ObjectAnimator.ofFloat(iconView, View.ALPHA, 1f, 0f)
+
+            val backgroundSlide = ObjectAnimator.ofFloat(
+                splashScreenView.view,
+                View.TRANSLATION_Y,
+                0f,
+                -splashScreenView.view.height.toFloat() * 0.3f
+            )
+            val backgroundFade = ObjectAnimator.ofFloat(splashScreenView.view, View.ALPHA, 1f, 0f)
+
+            val iconAnimator = AnimatorSet().apply {
+                playTogether(iconScaleX, iconScaleY, iconFade)
+                duration = 400L
+                interpolator = DecelerateInterpolator(1.5f)
+            }
+
+            val backgroundAnimator = AnimatorSet().apply {
+                playTogether(backgroundSlide, backgroundFade)
+                duration = 350L
+                startDelay = 100L
+                interpolator = AnticipateOvershootInterpolator(0.5f)
+            }
+
+            AnimatorSet().apply {
+                playTogether(iconAnimator, backgroundAnimator)
+                doOnEnd { splashScreenView.remove() }
+                start()
+            }
+        }
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 

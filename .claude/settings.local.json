@@ -31,7 +31,10 @@
       "Bash(cd /c/ComData/Projekti/WorkoutLog && JAVA_HOME=\"/c/Program Files/Android/Android Studio/jbr\" ./gradlew assembleDebug 2>&1)",
       "Bash(cd:*)",
       "Bash(gh repo:*)",
-      "Bash(gh api:*)"
+      "Bash(gh api:*)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(d[''sha'']\\)\")",
+      "Bash(ls:*)",
+      "Bash(find:*)"
     ]
   }
 }
