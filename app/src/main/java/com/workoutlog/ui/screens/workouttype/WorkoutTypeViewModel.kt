@@ -61,6 +61,8 @@ sealed class AddEditTypeEvent {
     data object Saved : AddEditTypeEvent()
     data object Deleted : AddEditTypeEvent()
     data class Error(val message: String) : AddEditTypeEvent()
+    /** Emitted when toggling rest day ON would displace an existing rest-day type. */
+    data class ConfirmRestDayConflict(val existingTypeName: String) : AddEditTypeEvent()
 }
 
 @HiltViewModel
@@ -110,7 +112,26 @@ class AddEditWorkoutTypeViewModel @Inject constructor(
     }
 
     fun onRestDayChanged(isRestDay: Boolean) {
-        _uiState.value = _uiState.value.copy(isRestDay = isRestDay)
+        if (!isRestDay) {
+            _uiState.value = _uiState.value.copy(isRestDay = false)
+            return
+        }
+        // Turning ON: check if another type already holds the rest-day flag
+        viewModelScope.launch {
+            val existing = repository.getRestDayType()
+            val currentId = _uiState.value.typeId
+            if (existing != null && existing.id != currentId) {
+                // Another type owns the flag — ask the user to confirm the switch
+                _events.emit(AddEditTypeEvent.ConfirmRestDayConflict(existing.name))
+            } else {
+                _uiState.value = _uiState.value.copy(isRestDay = true)
+            }
+        }
+    }
+
+    /** Called after the user confirms displacing the existing rest-day type. */
+    fun confirmRestDayOverride() {
+        _uiState.value = _uiState.value.copy(isRestDay = true)
     }
 
     fun delete() {
@@ -142,8 +163,12 @@ class AddEditWorkoutTypeViewModel @Inject constructor(
 
             if (state.isEditing) {
                 repository.update(type.toEntity())
+                // If this type is now the rest day, clear the flag from all others
+                if (type.isRestDay) repository.clearRestDayFlagExcept(type.id)
             } else {
-                repository.insert(type.toEntity())
+                val newId = repository.insert(type.toEntity())
+                // If the new type is the rest day, clear the flag from all others
+                if (type.isRestDay) repository.clearRestDayFlagExcept(newId)
             }
 
             _events.emit(AddEditTypeEvent.Saved)

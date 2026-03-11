@@ -1,6 +1,7 @@
 package com.workoutlog
 
 import android.animation.AnimatorSet
+import android.content.Intent
 import android.animation.ObjectAnimator
 import android.os.Bundle
 import android.view.View
@@ -96,6 +97,7 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.material3.ripple
 import androidx.activity.viewModels
+import androidx.core.app.NotificationManagerCompat
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 
@@ -110,7 +112,16 @@ class MainActivity : ComponentActivity() {
         splashScreen.setKeepOnScreenCondition { mainViewModel.onboardingCompleted.value == null }
 
         splashScreen.setOnExitAnimationListener { splashScreenView ->
-            val iconView = splashScreenView.iconView
+            // When launched from a notification the splash screen has no icon view.
+            // Accessing splashScreenView.iconView in that case throws a NPE inside
+            // the AndroidX SplashScreen library, so we guard with a try-catch and
+            // fall back to an instant dismiss.
+            val iconView = try { splashScreenView.iconView } catch (_: Exception) { null }
+
+            if (iconView == null) {
+                splashScreenView.remove()
+                return@setOnExitAnimationListener
+            }
 
             val iconScaleX = ObjectAnimator.ofFloat(iconView, View.SCALE_X, 1f, 1.5f)
             val iconScaleY = ObjectAnimator.ofFloat(iconView, View.SCALE_Y, 1f, 1.5f)
@@ -169,10 +180,27 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    override fun onResume() {
+        super.onResume()
+        // Dismiss the daily reminder notification whenever the app comes to the foreground,
+        // regardless of how it was opened (body tap, action button, or launcher).
+        NotificationManagerCompat.from(this)
+            .cancel(com.workoutlog.notifications.ReminderNotificationHelper.NOTIFICATION_ID)
+    }
+
+    /** Handles re-delivery when the activity is already running (singleTop). */
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+    }
 }
 
 @Composable
-fun MainContent(activity: MainActivity, startDestination: String, isPremium: Boolean) {
+fun MainContent(
+    activity: MainActivity,
+    startDestination: String,
+    isPremium: Boolean
+) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route

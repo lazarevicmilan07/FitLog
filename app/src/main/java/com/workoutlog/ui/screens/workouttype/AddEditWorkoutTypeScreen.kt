@@ -68,6 +68,7 @@ fun AddEditWorkoutTypeSheet(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     var showDeleteConfirm by remember { mutableStateOf(false) }
+    var restDayConflictName by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
@@ -75,6 +76,7 @@ fun AddEditWorkoutTypeSheet(
                 is AddEditTypeEvent.Saved   -> onDismiss()
                 is AddEditTypeEvent.Deleted -> onDismiss()
                 is AddEditTypeEvent.Error   -> snackbarHostState.showSnackbar(event.message)
+                is AddEditTypeEvent.ConfirmRestDayConflict -> restDayConflictName = event.existingTypeName
             }
         }
     }
@@ -315,6 +317,25 @@ fun AddEditWorkoutTypeSheet(
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteConfirm = false }) { Text("Cancel") }
+            }
+        )
+    }
+
+    restDayConflictName?.let { existingName ->
+        AlertDialog(
+            onDismissRequest = { restDayConflictName = null },
+            title = { Text("Change Rest Day Type?") },
+            text = {
+                Text("\"$existingName\" is currently marked as the rest day type. Only one type can have this designation. Continuing will remove it from \"$existingName\".")
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.confirmRestDayOverride()
+                    restDayConflictName = null
+                }) { Text("Continue") }
+            },
+            dismissButton = {
+                TextButton(onClick = { restDayConflictName = null }) { Text("Cancel") }
             }
         )
     }

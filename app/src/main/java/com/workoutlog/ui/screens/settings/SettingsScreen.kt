@@ -1,6 +1,9 @@
 package com.workoutlog.ui.screens.settings
 
+import android.Manifest
+import android.os.Build
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -10,7 +13,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -22,10 +27,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
@@ -48,6 +55,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -57,14 +65,35 @@ import com.workoutlog.BuildConfig
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
+
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.window.Dialog
+import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.Alignment
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -84,9 +113,27 @@ fun SettingsScreen(
     val context = LocalContext.current
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val isPremium by viewModel.isPremium.collectAsStateWithLifecycle()
+    val reminderEnabled by viewModel.reminderEnabled.collectAsStateWithLifecycle()
+    val reminderTime by viewModel.reminderTime.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
     var showAboutDialog by remember { mutableStateOf(false) }
+    var showReminderTimeDialog by remember { mutableStateOf(false) }
+
+    // Launcher for POST_NOTIFICATIONS permission (Android 13+)
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            viewModel.setReminderEnabled(true)
+        } else {
+            Toast.makeText(
+                context,
+                "Notification permission required for reminders",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
 
     // Export / backup dialog state
     var showExportDialog by remember { mutableStateOf(false) }
@@ -312,6 +359,110 @@ fun SettingsScreen(
 
             Spacer(Modifier.height(20.dp))
 
+            // Notifications section
+            SectionTitle("Notifications")
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                elevation = CardDefaults.cardElevation(1.dp)
+            ) {
+                Column {
+                    // Enable / disable toggle row
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                if (!reminderEnabled) {
+                                    // Request POST_NOTIFICATIONS on Android 13+
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                        notificationPermissionLauncher.launch(
+                                            Manifest.permission.POST_NOTIFICATIONS
+                                        )
+                                    } else {
+                                        viewModel.setReminderEnabled(true)
+                                    }
+                                } else {
+                                    viewModel.setReminderEnabled(false)
+                                }
+                            }
+                            .padding(horizontal = 16.dp, vertical = 14.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        SettingsIconBox(
+                            icon = Icons.Default.NotificationsActive,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(Modifier.width(14.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Daily Reminder",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Text(
+                                text = "Remind me to log my workout",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Switch(
+                            checked = reminderEnabled,
+                            onCheckedChange = { enabled ->
+                                if (enabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                    notificationPermissionLauncher.launch(
+                                        Manifest.permission.POST_NOTIFICATIONS
+                                    )
+                                } else {
+                                    viewModel.setReminderEnabled(enabled)
+                                }
+                            }
+                        )
+                    }
+
+                    // Reminder time row (only visible when reminders are enabled)
+                    if (reminderEnabled) {
+                        HorizontalDivider(
+                            modifier = Modifier.padding(start = 58.dp),
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                        )
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { showReminderTimeDialog = true }
+                                .padding(horizontal = 16.dp, vertical = 14.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            SettingsIconBox(
+                                icon = Icons.Default.AccessTime,
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                            Spacer(Modifier.width(14.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "Reminder Time",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.Medium
+                                )
+                                Text(
+                                    text = reminderTime.formatted(),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            Icon(
+                                imageVector = Icons.Default.ChevronRight,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(20.dp))
+
             // About section
             SectionTitle("About")
             Card(
@@ -472,6 +623,19 @@ fun SettingsScreen(
                 TextButton(onClick = { showAboutDialog = false }) {
                     Text("Close")
                 }
+            }
+        )
+    }
+
+    // Reminder time picker dialog
+    if (showReminderTimeDialog) {
+        ReminderTimePickerDialog(
+            currentHour = reminderTime.hour,
+            currentMinute = reminderTime.minute,
+            onDismiss = { showReminderTimeDialog = false },
+            onTimeSelected = { hour, minute ->
+                viewModel.setReminderTime(hour, minute)
+                showReminderTimeDialog = false
             }
         )
     }
@@ -739,6 +903,324 @@ private fun SettingsActionRow(
                 tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                 modifier = Modifier.size(20.dp)
             )
+        }
+    }
+}
+
+/** Scroll-wheel time picker dialog (Samsung alarm clock style, 24-hour format). */
+@Composable
+private fun ReminderTimePickerDialog(
+    currentHour: Int,
+    currentMinute: Int,
+    onDismiss: () -> Unit,
+    onTimeSelected: (hour: Int, minute: Int) -> Unit
+) {
+    var selectedHour by rememberSaveable { mutableIntStateOf(currentHour) }
+    var selectedMinute by rememberSaveable { mutableIntStateOf(currentMinute) }
+    var requestMinutesEdit by remember { mutableStateOf(false) }
+
+    Dialog(onDismissRequest = onDismiss) {
+        Card(
+            shape = RoundedCornerShape(28.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+            ),
+            elevation = CardDefaults.cardElevation(0.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(horizontal = 24.dp, vertical = 24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Set Reminder Time",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(Modifier.height(24.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    TimeScrollColumn(
+                        value = selectedHour,
+                        range = 0..23,
+                        onValueChange = { selectedHour = it },
+                        onDone = { requestMinutesEdit = true },
+                        imeAction = ImeAction.Next
+                    )
+                    Text(
+                        text = ":",
+                        style = MaterialTheme.typography.displayMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.padding(horizontal = 8.dp)
+                    )
+                    TimeScrollColumn(
+                        value = selectedMinute,
+                        range = 0..59,
+                        onValueChange = { selectedMinute = it },
+                        requestEdit = requestMinutesEdit,
+                        onEditStarted = { requestMinutesEdit = false }
+                    )
+                }
+                Spacer(Modifier.height(24.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    TextButton(onClick = onDismiss) { Text("Cancel") }
+                    Spacer(Modifier.width(8.dp))
+                    TextButton(onClick = { onTimeSelected(selectedHour, selectedMinute) }) {
+                        Text("OK")
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * A vertical scroll-wheel drum for picking a single numeric value.
+ *
+ * - Scroll to change value; snaps to the nearest item on fling release.
+ * - Tap the highlighted center item to switch to keyboard input mode.
+ * - Top/bottom items fade out via a gradient overlay to reinforce the drum feel.
+ */
+@Composable
+private fun TimeScrollColumn(
+    value: Int,
+    range: IntRange,
+    onValueChange: (Int) -> Unit,
+    onDone: (() -> Unit)? = null,
+    requestEdit: Boolean = false,
+    onEditStarted: () -> Unit = {},
+    imeAction: ImeAction = ImeAction.Done
+) {
+    val count = range.count()
+    // Large multiplier gives the illusion of infinite scrolling
+    val multiplier = 200
+    val totalItems = count * multiplier
+    val itemHeightDp = 52.dp
+
+    val listState = rememberLazyListState(
+        // Place `value` at the centre (index + 1 from first visible)
+        initialFirstVisibleItemIndex = (multiplier / 2) * count + (value - range.first) - 1
+    )
+    val flingBehavior = rememberSnapFlingBehavior(listState)
+    val scope = rememberCoroutineScope()
+
+    var isEditing by remember { mutableStateOf(false) }
+    var editText by remember { mutableStateOf("") }
+    val focusRequester = remember { FocusRequester() }
+
+    // Enter edit mode when triggered by the sibling column (e.g. hours → minutes)
+    LaunchedEffect(requestEdit) {
+        if (requestEdit) {
+            editText = ""
+            isEditing = true
+            onEditStarted()
+        }
+    }
+
+    // Centre item tracking: once scroll offset exceeds half an item height, the
+    // item visually at center has already moved to firstVisibleItemIndex + 2.
+    val itemHeightPx = with(LocalDensity.current) { itemHeightDp.toPx() }
+    val selectedAbsoluteIndex by remember(itemHeightPx) {
+        derivedStateOf {
+            val offset = listState.firstVisibleItemScrollOffset
+            if (offset > itemHeightPx / 2f) listState.firstVisibleItemIndex + 2
+            else listState.firstVisibleItemIndex + 1
+        }
+    }
+
+    // Keep parent state in sync with the visually selected item.
+    // Using selectedAbsoluteIndex (derived from scroll position) as the key
+    // means the value updates immediately as the user scrolls — no async delay
+    // between the snap settling and Save being pressed.
+    LaunchedEffect(selectedAbsoluteIndex) {
+        onValueChange(range.first + (selectedAbsoluteIndex % count))
+    }
+
+    // Back press while editing exits edit mode instead of closing the dialog
+    BackHandler(enabled = isEditing) {
+        isEditing = false
+        editText = ""
+    }
+
+    // "Hide keyboard" arrow (down button in nav bar) dismisses the keyboard without
+    // triggering back. Detect this by watching IME visibility: when the keyboard
+    // disappears while still in edit mode, exit edit mode so scrolling works again.
+    // A short delay is used so that a transient hide caused by focus transferring
+    // from hours to minutes does not incorrectly kill the minutes edit mode.
+    @OptIn(ExperimentalLayoutApi::class)
+    val imeVisible = WindowInsets.isImeVisible
+    val imeVisibleState = rememberUpdatedState(imeVisible)
+    LaunchedEffect(imeVisible) {
+        if (isEditing && !imeVisible) {
+            delay(200)
+            if (!imeVisibleState.value && isEditing) {
+                isEditing = false
+                editText = ""
+            }
+        }
+    }
+
+    val bgColor = MaterialTheme.colorScheme.surfaceContainerHigh
+    val primary = MaterialTheme.colorScheme.primary
+    val onSurface = MaterialTheme.colorScheme.onSurface
+
+    Box(modifier = Modifier.width(80.dp).height(itemHeightDp * 3)) {
+        if (isEditing) {
+            LaunchedEffect(Unit) { focusRequester.requestFocus() }
+            BasicTextField(
+                value = editText,
+                onValueChange = { text ->
+                    if (text.length <= 2 && text.all { it.isDigit() }) {
+                        // Clamp to range.last if a 2-digit entry exceeds the maximum
+                        // (e.g. "99" → "59" for minutes, "29" → "23" for hours)
+                        val effective = if (text.length == 2) {
+                            val n = text.toInt()
+                            if (n > range.last) "%02d".format(range.last) else text
+                        } else text
+
+                        editText = effective
+                        // Live-update parent so dialog OK always reflects what was typed
+                        effective.toIntOrNull()?.let { num -> if (num in range) onValueChange(num) }
+                        // Auto-advance when a second digit is entered, or when the
+                        // single digit typed can't possibly be a valid tens digit
+                        // (e.g. hours: digit ≥ 3 → no 2-digit hour starts with 3–9).
+                        if (onDone != null) {
+                            val shouldAdvance = effective.length == 2 ||
+                                (effective.length == 1 && (effective.toIntOrNull() ?: 0) * 10 > range.last)
+                            if (shouldAdvance) {
+                                // Scroll the drum to the entered value before hiding
+                                // the text field, so the wheel shows the correct position
+                                effective.toIntOrNull()?.let { num ->
+                                    if (num in range) {
+                                        val targetFirst = (multiplier / 2) * count + (num - range.first) - 1
+                                        scope.launch { listState.scrollToItem(targetFirst) }
+                                    }
+                                }
+                                isEditing = false
+                                editText = ""
+                                onDone.invoke()
+                            }
+                        }
+                    }
+                },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = imeAction
+                ),
+                keyboardActions = KeyboardActions(
+                    onDone = {
+                        val num = editText.toIntOrNull()
+                        if (num != null && num in range) {
+                            onValueChange(num)
+                            val targetFirst = (multiplier / 2) * count + (num - range.first) - 1
+                            scope.launch { listState.scrollToItem(targetFirst) }
+                        }
+                        isEditing = false
+                        editText = ""
+                        onDone?.invoke()
+                    },
+                    onNext = {
+                        val num = editText.toIntOrNull()
+                        if (num != null && num in range) {
+                            onValueChange(num)
+                            val targetFirst = (multiplier / 2) * count + (num - range.first) - 1
+                            scope.launch { listState.scrollToItem(targetFirst) }
+                        }
+                        isEditing = false
+                        editText = ""
+                        onDone?.invoke()
+                    }
+                ),
+                modifier = Modifier.align(Alignment.Center).focusRequester(focusRequester),
+                textStyle = MaterialTheme.typography.displaySmall.copy(
+                    color = primary,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
+                ),
+                singleLine = true,
+                decorationBox = { innerTextField ->
+                    Box(
+                        modifier = Modifier
+                            .size(80.dp, itemHeightDp)
+                            .background(primary.copy(alpha = 0.12f), RoundedCornerShape(12.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (editText.isEmpty()) {
+                            Text(
+                                text = "%02d".format(value),
+                                style = MaterialTheme.typography.displaySmall.copy(
+                                    color = primary.copy(alpha = 0.4f),
+                                    fontWeight = FontWeight.Bold,
+                                    textAlign = TextAlign.Center
+                                )
+                            )
+                        }
+                        innerTextField()
+                    }
+                }
+            )
+        } else {
+            LazyColumn(
+                state = listState,
+                flingBehavior = flingBehavior,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .drawWithContent {
+                        drawContent()
+                        // Fade top third
+                        drawRect(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(bgColor, Color.Transparent),
+                                startY = 0f, endY = size.height / 3f
+                            )
+                        )
+                        // Fade bottom third
+                        drawRect(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(Color.Transparent, bgColor),
+                                startY = size.height * 2f / 3f, endY = size.height
+                            )
+                        )
+                    }
+            ) {
+                items(totalItems) { absoluteIndex ->
+                    val itemValue = range.first + (absoluteIndex % count)
+                    val isSelected = absoluteIndex == selectedAbsoluteIndex
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(itemHeightDp)
+                            .then(
+                                if (isSelected) Modifier.background(
+                                    primary.copy(alpha = 0.12f), RoundedCornerShape(12.dp)
+                                ) else Modifier
+                            )
+                            .clickable {
+                                if (isSelected) {
+                                    editText = ""
+                                    isEditing = true
+                                } else {
+                                    scope.launch { listState.animateScrollToItem(absoluteIndex - 1) }
+                                }
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "%02d".format(itemValue),
+                            style = MaterialTheme.typography.displaySmall,
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                            color = if (isSelected) primary else onSurface.copy(alpha = 0.4f)
+                        )
+                    }
+                }
+            }
         }
     }
 }

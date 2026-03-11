@@ -4,8 +4,11 @@ import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.workoutlog.data.datastore.ReminderPreferences
+import com.workoutlog.data.datastore.ReminderTime
 import com.workoutlog.data.datastore.SettingsDataStore
 import com.workoutlog.data.datastore.ThemeMode
+import com.workoutlog.notifications.ReminderManager
 import com.workoutlog.data.repository.WorkoutEntryRepository
 import com.workoutlog.data.repository.WorkoutGoalRepository
 import com.workoutlog.data.repository.WorkoutTypeRepository
@@ -51,6 +54,8 @@ sealed class SettingsEvent {
 class SettingsViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val settingsDataStore: SettingsDataStore,
+    private val reminderPreferences: ReminderPreferences,
+    private val reminderManager: ReminderManager,
     private val typeRepository: WorkoutTypeRepository,
     private val entryRepository: WorkoutEntryRepository,
     private val goalRepository: WorkoutGoalRepository
@@ -61,6 +66,12 @@ class SettingsViewModel @Inject constructor(
 
     val isPremium: StateFlow<Boolean> = settingsDataStore.isPremium
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
+    val reminderEnabled: StateFlow<Boolean> = reminderPreferences.isEnabled
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
+    val reminderTime: StateFlow<ReminderTime> = reminderPreferences.reminderTime
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ReminderTime(20, 0))
 
     private val _events = MutableSharedFlow<SettingsEvent>()
     val events = _events.asSharedFlow()
@@ -86,6 +97,37 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             settingsDataStore.setThemeMode(mode)
             _uiState.value = _uiState.value.copy(themeMode = mode)
+        }
+    }
+
+    /**
+     * Enables or disables daily reminders.
+     * When enabling, schedules the reminder at the current saved time.
+     * When disabling, cancels any pending reminder.
+     */
+    fun setReminderEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            reminderPreferences.setEnabled(enabled)
+            if (enabled) {
+                val time = reminderPreferences.reminderTime.first()
+                reminderManager.scheduleReminder(time.hour, time.minute)
+            } else {
+                reminderManager.cancelReminder()
+            }
+        }
+    }
+
+    /**
+     * Updates the reminder time and immediately reschedules the pending
+     * WorkManager job so the new time takes effect from the next execution.
+     */
+    fun setReminderTime(hour: Int, minute: Int) {
+        viewModelScope.launch {
+            reminderPreferences.setReminderTime(hour, minute)
+            // Only reschedule if reminders are currently enabled
+            if (reminderPreferences.isEnabled.first()) {
+                reminderManager.scheduleReminder(hour, minute)
+            }
         }
     }
 

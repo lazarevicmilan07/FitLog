@@ -32,6 +32,12 @@ class WorkoutTypeRepository @Inject constructor(
 
     suspend fun deleteAll() = dao.deleteAll()
 
+    /** Returns the single workout type marked as rest day, or null if none exists. */
+    suspend fun getRestDayType(): WorkoutTypeEntity? = dao.getRestDayType()
+
+    /** Clears the rest day flag on every type except [excludeId]. */
+    suspend fun clearRestDayFlagExcept(excludeId: Long) = dao.clearRestDayFlagExcept(excludeId)
+
     suspend fun insertDefaults() {
         if (dao.getCount() == 0) {
             val defaults = listOf(

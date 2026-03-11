@@ -44,4 +44,12 @@ interface WorkoutTypeDao {
 
     @Query("DELETE FROM workout_types")
     suspend fun deleteAll()
+
+    /** Returns the single workout type marked as rest day, or null if none exists. */
+    @Query("SELECT * FROM workout_types WHERE isRestDay = 1 LIMIT 1")
+    suspend fun getRestDayType(): WorkoutTypeEntity?
+
+    /** Clears the rest day flag on every type except the one being saved. */
+    @Query("UPDATE workout_types SET isRestDay = 0 WHERE id != :excludeId")
+    suspend fun clearRestDayFlagExcept(excludeId: Long)
 }

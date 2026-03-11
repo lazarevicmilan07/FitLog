@@ -4,7 +4,9 @@ import com.workoutlog.data.local.dao.DailyCount
 import com.workoutlog.data.local.dao.WorkoutEntryDao
 import com.workoutlog.data.local.dao.WorkoutTypeCount
 import com.workoutlog.data.local.entity.WorkoutEntryEntity
+import com.workoutlog.domain.model.toEpochMilli
 import kotlinx.coroutines.flow.Flow
+import java.time.LocalDate
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -52,4 +54,8 @@ class WorkoutEntryRepository @Inject constructor(
         dao.getCountBetween(startDate, endDate)
 
     suspend fun deleteAll() = dao.deleteAll()
+
+    /** Returns true if any entry (workout or rest day) exists for today's date. */
+    suspend fun hasEntryForToday(): Boolean =
+        dao.getByDate(LocalDate.now().toEpochMilli()) != null
 }

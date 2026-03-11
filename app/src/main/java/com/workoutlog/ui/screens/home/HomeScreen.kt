@@ -79,6 +79,7 @@ import com.workoutlog.ui.screens.entry.AddEditEntrySheet
 import com.workoutlog.ui.screens.entry.EntryViewModel
 import com.workoutlog.ui.screens.overview.MonthCalendar
 import com.workoutlog.ui.theme.getWorkoutIcon
+import androidx.compose.runtime.LaunchedEffect
 import kotlinx.coroutines.launch
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
