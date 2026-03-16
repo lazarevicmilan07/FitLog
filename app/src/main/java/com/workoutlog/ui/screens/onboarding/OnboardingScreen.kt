@@ -22,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.TrackChanges
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -55,6 +56,11 @@ val onboardingPages = listOf(
         icon = Icons.Default.CalendarMonth,
         title = "Monthly Overview",
         description = "See your workout calendar at a glance. Track rest days and stay balanced."
+    ),
+    OnboardingPage(
+        icon = Icons.Default.TrackChanges,
+        title = "Set Workout Goals",
+        description = "Set monthly or yearly goals to stay motivated. Track your progress right on the home screen."
     ),
     OnboardingPage(
         icon = Icons.Default.BarChart,
