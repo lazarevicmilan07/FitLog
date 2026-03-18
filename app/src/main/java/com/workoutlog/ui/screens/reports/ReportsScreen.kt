@@ -81,6 +81,8 @@ import com.workoutlog.ui.components.EmptyState
 import com.workoutlog.ui.components.LoadingIndicator
 import com.workoutlog.ui.components.MonthYearPickerDialog
 import com.workoutlog.ui.components.YearPickerDialog
+import androidx.compose.ui.res.stringResource
+import com.workoutlog.R
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.Month
@@ -95,15 +97,10 @@ import kotlin.math.sqrt
 
 @Composable
 fun ReportsScreen(
-    initialIsMonthly: Boolean = true,
     viewModel: ReportsViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     var showPeriodPicker by remember { mutableStateOf(false) }
-
-    LaunchedEffect(Unit) {
-        viewModel.setMonthly(initialIsMonthly)
-    }
 
     LifecycleResumeEffect(Unit) {
         viewModel.refresh()
@@ -139,17 +136,23 @@ fun ReportsScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            // Title — dynamic per mode
-            Box(
+            // Header with title + segmented tab control inline
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.08f))
-                    .padding(start = 16.dp, top = 14.dp, end = 16.dp, bottom = 12.dp)
+                    .padding(start = 16.dp, top = 14.dp, end = 16.dp, bottom = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = if (state.isMonthly) "Monthly Stats" else "Yearly Stats",
+                    text = stringResource(R.string.reports_title),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
+                )
+                StatsSegmentedControl(
+                    isMonthly = state.isMonthly,
+                    onSelect = { viewModel.setMonthly(it) }
                 )
             }
 
@@ -164,7 +167,7 @@ fun ReportsScreen(
                 IconButton(onClick = { animatePrevious() }) {
                     Icon(
                         Icons.Default.ChevronLeft,
-                        contentDescription = "Previous",
+                        contentDescription = stringResource(R.string.cd_previous),
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
@@ -178,6 +181,7 @@ fun ReportsScreen(
                         text = if (state.isMonthly)
                             YearMonth.of(state.selectedYear, state.selectedMonth)
                                 .format(DateTimeFormatter.ofPattern("MMMM"))
+                                .replaceFirstChar { it.titlecase(Locale.getDefault()) }
                         else
                             "${state.selectedYear}",
                         style = MaterialTheme.typography.titleLarge,
@@ -185,7 +189,7 @@ fun ReportsScreen(
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        text = if (state.isMonthly) "${state.selectedYear}" else "Annual",
+                        text = if (state.isMonthly) "${state.selectedYear}" else stringResource(R.string.reports_annual),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -193,7 +197,7 @@ fun ReportsScreen(
                 IconButton(onClick = { animateNext() }) {
                     Icon(
                         Icons.Default.ChevronRight,
-                        contentDescription = "Next",
+                        contentDescription = stringResource(R.string.cd_next),
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
@@ -303,7 +307,7 @@ fun MonthlyReportContent(state: ReportsUiState) {
     val report = state.monthlyReport
 
     if (report == null || report.totalWorkouts == 0) {
-        EmptyState(title = "No workouts this month", subtitle = "Start logging to see reports")
+        EmptyState(title = stringResource(R.string.reports_no_workouts_month), subtitle = stringResource(R.string.reports_start_logging))
         return
     }
 
@@ -352,7 +356,7 @@ fun MonthlyReportContent(state: ReportsUiState) {
                             )
                         },
                         accentColor = Color(0xFF4CAF6A),
-                        label = "Workouts",
+                        label = stringResource(R.string.stat_workouts),
                         value = "$workoutCount / $daysElapsed",
                         modifier = Modifier.weight(1f)
                     )
@@ -366,7 +370,7 @@ fun MonthlyReportContent(state: ReportsUiState) {
                             )
                         },
                         accentColor = Color(0xFF5B8DEE),
-                        label = "Consistency",
+                        label = stringResource(R.string.stat_consistency),
                         value = "$workoutPercentage%",
                         modifier = Modifier.weight(1f)
                     )
@@ -385,7 +389,7 @@ fun MonthlyReportContent(state: ReportsUiState) {
                             )
                         },
                         accentColor = Color(0xFFEF4444),
-                        label = "Rest Days",
+                        label = stringResource(R.string.overview_rest_days),
                         value = "${report.totalRestDays}",
                         modifier = Modifier.weight(1f)
                     )
@@ -399,7 +403,7 @@ fun MonthlyReportContent(state: ReportsUiState) {
                             )
                         },
                         accentColor = amberAccent,
-                        label = "Favourite",
+                        label = stringResource(R.string.reports_stat_favourite),
                         value = favouriteWorkout,
                         modifier = Modifier.weight(1f)
                     )
@@ -410,7 +414,7 @@ fun MonthlyReportContent(state: ReportsUiState) {
         // Workout distribution — donut + legend side by side
         if (report.workoutTypeCounts.isNotEmpty()) {
             item {
-                StatsCard(title = "Distribution") {
+                StatsCard(title = stringResource(R.string.reports_stat_distribution)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
@@ -436,7 +440,7 @@ fun MonthlyReportContent(state: ReportsUiState) {
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = "Rest days",
+                                    text = stringResource(R.string.reports_rest_days_toggle),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -471,7 +475,7 @@ fun MonthlyReportContent(state: ReportsUiState) {
                             )
                         } else {
                             Text(
-                                text = "No data to display",
+                                text = stringResource(R.string.reports_no_data),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier
@@ -496,7 +500,7 @@ fun YearlyReportContent(state: ReportsUiState) {
     val report = state.yearlyReport
 
     if (report == null || report.totalWorkouts == 0) {
-        EmptyState(title = "No workouts this year", subtitle = "Start logging to see reports")
+        EmptyState(title = stringResource(R.string.reports_no_workouts_year), subtitle = stringResource(R.string.reports_start_logging))
         return
     }
 
@@ -516,6 +520,7 @@ fun YearlyReportContent(state: ReportsUiState) {
     val bestMonthData = report.monthlyCounts.maxByOrNull { it.count }
     val bestMonthValue = if (bestMonthData != null && bestMonthData.count > 0) {
         Month.of(bestMonthData.month).getDisplayName(JTextStyle.FULL, Locale.getDefault())
+            .replaceFirstChar { it.titlecase(Locale.getDefault()) }
     } else "—"
     val completedMonths = when {
         report.year > currentYear -> 0
@@ -564,7 +569,7 @@ fun YearlyReportContent(state: ReportsUiState) {
                             )
                         },
                         accentColor = greenAccent,
-                        label = "Workouts",
+                        label = stringResource(R.string.stat_workouts),
                         value = "$actualWorkouts / $daysElapsed",
                         modifier = Modifier.weight(1f),
                         labelMinLines = 2
@@ -579,7 +584,7 @@ fun YearlyReportContent(state: ReportsUiState) {
                             )
                         },
                         accentColor = tealAccent,
-                        label = "Active Months",
+                        label = stringResource(R.string.reports_stat_active_months),
                         value = "$activeMonths / $elapsedMonths",
                         modifier = Modifier.weight(1f),
                         labelMinLines = 2
@@ -600,7 +605,7 @@ fun YearlyReportContent(state: ReportsUiState) {
                             )
                         },
                         accentColor = violetAccent,
-                        label = "Best Month",
+                        label = stringResource(R.string.reports_stat_best_month),
                         value = bestMonthValue,
                         modifier = Modifier.weight(1f),
                         labelMinLines = 2
@@ -615,7 +620,7 @@ fun YearlyReportContent(state: ReportsUiState) {
                             )
                         },
                         accentColor = Color(0xFF29B6F6),
-                        label = "Favourite",
+                        label = stringResource(R.string.reports_stat_favourite),
                         value = favouriteWorkout,
                         modifier = Modifier.weight(1f),
                         labelMinLines = 2
@@ -636,7 +641,7 @@ fun YearlyReportContent(state: ReportsUiState) {
                             )
                         },
                         accentColor = blueAccent,
-                        label = "Avg/Month Consistency",
+                        label = stringResource(R.string.reports_stat_avg_consistency),
                         value = "$consistencyPct%",
                         modifier = Modifier.weight(1f),
                         labelMinLines = 2
@@ -651,7 +656,7 @@ fun YearlyReportContent(state: ReportsUiState) {
                             )
                         },
                         accentColor = orangeAccent,
-                        label = "Avg/Month Workouts",
+                        label = stringResource(R.string.reports_stat_avg_workouts),
                         value = if (avgPerMonth > 0) "$avgPerMonth" else "—",
                         modifier = Modifier.weight(1f),
                         labelMinLines = 2
@@ -669,7 +674,7 @@ fun YearlyReportContent(state: ReportsUiState) {
                     if (includeRestDays) report.workoutTypeCounts
                     else report.workoutTypeCounts.filter { !it.workoutType.isRestDay }
                 }
-                StatsCard(title = "Distribution") {
+                StatsCard(title = stringResource(R.string.reports_stat_distribution)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
@@ -694,7 +699,7 @@ fun YearlyReportContent(state: ReportsUiState) {
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = "Rest days",
+                                    text = stringResource(R.string.reports_rest_days_toggle),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -728,7 +733,7 @@ fun YearlyReportContent(state: ReportsUiState) {
                             )
                         } else {
                             Text(
-                                text = "No data to display",
+                                text = stringResource(R.string.reports_no_data),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier
@@ -744,7 +749,7 @@ fun YearlyReportContent(state: ReportsUiState) {
 
         // Monthly activity
         item {
-            StatsCard(title = "Monthly Activity") {
+            StatsCard(title = stringResource(R.string.reports_monthly_activity)) {
                 MonthlyBarChart(
                     data = report.monthlyCounts,
                     modifier = Modifier
@@ -859,7 +864,7 @@ fun DonutChart(
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
-                    text = "total",
+                    text = stringResource(R.string.reports_total),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -1050,6 +1055,46 @@ fun MonthlyBarChart(
                 size.height - 2f,
                 labelPaint
             )
+        }
+    }
+}
+
+@Composable
+private fun StatsSegmentedControl(
+    isMonthly: Boolean,
+    onSelect: (Boolean) -> Unit
+) {
+    val primary = MaterialTheme.colorScheme.primary
+    val onPrimary = MaterialTheme.colorScheme.onPrimary
+    val surface = MaterialTheme.colorScheme.surfaceVariant
+    val onSurface = MaterialTheme.colorScheme.onSurfaceVariant
+
+    Row(
+        modifier = Modifier
+            .clip(RoundedCornerShape(8.dp))
+            .background(surface)
+            .padding(2.dp)
+    ) {
+        listOf(true to stringResource(R.string.reports_monthly), false to stringResource(R.string.reports_yearly)).forEach { (monthly, label) ->
+            val selected = isMonthly == monthly
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(if (selected) primary else Color.Transparent)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) { onSelect(monthly) }
+                    .padding(horizontal = 10.dp, vertical = 6.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+                    color = if (selected) onPrimary else onSurface
+                )
+            }
         }
     }
 }

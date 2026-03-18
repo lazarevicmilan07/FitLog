@@ -1,8 +1,16 @@
 package com.workoutlog.ui.screens.home
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
@@ -29,13 +37,17 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
@@ -68,9 +80,12 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.workoutlog.domain.model.GoalPeriod
 import com.workoutlog.domain.model.WorkoutEntry
+import com.workoutlog.domain.model.WorkoutGoal
 import com.workoutlog.domain.model.WorkoutType
 import com.workoutlog.ui.components.DashStatCard
 import com.workoutlog.ui.components.LoadingIndicator
@@ -80,10 +95,17 @@ import com.workoutlog.ui.screens.entry.EntryViewModel
 import com.workoutlog.ui.screens.overview.MonthCalendar
 import com.workoutlog.ui.theme.getWorkoutIcon
 import androidx.compose.runtime.LaunchedEffect
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 import kotlin.math.roundToInt
+import androidx.compose.ui.res.stringArrayResource
+import androidx.compose.ui.res.stringResource
+import com.workoutlog.R
+
+private data class GoalToastData(val goal: WorkoutGoal, val message: String)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -92,10 +114,25 @@ fun HomeScreen(
     entryViewModel: EntryViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val goalCompletedMessages = stringArrayResource(R.array.goal_completed_messages).toList()
+    var goalToast by remember { mutableStateOf<GoalToastData?>(null) }
     var showMonthPicker by remember { mutableStateOf(false) }
     var showGoalSheet by remember { mutableStateOf(false) }
     var editGoalId by remember { mutableStateOf<Long?>(null) }
     var showFilterSheet by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        viewModel.goalCompletedEvent.collect { goal ->
+            goalToast = GoalToastData(goal, goalCompletedMessages.random())
+        }
+    }
+
+    LaunchedEffect(goalToast) {
+        if (goalToast != null) {
+            delay(3500)
+            goalToast = null
+        }
+    }
 
     var showEntrySheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -138,6 +175,7 @@ fun HomeScreen(
     fun animatePrevious() { scope.launch { doAnimatePrevious() } }
     fun animateNext() { scope.launch { doAnimateNext() } }
 
+    Box(modifier = Modifier.fillMaxSize()) {
     Scaffold(contentWindowInsets = WindowInsets(0)) { padding ->
         if (state.isLoading) {
             LoadingIndicator()
@@ -159,7 +197,7 @@ fun HomeScreen(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "Workout Log",
+                    text = stringResource(R.string.home_title),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
@@ -174,7 +212,7 @@ fun HomeScreen(
                         ) {
                             Icon(
                                 Icons.Default.FilterList,
-                                contentDescription = "Filter",
+                                contentDescription = stringResource(R.string.cd_filter),
                                 tint = if (state.selectedFilters.isNotEmpty())
                                     MaterialTheme.colorScheme.primary
                                 else
@@ -185,7 +223,7 @@ fun HomeScreen(
                     IconButton(onClick = { openAddSheet(null) }) {
                         Icon(
                             Icons.Default.Add,
-                            contentDescription = "Add workout",
+                            contentDescription = stringResource(R.string.cd_add_workout),
                             tint = MaterialTheme.colorScheme.primary
                         )
                     }
@@ -203,7 +241,7 @@ fun HomeScreen(
                 IconButton(onClick = { animatePrevious() }) {
                     Icon(
                         Icons.Default.ChevronLeft,
-                        contentDescription = "Previous month",
+                        contentDescription = stringResource(R.string.cd_previous_month),
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
@@ -214,7 +252,8 @@ fun HomeScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = state.currentMonth.format(monthFormatter),
+                        text = state.currentMonth.format(monthFormatter)
+                            .replaceFirstChar { it.titlecase(Locale.getDefault()) },
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
@@ -228,7 +267,7 @@ fun HomeScreen(
                 IconButton(onClick = { animateNext() }) {
                     Icon(
                         Icons.Default.ChevronRight,
-                        contentDescription = "Next month",
+                        contentDescription = stringResource(R.string.cd_next_month),
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
@@ -284,7 +323,7 @@ fun HomeScreen(
                                     )
                                 },
                                 accentColor = Color(0xFF4CAF6A),
-                                label = "Workouts",
+                                label = stringResource(R.string.stat_workouts),
                                 value = if (hasData) "${state.workoutCount} / ${state.daysElapsed}" else "—",
                                 modifier = Modifier.weight(1f)
                             )
@@ -298,7 +337,7 @@ fun HomeScreen(
                                     )
                                 },
                                 accentColor = Color(0xFF5B8DEE),
-                                label = "Consistency",
+                                label = stringResource(R.string.stat_consistency),
                                 value = if (hasData) "${state.workoutPercentage}%" else "—",
                                 modifier = Modifier.weight(1f)
                             )
@@ -333,6 +372,31 @@ fun HomeScreen(
             }
         }
     }
+
+    // Goal completed toast overlay
+    AnimatedVisibility(
+        visible = goalToast != null,
+        enter = slideInVertically(
+            animationSpec = spring(
+                dampingRatio = Spring.DampingRatioMediumBouncy,
+                stiffness = Spring.StiffnessMediumLow
+            )
+        ) { it } + fadeIn(tween(150)),
+        exit = slideOutVertically(tween(200)) { it } + fadeOut(tween(200)),
+        modifier = Modifier
+            .align(Alignment.BottomCenter)
+            .fillMaxWidth()
+    ) {
+        goalToast?.let { toast ->
+            GoalCompletedToast(
+                goal = toast.goal,
+                message = toast.message,
+                onDismiss = { goalToast = null }
+            )
+        }
+    }
+
+    } // end Box
 
     // Month/year picker
     if (showMonthPicker) {
@@ -399,6 +463,99 @@ fun HomeScreen(
     }
 }
 
+@Composable
+private fun GoalCompletedToast(
+    goal: WorkoutGoal,
+    message: String,
+    onDismiss: () -> Unit
+) {
+    val accentColor = when (goal.period) {
+        GoalPeriod.MONTHLY -> Color(0xFF9C6ADE)
+        GoalPeriod.YEARLY  -> Color(0xFFD4720A)
+    }
+    val periodLetter = when (goal.period) {
+        GoalPeriod.MONTHLY -> "M"
+        GoalPeriod.YEARLY  -> "Y"
+    }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .padding(bottom = 80.dp)
+            .clickable(onClick = onDismiss),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+        border = BorderStroke(1.dp, accentColor.copy(alpha = 0.35f))
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            // Icon box
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(accentColor.copy(alpha = 0.15f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Star,
+                    contentDescription = null,
+                    tint = accentColor,
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+            // Text
+            Column(modifier = Modifier.weight(1f)) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Text(
+                        text = "Goal Complete!",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = accentColor
+                    )
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(accentColor.copy(alpha = 0.15f))
+                            .padding(horizontal = 5.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = periodLetter,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = accentColor,
+                            fontSize = 10.sp,
+                            lineHeight = 10.sp
+                        )
+                    }
+                }
+                Text(
+                    text = message,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 2
+                )
+            }
+            // Checkmark
+            Icon(
+                imageVector = Icons.Filled.CheckCircle,
+                contentDescription = null,
+                tint = Color(0xFF4A9B6F),
+                modifier = Modifier.size(20.dp)
+            )
+        }
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 private fun FilterSheet(
@@ -429,13 +586,13 @@ private fun FilterSheet(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "Filter by Workout Type",
+                    text = stringResource(R.string.filter_by_type),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
                 if (selectedFilters.isNotEmpty()) {
                     TextButton(onClick = onClearFilters) {
-                        Text("Clear all")
+                        Text(stringResource(R.string.filter_clear_all))
                     }
                 }
             }

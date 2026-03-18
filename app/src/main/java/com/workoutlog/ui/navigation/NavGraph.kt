@@ -20,7 +20,7 @@ private const val ANIM_DURATION = 300
 
 private fun getNavIndex(route: String?): Int = when (route) {
     Screen.Home.route -> 0
-    Screen.StatsMonthly.route, Screen.StatsYearly.route -> 1
+    Screen.Stats.route, Screen.StatsMonthly.route, Screen.StatsYearly.route -> 1
     Screen.WorkoutTypes.route -> 2
     Screen.Settings.route -> 3
     else -> -1
@@ -71,12 +71,8 @@ fun NavGraph(
             HomeScreen()
         }
 
-        composable(Screen.StatsMonthly.route) {
-            ReportsScreen(initialIsMonthly = true)
-        }
-
-        composable(Screen.StatsYearly.route) {
-            ReportsScreen(initialIsMonthly = false)
+        composable(Screen.Stats.route) {
+            ReportsScreen()
         }
 
         composable(Screen.WorkoutTypes.route) {

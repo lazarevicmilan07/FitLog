@@ -1,4 +1,250 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Workout Log</string>
+
+    <!-- Bottom Navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_stats">Stats</string>
+    <string name="nav_types">Types</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Common buttons / shared -->
+    <string name="btn_ok">OK</string>
+    <string name="btn_cancel">Cancel</string>
+    <string name="btn_save">Save</string>
+    <string name="btn_delete">Delete</string>
+    <string name="btn_close">Close</string>
+    <string name="btn_continue">Continue</string>
+    <string name="cd_back">Back</string>
+
+    <!-- Home Screen -->
+    <string name="home_title">Workout Log</string>
+    <string name="cd_filter">Filter</string>
+    <string name="cd_add_workout">Add workout</string>
+    <string name="cd_previous_month">Previous month</string>
+    <string name="cd_next_month">Next month</string>
+    <string name="stat_workouts">Workouts</string>
+    <string name="stat_consistency">Consistency</string>
+    <string name="filter_by_type">Filter by Workout Type</string>
+    <string name="filter_clear_all">Clear all</string>
+
+    <!-- Goals Section -->
+    <string name="goals_title">Goals</string>
+    <string name="cd_manage_goals">Manage goals</string>
+    <string name="goals_empty">Tap + to set a goal</string>
+    <string name="goals_all_workouts">All Workouts</string>
+    <string name="cd_goal_completed">Goal completed</string>
+    <string name="cd_goal_not_completed">Goal not completed</string>
+    <string name="goals_period_monthly">Monthly</string>
+    <string name="goals_period_yearly">Yearly</string>
+    <string name="goals_complete_title">Goal Complete!</string>
+    <string name="goals_period_label">Period</string>
+    <string name="goals_workout_type_label">Workout Type</string>
+    <string name="goals_target_label">Target</string>
+    <string name="goals_edit_header">Edit Goal</string>
+    <string name="goals_new_header">New Goal</string>
+    <string name="goals_new_btn">New Goal</string>
+    <string name="goals_update_btn">Update Goal</string>
+    <string name="goals_add_btn">Add Goal</string>
+    <string name="goals_target_progress">Target %1$d  ·  %2$d/%3$d this period</string>
+    <string name="goals_delete_cd">Delete goal</string>
+
+    <!-- Goal Completion Messages (random motivational toasts) -->
+    <string-array name="goal_completed_messages">
+        <item>Goal crushed! Keep that momentum going!</item>
+        <item>You did it! Target reached!</item>
+        <item>That\'s what dedication looks like. Goal complete!</item>
+        <item>Another goal down. You\'re unstoppable!</item>
+        <item>Goal reached! Your hard work is paying off.</item>
+        <item>Consistency wins. Goal achieved!</item>
+        <item>Mission accomplished. You\'re on fire!</item>
+        <item>You set it, you hit it. Well done!</item>
+        <item>One goal down, no stopping now!</item>
+        <item>Hard work pays off. Goal complete!</item>
+    </string-array>
+
+    <!-- Entry Item -->
+    <string name="entry_unknown">Unknown</string>
+    <string name="cd_delete">Delete</string>
+
+    <!-- Add / Edit Entry Screen -->
+    <string name="cd_close">Close</string>
+    <string name="entry_edit_title">Edit Workout</string>
+    <string name="entry_add_title">Log Workout</string>
+    <string name="entry_duplicate_warning">A workout already exists for this date. Saving will replace it.</string>
+    <string name="entry_workout_type_label">Workout Type</string>
+    <string name="entry_no_types">No workout types yet — add some in Types tab</string>
+    <string name="entry_duration_label">Duration</string>
+    <string name="entry_duration_unit">min</string>
+    <string name="entry_calories_label">Calories</string>
+    <string name="entry_calories_unit">kcal</string>
+    <string name="entry_note_label">Note</string>
+    <string name="entry_note_hint">How was your workout?</string>
+    <string name="entry_delete_dialog_title">Delete workout?</string>
+    <string name="entry_delete_dialog_message">This action cannot be undone.</string>
+
+    <!-- Workout Types Screen -->
+    <string name="types_title">Workout Types</string>
+    <string name="cd_add_type">Add workout type</string>
+    <string name="types_empty_title">No workout types</string>
+    <string name="types_empty_subtitle">Tap + to create your first workout type</string>
+
+    <!-- Add / Edit Workout Type Screen -->
+    <string name="type_edit_title">Edit Type</string>
+    <string name="type_add_title">Add Type</string>
+    <string name="type_name_label">Name</string>
+    <string name="type_name_hint">e.g. Chest, Cardio</string>
+    <string name="type_color_label">Color</string>
+    <string name="type_icon_label">Icon</string>
+    <string name="type_rest_day_label">Rest Day</string>
+    <string name="type_rest_day_subtitle">Mark this type as a rest day</string>
+    <string name="type_delete_dialog_title">Delete %s?</string>
+    <string name="type_delete_dialog_message">This will also delete all workout entries of this type. This action cannot be undone.</string>
+    <string name="type_change_rest_title">Change Rest Day Type?</string>
+    <string name="type_change_rest_message">\"%1$s\" is currently marked as the rest day type. Only one type can have this designation. Continuing will remove it from \"%1$s\".</string>
+
+    <!-- Onboarding Screen -->
+    <string name="onboarding_skip">Skip</string>
+    <string name="onboarding_get_started">Get Started</string>
+    <string name="onboarding_next">Next</string>
+    <string name="onboarding_page0_title">Track Your Workouts</string>
+    <string name="onboarding_page0_desc">Log every workout with type, duration, and notes. Stay consistent and build healthy habits.</string>
+    <string name="onboarding_page1_title">Monthly Overview</string>
+    <string name="onboarding_page1_desc">See your workout calendar at a glance. Track rest days and stay balanced.</string>
+    <string name="onboarding_page2_title">Set Workout Goals</string>
+    <string name="onboarding_page2_desc">Set monthly or yearly goals to stay motivated. Track your progress right on the home screen.</string>
+    <string name="onboarding_page3_title">Detailed Reports</string>
+    <string name="onboarding_page3_desc">Visualize your progress with charts. Export reports to Excel or PDF.</string>
+
+    <!-- Reports / Stats Screen -->
+    <string name="reports_title">Stats</string>
+    <string name="cd_previous">Previous</string>
+    <string name="cd_next">Next</string>
+    <string name="reports_monthly">Monthly</string>
+    <string name="reports_yearly">Yearly</string>
+    <string name="reports_annual">Annual</string>
+    <string name="reports_no_workouts_month">No workouts this month</string>
+    <string name="reports_no_workouts_year">No workouts this year</string>
+    <string name="reports_start_logging">Start logging to see reports</string>
+    <string name="reports_stat_favourite">Favourite</string>
+    <string name="reports_stat_distribution">Distribution</string>
+    <string name="reports_rest_days_toggle">Rest days</string>
+    <string name="reports_no_data">No data to display</string>
+    <string name="reports_stat_active_months">Active Months</string>
+    <string name="reports_stat_best_month">Best Month</string>
+    <string name="reports_stat_avg_consistency">Avg/Month Consistency</string>
+    <string name="reports_stat_avg_workouts">Avg/Month Workouts</string>
+    <string name="reports_monthly_activity">Monthly Activity</string>
+    <string name="reports_total">total</string>
+
+    <!-- Date Picker Dialogs -->
+    <string name="picker_select_month_year">Select Month and Year</string>
+    <string name="cd_prev_year">Previous year</string>
+    <string name="cd_next_year">Next year</string>
+    <string name="picker_select_year">Select Year</string>
+    <string name="month_jan">Jan</string>
+    <string name="month_feb">Feb</string>
+    <string name="month_mar">Mar</string>
+    <string name="month_apr">Apr</string>
+    <string name="month_may">May</string>
+    <string name="month_jun">Jun</string>
+    <string name="month_jul">Jul</string>
+    <string name="month_aug">Aug</string>
+    <string name="month_sep">Sep</string>
+    <string name="month_oct">Oct</string>
+    <string name="month_nov">Nov</string>
+    <string name="month_dec">Dec</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_premium_toast">Premium activated! All features unlocked.</string>
+    <string name="settings_section_appearance">Appearance</string>
+    <string name="settings_theme">Theme</string>
+    <string name="settings_theme_auto">Auto</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_theme_dark">Dark</string>
+    <string name="settings_section_language">Language</string>
+    <string name="settings_language">Language</string>
+    <string name="settings_language_subtitle">App display language</string>
+    <string name="settings_section_data">Data</string>
+    <string name="settings_export_excel">Export to Excel</string>
+    <string name="settings_export_excel_subtitle">Export workout report as spreadsheet</string>
+    <string name="settings_export_pdf">Export to PDF</string>
+    <string name="settings_export_pdf_subtitle">Export workout report as PDF document</string>
+    <string name="settings_backup">Backup data</string>
+    <string name="settings_backup_subtitle">Export all data to JSON file</string>
+    <string name="settings_restore">Restore data</string>
+    <string name="settings_restore_subtitle">Import data from JSON backup</string>
+    <string name="settings_premium_feature">Premium feature</string>
+    <string name="settings_section_notifications">Notifications</string>
+    <string name="settings_notif_permission">Notification permission required for reminders</string>
+    <string name="settings_daily_reminder">Daily Reminder</string>
+    <string name="settings_daily_reminder_subtitle">Remind me to log my workout</string>
+    <string name="settings_reminder_time">Reminder Time</string>
+    <string name="settings_backup_reminder">Backup Reminder</string>
+    <string name="settings_backup_reminder_subtitle">Remind me to back up my data</string>
+    <string name="settings_frequency">Frequency</string>
+    <string name="settings_freq_daily">Daily</string>
+    <string name="settings_freq_weekly">Weekly</string>
+    <string name="settings_freq_monthly">Monthly</string>
+    <string name="settings_day_of_week">Day of Week</string>
+    <string name="settings_day_of_month">Day of Month</string>
+    <string name="settings_section_about">About</string>
+    <string name="settings_version">Version %s</string>
+    <string name="settings_privacy_policy">Privacy Policy</string>
+    <string name="settings_rate_app">Rate App</string>
+    <string name="settings_reminder_time_title">Set Reminder Time</string>
+    <string name="settings_restore_title">Restore Data</string>
+    <string name="settings_restore_message">This will permanently delete all your current workout data and replace it with the data from the backup file.\n\nThis action cannot be undone. Are you sure you want to continue?</string>
+    <string name="settings_restore_btn">Restore</string>
+    <string name="settings_upgrade_premium">Upgrade to Premium</string>
+    <string name="settings_upgrade_subtitle">Unlock all features with a one-time purchase</string>
+    <string name="settings_backup_data_title">Backup Data</string>
+    <string name="settings_export_report_title">Export Report</string>
+    <string name="export_monthly_title">Monthly</string>
+    <string name="export_monthly_desc">Select data for a specific month</string>
+    <string name="export_yearly_title">Yearly</string>
+    <string name="export_yearly_desc">Select data for a full year</string>
+    <string name="export_select_month">Select Month</string>
+    <string name="export_select_year">Select Year</string>
+
+    <!-- Messages emitted from ViewModel (resolved in UI layer) -->
+    <string name="msg_backup_saved">Backup saved successfully</string>
+    <string name="msg_backup_failed">Backup failed: %s</string>
+    <string name="msg_restore_success">Data restored successfully</string>
+    <string name="msg_restore_invalid">Invalid backup file</string>
+    <string name="msg_restore_failed">Restore failed: %s</string>
+    <string name="msg_excel_exported">Excel exported successfully</string>
+    <string name="msg_pdf_exported">PDF exported successfully</string>
+    <string name="msg_export_failed">Export failed: %s</string>
+
+    <!-- Premium Screen -->
+    <string name="premium_title">Unlock Premium</string>
+    <string name="premium_subtitle">One-time purchase, lifetime access</string>
+    <string name="premium_feature_backup">Backup &amp; Restore</string>
+    <string name="premium_feature_backup_desc">Never lose your workout data</string>
+    <string name="premium_feature_no_ads">Remove Ads</string>
+    <string name="premium_feature_no_ads_desc">Enjoy an ad-free experience</string>
+    <string name="premium_one_time">One-time payment</string>
+    <string name="premium_unlock_btn">Unlock Premium</string>
+    <string name="premium_restore_btn">Restore Purchases</string>
+    <string name="premium_secure_payment">Secure payment via Google Play</string>
+    <string name="premium_unlocked_toast">Premium unlocked! Thank you!</string>
+    <string name="premium_canceled_toast">Purchase canceled</string>
+
+    <!-- Overview Screen -->
+    <string name="overview_rest_days">Rest Days</string>
+    <string name="overview_top_type">Top Type</string>
+    <string name="overview_all">All</string>
+    <string name="overview_this_month">Workouts this month</string>
+
+    <!-- Language Picker Dialog -->
+    <string name="lang_picker_title">Select Language</string>
+    <string name="lang_en">English</string>
+    <string name="lang_es">Español</string>
+    <string name="lang_pt">Português</string>
+    <string name="lang_de">Deutsch</string>
+    <string name="lang_fr">Français</string>
+    <string name="lang_ru">Русский</string>
+    <string name="lang_sr">Srpski</string>
 </resources>

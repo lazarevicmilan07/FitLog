@@ -1,5 +1,6 @@
 package com.workoutlog.ui.navigation
 
+import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.FitnessCenter
@@ -10,11 +11,13 @@ import androidx.compose.material.icons.outlined.FitnessCenter
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.workoutlog.R
 
 sealed class Screen(val route: String) {
     data object Onboarding : Screen("onboarding")
     data object Home : Screen("home")
     data object Overview : Screen("overview")
+    data object Stats : Screen("stats")
     data object StatsMonthly : Screen("stats_monthly")
     data object StatsYearly : Screen("stats_yearly")
     data object WorkoutTypes : Screen("workout_types")
@@ -34,14 +37,14 @@ sealed class Screen(val route: String) {
 
 data class BottomNavItem(
     val screen: Screen,
-    val label: String,
+    @StringRes val labelRes: Int,
     val selectedIcon: ImageVector,
     val unselectedIcon: ImageVector
 )
 
 val bottomNavItems = listOf(
-    BottomNavItem(Screen.Home, "Home", Icons.Filled.Home, Icons.Outlined.Home),
-    BottomNavItem(Screen.StatsMonthly, "Stats", Icons.Filled.BarChart, Icons.Outlined.BarChart),
-    BottomNavItem(Screen.WorkoutTypes, "Types", Icons.Filled.FitnessCenter, Icons.Outlined.FitnessCenter),
-    BottomNavItem(Screen.Settings, "Settings", Icons.Filled.Settings, Icons.Outlined.Settings),
+    BottomNavItem(Screen.Home, R.string.nav_home, Icons.Filled.Home, Icons.Outlined.Home),
+    BottomNavItem(Screen.Stats, R.string.nav_stats, Icons.Filled.BarChart, Icons.Outlined.BarChart),
+    BottomNavItem(Screen.WorkoutTypes, R.string.nav_types, Icons.Filled.FitnessCenter, Icons.Outlined.FitnessCenter),
+    BottomNavItem(Screen.Settings, R.string.nav_settings, Icons.Filled.Settings, Icons.Outlined.Settings),
 )

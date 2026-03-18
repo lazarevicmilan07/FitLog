@@ -50,11 +50,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.workoutlog.R
 import com.workoutlog.ui.components.LoadingIndicator
 import com.workoutlog.ui.theme.WorkoutColors
 import com.workoutlog.ui.theme.WorkoutIcons
@@ -100,12 +102,12 @@ fun AddEditWorkoutTypeSheet(
             IconButton(onClick = onDismiss) {
                 Icon(
                     Icons.Default.Close,
-                    contentDescription = "Close",
+                    contentDescription = stringResource(R.string.cd_close),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             Text(
-                text = if (state.isEditing) "Edit Type" else "Add Type",
+                text = if (state.isEditing) stringResource(R.string.type_edit_title) else stringResource(R.string.type_add_title),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.weight(1f),
@@ -129,7 +131,7 @@ fun AddEditWorkoutTypeSheet(
                 // Name
                 Column {
                     Text(
-                        text = "Name",
+                        text = stringResource(R.string.type_name_label),
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Medium
                     )
@@ -138,7 +140,7 @@ fun AddEditWorkoutTypeSheet(
                         value = state.name,
                         onValueChange = viewModel::onNameChanged,
                         modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text("e.g. Chest, Cardio") },
+                        placeholder = { Text(stringResource(R.string.type_name_hint)) },
                         singleLine = true,
                         shape = RoundedCornerShape(12.dp)
                     )
@@ -147,7 +149,7 @@ fun AddEditWorkoutTypeSheet(
                 // Color picker
                 Column {
                     Text(
-                        text = "Color",
+                        text = stringResource(R.string.type_color_label),
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Medium
                     )
@@ -187,7 +189,7 @@ fun AddEditWorkoutTypeSheet(
                 // Icon picker
                 Column {
                     Text(
-                        text = "Icon",
+                        text = stringResource(R.string.type_icon_label),
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Medium
                     )
@@ -236,12 +238,12 @@ fun AddEditWorkoutTypeSheet(
                 ) {
                     Column {
                         Text(
-                            text = "Rest Day",
+                            text = stringResource(R.string.type_rest_day_label),
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.Medium
                         )
                         Text(
-                            text = "Mark this type as a rest day",
+                            text = stringResource(R.string.type_rest_day_subtitle),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -277,7 +279,7 @@ fun AddEditWorkoutTypeSheet(
                     ) {
                         Icon(Icons.Default.Delete, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(Modifier.width(6.dp))
-                        Text("Delete", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                        Text(stringResource(R.string.btn_delete), fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
                     }
                 }
                 Button(
@@ -296,7 +298,7 @@ fun AddEditWorkoutTypeSheet(
                 ) {
                     Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(16.dp))
                     Spacer(Modifier.width(6.dp))
-                    Text("Save", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                    Text(stringResource(R.string.btn_save), fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
                 }
             }
         }
@@ -307,16 +309,16 @@ fun AddEditWorkoutTypeSheet(
     if (showDeleteConfirm) {
         AlertDialog(
             onDismissRequest = { showDeleteConfirm = false },
-            title = { Text("Delete ${state.name}?") },
-            text = { Text("This will also delete all workout entries of this type. This action cannot be undone.") },
+            title = { Text(stringResource(R.string.type_delete_dialog_title, state.name)) },
+            text = { Text(stringResource(R.string.type_delete_dialog_message)) },
             confirmButton = {
                 TextButton(onClick = {
                     viewModel.delete()
                     showDeleteConfirm = false
-                }) { Text("Delete", color = MaterialTheme.colorScheme.error) }
+                }) { Text(stringResource(R.string.btn_delete), color = MaterialTheme.colorScheme.error) }
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteConfirm = false }) { Text("Cancel") }
+                TextButton(onClick = { showDeleteConfirm = false }) { Text(stringResource(R.string.btn_cancel)) }
             }
         )
     }
@@ -324,9 +326,9 @@ fun AddEditWorkoutTypeSheet(
     restDayConflictName?.let { existingName ->
         AlertDialog(
             onDismissRequest = { restDayConflictName = null },
-            title = { Text("Change Rest Day Type?") },
+            title = { Text(stringResource(R.string.type_change_rest_title)) },
             text = {
-                Text("\"$existingName\" is currently marked as the rest day type. Only one type can have this designation. Continuing will remove it from \"$existingName\".")
+                Text(stringResource(R.string.type_change_rest_message, existingName))
             },
             confirmButton = {
                 TextButton(onClick = {
@@ -335,7 +337,7 @@ fun AddEditWorkoutTypeSheet(
                 }) { Text("Continue") }
             },
             dismissButton = {
-                TextButton(onClick = { restDayConflictName = null }) { Text("Cancel") }
+                TextButton(onClick = { restDayConflictName = null }) { Text(stringResource(R.string.btn_cancel)) }
             }
         )
     }

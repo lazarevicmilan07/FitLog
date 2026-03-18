@@ -1,6 +1,7 @@
 package com.workoutlog.ui.screens.settings
 
 import android.Manifest
+import android.app.Activity
 import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
@@ -41,6 +42,8 @@ import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.TableChart
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
@@ -62,6 +65,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import com.workoutlog.BuildConfig
+import com.workoutlog.R
+import com.workoutlog.data.preferences.LanguagePreferences
+import com.workoutlog.data.preferences.supportedLanguages
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -94,16 +100,23 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.workoutlog.data.datastore.ThemeMode
+import com.workoutlog.notifications.BackupMonthlyOption
+import com.workoutlog.notifications.BackupReminderFrequency
+import com.workoutlog.notifications.BackupReminderSettings
 import com.workoutlog.ui.components.MonthGrid
 import com.workoutlog.ui.components.YearGrid
+import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
+import java.time.format.TextStyle
+import java.util.Locale
 
 @Composable
 fun SettingsScreen(
@@ -115,10 +128,16 @@ fun SettingsScreen(
     val isPremium by viewModel.isPremium.collectAsStateWithLifecycle()
     val reminderEnabled by viewModel.reminderEnabled.collectAsStateWithLifecycle()
     val reminderTime by viewModel.reminderTime.collectAsStateWithLifecycle()
+    val backupReminderSettings by viewModel.backupReminderSettings.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
     var showAboutDialog by remember { mutableStateOf(false) }
     var showReminderTimeDialog by remember { mutableStateOf(false) }
+    var showBackupReminderTimeDialog by remember { mutableStateOf(false) }
+    var showBackupReminderDayOfWeekDialog by remember { mutableStateOf(false) }
+    var showBackupReminderDayOfMonthDialog by remember { mutableStateOf(false) }
+    var showLanguageDialog by remember { mutableStateOf(false) }
+    val currentLanguage = remember { LanguagePreferences.getLanguage(context) }
 
     // Launcher for POST_NOTIFICATIONS permission (Android 13+)
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
@@ -129,7 +148,21 @@ fun SettingsScreen(
         } else {
             Toast.makeText(
                 context,
-                "Notification permission required for reminders",
+                context.getString(R.string.settings_notif_permission),
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
+    val backupNotificationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            viewModel.setBackupReminderEnabled(true)
+        } else {
+            Toast.makeText(
+                context,
+                context.getString(R.string.settings_notif_permission),
                 Toast.LENGTH_SHORT
             ).show()
         }
@@ -175,7 +208,11 @@ fun SettingsScreen(
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             when (event) {
-                is SettingsEvent.Message -> snackbarHostState.showSnackbar(event.text)
+                is SettingsEvent.Message -> {
+                    val msg = if (event.arg != null) context.getString(event.resId, event.arg)
+                               else context.getString(event.resId)
+                    snackbarHostState.showSnackbar(msg)
+                }
                 is SettingsEvent.ShowPremiumRequired -> onShowPremium()
             }
         }
@@ -197,7 +234,7 @@ fun SettingsScreen(
                     .padding(start = 16.dp, top = 14.dp, end = 16.dp, bottom = 12.dp)
             ) {
                 Text(
-                    text = "Settings",
+                    text = stringResource(R.string.settings_title),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
@@ -211,16 +248,17 @@ fun SettingsScreen(
                     .padding(top = 16.dp, bottom = 16.dp)
             ) {
             // Premium banner
+            val premiumToastMsg = stringResource(R.string.settings_premium_toast)
             if (!isPremium) {
                 PremiumBanner(onClick = {
                     viewModel.setPremium(true)
-                    Toast.makeText(context, "Premium activated! All features unlocked.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, premiumToastMsg, Toast.LENGTH_SHORT).show()
                 })
                 Spacer(Modifier.height(20.dp))
             }
 
             // Appearance section
-            SectionTitle("Appearance")
+            SectionTitle(stringResource(R.string.settings_section_appearance))
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
@@ -239,7 +277,7 @@ fun SettingsScreen(
                     )
                     Spacer(Modifier.width(14.dp))
                     Text(
-                        text = "Theme",
+                        text = stringResource(R.string.settings_theme),
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Medium,
                         modifier = Modifier.weight(1f)
@@ -266,9 +304,9 @@ fun SettingsScreen(
                             ) {
                                 Text(
                                     text = when (mode) {
-                                        ThemeMode.SYSTEM -> "Auto"
-                                        ThemeMode.LIGHT -> "Light"
-                                        ThemeMode.DARK -> "Dark"
+                                        ThemeMode.SYSTEM -> stringResource(R.string.settings_theme_auto)
+                                        ThemeMode.LIGHT -> stringResource(R.string.settings_theme_light)
+                                        ThemeMode.DARK -> stringResource(R.string.settings_theme_dark)
                                     },
                                     style = MaterialTheme.typography.labelSmall,
                                     fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
@@ -283,8 +321,29 @@ fun SettingsScreen(
 
             Spacer(Modifier.height(20.dp))
 
+            // Language section
+            SectionTitle(stringResource(R.string.settings_section_language))
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                elevation = CardDefaults.cardElevation(1.dp)
+            ) {
+                val selectedLang = supportedLanguages.find { it.code == currentLanguage }
+                SettingsActionRow(
+                    icon = Icons.Default.Language,
+                    iconTint = MaterialTheme.colorScheme.primary,
+                    title = stringResource(R.string.settings_language),
+                    subtitle = selectedLang?.nativeName ?: "English",
+                    isLoading = false,
+                    onClick = { showLanguageDialog = true }
+                )
+            }
+
+            Spacer(Modifier.height(20.dp))
+
             // Data section
-            SectionTitle("Data")
+            SectionTitle(stringResource(R.string.settings_section_data))
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
@@ -295,8 +354,8 @@ fun SettingsScreen(
                     SettingsActionRow(
                         icon = Icons.Default.TableChart,
                         iconTint = MaterialTheme.colorScheme.primary,
-                        title = "Export to Excel",
-                        subtitle = "Export workout report as spreadsheet",
+                        title = stringResource(R.string.settings_export_excel),
+                        subtitle = stringResource(R.string.settings_export_excel_subtitle),
                         isLoading = state.isExportingExcel,
                         onClick = {
                             pendingExportFormat = "excel"
@@ -310,8 +369,8 @@ fun SettingsScreen(
                     SettingsActionRow(
                         icon = Icons.Default.Description,
                         iconTint = MaterialTheme.colorScheme.primary,
-                        title = "Export to PDF",
-                        subtitle = "Export workout report as PDF document",
+                        title = stringResource(R.string.settings_export_pdf),
+                        subtitle = stringResource(R.string.settings_export_pdf_subtitle),
                         isLoading = state.isExportingPdf,
                         onClick = {
                             pendingExportFormat = "pdf"
@@ -325,8 +384,8 @@ fun SettingsScreen(
                     SettingsActionRow(
                         icon = Icons.Default.Backup,
                         iconTint = MaterialTheme.colorScheme.primary,
-                        title = "Backup data",
-                        subtitle = if (isPremium) "Export all data to JSON file" else "Premium feature",
+                        title = stringResource(R.string.settings_backup),
+                        subtitle = if (isPremium) stringResource(R.string.settings_backup_subtitle) else stringResource(R.string.settings_premium_feature),
                         isLoading = state.isBackingUp,
                         isPremiumLocked = !isPremium,
                         onClick = {
@@ -345,8 +404,8 @@ fun SettingsScreen(
                     SettingsActionRow(
                         icon = Icons.Default.Restore,
                         iconTint = MaterialTheme.colorScheme.primary,
-                        title = "Restore data",
-                        subtitle = if (isPremium) "Import data from JSON backup" else "Premium feature",
+                        title = stringResource(R.string.settings_restore),
+                        subtitle = if (isPremium) stringResource(R.string.settings_restore_subtitle) else stringResource(R.string.settings_premium_feature),
                         isLoading = state.isRestoring,
                         isPremiumLocked = !isPremium,
                         onClick = {
@@ -360,7 +419,7 @@ fun SettingsScreen(
             Spacer(Modifier.height(20.dp))
 
             // Notifications section
-            SectionTitle("Notifications")
+            SectionTitle(stringResource(R.string.settings_section_notifications))
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
@@ -396,12 +455,12 @@ fun SettingsScreen(
                         Spacer(Modifier.width(14.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "Daily Reminder",
+                                text = stringResource(R.string.settings_daily_reminder),
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Medium
                             )
                             Text(
-                                text = "Remind me to log my workout",
+                                text = stringResource(R.string.settings_daily_reminder_subtitle),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -440,7 +499,7 @@ fun SettingsScreen(
                             Spacer(Modifier.width(14.dp))
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = "Reminder Time",
+                                    text = stringResource(R.string.settings_reminder_time),
                                     style = MaterialTheme.typography.bodyMedium,
                                     fontWeight = FontWeight.Medium
                                 )
@@ -458,13 +517,256 @@ fun SettingsScreen(
                             )
                         }
                     }
+
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+
+                    // Backup Reminder toggle (premium feature)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                if (!isPremium) {
+                                    onShowPremium()
+                                } else if (!backupReminderSettings.enabled) {
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                        backupNotificationPermissionLauncher.launch(
+                                            Manifest.permission.POST_NOTIFICATIONS
+                                        )
+                                    } else {
+                                        viewModel.setBackupReminderEnabled(true)
+                                    }
+                                } else {
+                                    viewModel.setBackupReminderEnabled(false)
+                                }
+                            }
+                            .padding(horizontal = 16.dp, vertical = 14.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        SettingsIconBox(
+                            icon = Icons.Default.Backup,
+                            tint = if (isPremium) MaterialTheme.colorScheme.primary
+                                   else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(Modifier.width(14.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(R.string.settings_backup_reminder),
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Text(
+                                text = if (isPremium) stringResource(R.string.settings_backup_reminder_subtitle)
+                                       else stringResource(R.string.settings_premium_feature),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        if (!isPremium) {
+                            Icon(
+                                imageVector = Icons.Default.Lock,
+                                contentDescription = "Premium",
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        } else {
+                            Switch(
+                                checked = backupReminderSettings.enabled,
+                                onCheckedChange = { enabled ->
+                                    if (enabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                        backupNotificationPermissionLauncher.launch(
+                                            Manifest.permission.POST_NOTIFICATIONS
+                                        )
+                                    } else {
+                                        viewModel.setBackupReminderEnabled(enabled)
+                                    }
+                                }
+                            )
+                        }
+                    }
+
+                    // Expanded backup reminder config (only when premium + enabled)
+                    if (isPremium && backupReminderSettings.enabled) {
+                        HorizontalDivider(
+                            modifier = Modifier.padding(start = 58.dp),
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                        )
+                        // Frequency row
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            SettingsIconBox(
+                                icon = Icons.Default.CalendarMonth,
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                            Spacer(Modifier.width(14.dp))
+                            Text(
+                                text = stringResource(R.string.settings_frequency),
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Medium,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Row(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                                    .padding(2.dp)
+                            ) {
+                                BackupReminderFrequency.entries.forEach { freq ->
+                                    val isSelected = backupReminderSettings.frequency == freq
+                                    Box(
+                                        modifier = Modifier
+                                            .clip(RoundedCornerShape(6.dp))
+                                            .background(
+                                                if (isSelected) MaterialTheme.colorScheme.primary
+                                                else Color.Transparent
+                                            )
+                                            .clickable {
+                                                viewModel.updateBackupReminderSettings(
+                                                    backupReminderSettings.copy(frequency = freq)
+                                                )
+                                            }
+                                            .padding(horizontal = 10.dp, vertical = 6.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = when (freq) {
+                                                BackupReminderFrequency.DAILY   -> stringResource(R.string.settings_freq_daily)
+                                                BackupReminderFrequency.WEEKLY  -> stringResource(R.string.settings_freq_weekly)
+                                                BackupReminderFrequency.MONTHLY -> stringResource(R.string.settings_freq_monthly)
+                                            },
+                                            style = MaterialTheme.typography.labelSmall,
+                                            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                                            color = if (isSelected) MaterialTheme.colorScheme.onPrimary
+                                                    else MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                        HorizontalDivider(
+                            modifier = Modifier.padding(start = 58.dp),
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                        )
+                        // Time row
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { showBackupReminderTimeDialog = true }
+                                .padding(horizontal = 16.dp, vertical = 14.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            SettingsIconBox(
+                                icon = Icons.Default.AccessTime,
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                            Spacer(Modifier.width(14.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = stringResource(R.string.settings_reminder_time),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.Medium
+                                )
+                                Text(
+                                    text = "%02d:%02d".format(backupReminderSettings.hour, backupReminderSettings.minute),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            Icon(
+                                imageVector = Icons.Default.ChevronRight,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                        // Day of week row (weekly only)
+                        if (backupReminderSettings.frequency == BackupReminderFrequency.WEEKLY) {
+                            HorizontalDivider(
+                                modifier = Modifier.padding(start = 58.dp),
+                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                            )
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { showBackupReminderDayOfWeekDialog = true }
+                                    .padding(horizontal = 16.dp, vertical = 14.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                SettingsIconBox(
+                                    icon = Icons.Default.CalendarToday,
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                                Spacer(Modifier.width(14.dp))
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = stringResource(R.string.settings_day_of_week),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                    Text(
+                                        text = DayOfWeek.of(backupReminderSettings.dayOfWeek)
+                                            .getDisplayName(TextStyle.FULL, Locale.getDefault()),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                                Icon(
+                                    imageVector = Icons.Default.ChevronRight,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        }
+                        // Day of month row (monthly only)
+                        if (backupReminderSettings.frequency == BackupReminderFrequency.MONTHLY) {
+                            HorizontalDivider(
+                                modifier = Modifier.padding(start = 58.dp),
+                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                            )
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { showBackupReminderDayOfMonthDialog = true }
+                                    .padding(horizontal = 16.dp, vertical = 14.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                SettingsIconBox(
+                                    icon = Icons.Default.CalendarMonth,
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                                Spacer(Modifier.width(14.dp))
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = stringResource(R.string.settings_day_of_month),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                    Text(
+                                        text = backupReminderSettings.monthlyOption.label,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                                Icon(
+                                    imageVector = Icons.Default.ChevronRight,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        }
+                    }
                 }
             }
 
             Spacer(Modifier.height(20.dp))
 
             // About section
-            SectionTitle("About")
+            SectionTitle(stringResource(R.string.settings_section_about))
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -486,12 +788,12 @@ fun SettingsScreen(
                     Spacer(Modifier.width(14.dp))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = "Workout Log",
+                            text = stringResource(R.string.app_name),
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Medium
                         )
                         Text(
-                            text = "Version ${BuildConfig.VERSION_NAME}",
+                            text = stringResource(R.string.settings_version, BuildConfig.VERSION_NAME),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -512,7 +814,7 @@ fun SettingsScreen(
 
     // Export / backup period picker dialog
     if (showExportDialog) {
-        val dialogTitle = if (pendingExportFormat == "backup") "Backup Data" else "Export Report"
+        val dialogTitle = if (pendingExportFormat == "backup") stringResource(R.string.settings_backup_data_title) else stringResource(R.string.settings_export_report_title)
         ExportPeriodPickerDialog(
             title = dialogTitle,
             onDismiss = { showExportDialog = false },
@@ -561,7 +863,7 @@ fun SettingsScreen(
             },
             title = {
                 Text(
-                    text = "Workout Log",
+                    text = stringResource(R.string.app_name),
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -573,18 +875,18 @@ fun SettingsScreen(
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     Text(
-                        text = "Version ${BuildConfig.VERSION_NAME}",
+                        text = stringResource(R.string.settings_version, BuildConfig.VERSION_NAME),
                         style = MaterialTheme.typography.bodyMedium
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "\u00A9 ${java.time.Year.now().value} Workout Log",
+                        text = "\u00A9 ${java.time.Year.now().value} ${stringResource(R.string.app_name)}",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Privacy Policy",
+                        text = stringResource(R.string.settings_privacy_policy),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.clickable {
@@ -616,12 +918,12 @@ fun SettingsScreen(
                         }
                     }
                 ) {
-                    Text("Rate App")
+                    Text(stringResource(R.string.settings_rate_app))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showAboutDialog = false }) {
-                    Text("Close")
+                    Text(stringResource(R.string.btn_close))
                 }
             }
         )
@@ -640,6 +942,95 @@ fun SettingsScreen(
         )
     }
 
+    // Backup reminder time picker
+    if (showBackupReminderTimeDialog) {
+        ReminderTimePickerDialog(
+            currentHour = backupReminderSettings.hour,
+            currentMinute = backupReminderSettings.minute,
+            onDismiss = { showBackupReminderTimeDialog = false },
+            onTimeSelected = { hour, minute ->
+                viewModel.updateBackupReminderSettings(
+                    backupReminderSettings.copy(hour = hour, minute = minute)
+                )
+                showBackupReminderTimeDialog = false
+            }
+        )
+    }
+
+    // Backup reminder day-of-week picker
+    if (showBackupReminderDayOfWeekDialog) {
+        BackupReminderDayOfWeekDialog(
+            selected = backupReminderSettings.dayOfWeek,
+            onConfirm = { day ->
+                viewModel.updateBackupReminderSettings(
+                    backupReminderSettings.copy(dayOfWeek = day)
+                )
+                showBackupReminderDayOfWeekDialog = false
+            },
+            onDismiss = { showBackupReminderDayOfWeekDialog = false }
+        )
+    }
+
+    // Backup reminder day-of-month picker
+    if (showBackupReminderDayOfMonthDialog) {
+        BackupReminderDayOfMonthDialog(
+            selected = backupReminderSettings.monthlyOption,
+            onConfirm = { option ->
+                viewModel.updateBackupReminderSettings(
+                    backupReminderSettings.copy(monthlyOption = option)
+                )
+                showBackupReminderDayOfMonthDialog = false
+            },
+            onDismiss = { showBackupReminderDayOfMonthDialog = false }
+        )
+    }
+
+    // Language picker dialog
+    if (showLanguageDialog) {
+        AlertDialog(
+            onDismissRequest = { showLanguageDialog = false },
+            title = { Text(stringResource(R.string.lang_picker_title)) },
+            text = {
+                Column {
+                    supportedLanguages.forEach { lang ->
+                        val isSelected = lang.code == currentLanguage
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    LanguagePreferences.setLanguage(context, lang.code)
+                                    showLanguageDialog = false
+                                    (context as? Activity)?.recreate()
+                                }
+                                .padding(vertical = 12.dp, horizontal = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = lang.nativeName,
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                                modifier = Modifier.weight(1f)
+                            )
+                            if (isSelected) {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showLanguageDialog = false }) {
+                    Text(stringResource(R.string.btn_cancel))
+                }
+            }
+        )
+    }
+
     // Restore confirmation dialog
     if (showRestoreConfirmDialog) {
         AlertDialog(
@@ -651,11 +1042,9 @@ fun SettingsScreen(
                     tint = MaterialTheme.colorScheme.error
                 )
             },
-            title = { Text("Restore Data") },
+            title = { Text(stringResource(R.string.settings_restore_title)) },
             text = {
-                Text(
-                    "This will permanently delete all your current workout data and replace it with the data from the backup file.\n\nThis action cannot be undone. Are you sure you want to continue?"
-                )
+                Text(stringResource(R.string.settings_restore_message))
             },
             confirmButton = {
                 TextButton(
@@ -667,12 +1056,12 @@ fun SettingsScreen(
                         contentColor = MaterialTheme.colorScheme.error
                     )
                 ) {
-                    Text("Restore")
+                    Text(stringResource(R.string.settings_restore_btn))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showRestoreConfirmDialog = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.btn_cancel))
                 }
             }
         )
@@ -708,8 +1097,8 @@ private fun ExportPeriodPickerDialog(
                 }
                 Text(
                     text = if (step == 1) title
-                           else if (isMonthly) "Select Month"
-                           else "Select Year",
+                           else if (isMonthly) stringResource(R.string.export_select_month)
+                           else stringResource(R.string.export_select_year),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -721,14 +1110,14 @@ private fun ExportPeriodPickerDialog(
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         PeriodTypeOption(
                             icon = Icons.Default.CalendarToday,
-                            title = "Monthly",
-                            description = "Select data for a specific month",
+                            title = stringResource(R.string.export_monthly_title),
+                            description = stringResource(R.string.export_monthly_desc),
                             onClick = { isMonthly = true; step = 2 }
                         )
                         PeriodTypeOption(
                             icon = Icons.Default.CalendarMonth,
-                            title = "Yearly",
-                            description = "Select data for a full year",
+                            title = stringResource(R.string.export_yearly_title),
+                            description = stringResource(R.string.export_yearly_desc),
                             onClick = { isMonthly = false; step = 2 }
                         )
                     }
@@ -774,11 +1163,11 @@ private fun ExportPeriodPickerDialog(
                 TextButton(onClick = {
                     if (isMonthly) onConfirm(true, selectedYear, selectedMonth)
                     else onConfirm(false, selectedYear, 0)
-                }) { Text("OK") }
+                }) { Text(stringResource(R.string.btn_ok)) }
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.btn_cancel)) }
         }
     )
 }
@@ -932,7 +1321,7 @@ private fun ReminderTimePickerDialog(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Set Reminder Time",
+                    text = stringResource(R.string.settings_reminder_time_title),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface
@@ -970,10 +1359,10 @@ private fun ReminderTimePickerDialog(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
                 ) {
-                    TextButton(onClick = onDismiss) { Text("Cancel") }
+                    TextButton(onClick = onDismiss) { Text(stringResource(R.string.btn_cancel)) }
                     Spacer(Modifier.width(8.dp))
                     TextButton(onClick = { onTimeSelected(selectedHour, selectedMinute) }) {
-                        Text("OK")
+                        Text(stringResource(R.string.btn_ok))
                     }
                 }
             }
@@ -1250,12 +1639,12 @@ private fun PremiumBanner(onClick: () -> Unit) {
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Upgrade to Premium",
+                    text = stringResource(R.string.settings_upgrade_premium),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
                 Text(
-                    text = "Unlock all features with a one-time purchase",
+                    text = stringResource(R.string.settings_upgrade_subtitle),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                 )
@@ -1267,4 +1656,92 @@ private fun PremiumBanner(onClick: () -> Unit) {
             )
         }
     }
+}
+
+@Composable
+private fun BackupReminderDayOfWeekDialog(
+    selected: Int,
+    onConfirm: (Int) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var current by remember { mutableIntStateOf(selected) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.settings_day_of_week)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                (1..7).forEach { day ->
+                    val isSelected = day == current
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable { current = day },
+                        color = if (isSelected) MaterialTheme.colorScheme.primary
+                                else MaterialTheme.colorScheme.surfaceVariant,
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(
+                            text = DayOfWeek.of(day).getDisplayName(TextStyle.FULL, Locale.getDefault()),
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                            color = if (isSelected) MaterialTheme.colorScheme.onPrimary
+                                    else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onConfirm(current) }) { Text(stringResource(R.string.btn_ok)) }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.btn_cancel)) }
+        }
+    )
+}
+
+@Composable
+private fun BackupReminderDayOfMonthDialog(
+    selected: BackupMonthlyOption,
+    onConfirm: (BackupMonthlyOption) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var current by remember { mutableStateOf(selected) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.settings_day_of_month)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                BackupMonthlyOption.entries.forEach { option ->
+                    val isSelected = option == current
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable { current = option },
+                        color = if (isSelected) MaterialTheme.colorScheme.primary
+                                else MaterialTheme.colorScheme.surfaceVariant,
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(
+                            text = option.label,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                            color = if (isSelected) MaterialTheme.colorScheme.onPrimary
+                                    else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onConfirm(current) }) { Text(stringResource(R.string.btn_ok)) }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.btn_cancel)) }
+        }
+    )
 }

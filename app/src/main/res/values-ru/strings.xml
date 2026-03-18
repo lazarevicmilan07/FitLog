@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Workout Log</string>
+
+    <string name="nav_home">Главная</string>
+    <string name="nav_stats">Статистика</string>
+    <string name="nav_types">Типы</string>
+    <string name="nav_settings">Настройки</string>
+
+    <string name="btn_ok">ОК</string>
+    <string name="btn_cancel">Отмена</string>
+    <string name="btn_save">Сохранить</string>
+    <string name="btn_delete">Удалить</string>
+    <string name="btn_close">Закрыть</string>
+    <string name="btn_continue">Продолжить</string>
+    <string name="cd_back">Назад</string>
+
+    <string name="home_title">Workout Log</string>
+    <string name="cd_filter">Фильтр</string>
+    <string name="cd_add_workout">Добавить тренировку</string>
+    <string name="cd_previous_month">Предыдущий месяц</string>
+    <string name="cd_next_month">Следующий месяц</string>
+    <string name="stat_workouts">Тренировки</string>
+    <string name="stat_consistency">Регулярность</string>
+    <string name="filter_by_type">Фильтр по типу тренировки</string>
+    <string name="filter_clear_all">Очистить всё</string>
+
+    <string name="goals_title">Цели</string>
+    <string name="cd_manage_goals">Управление целями</string>
+    <string name="goals_empty">Нажмите +, чтобы установить цель</string>
+    <string name="goals_all_workouts">Все тренировки</string>
+    <string name="cd_goal_completed">Цель достигнута</string>
+    <string name="cd_goal_not_completed">Цель не достигнута</string>
+    <string name="goals_period_monthly">Ежемесячно</string>
+    <string name="goals_period_yearly">Ежегодно</string>
+    <string name="goals_complete_title">Цель достигнута!</string>
+    <string name="goals_period_label">Период</string>
+    <string name="goals_workout_type_label">Тип тренировки</string>
+    <string name="goals_target_label">Цель</string>
+    <string name="goals_edit_header">Изменить цель</string>
+    <string name="goals_new_header">Новая цель</string>
+    <string name="goals_new_btn">Новая цель</string>
+    <string name="goals_update_btn">Обновить цель</string>
+    <string name="goals_add_btn">Добавить цель</string>
+    <string name="goals_target_progress">Цель %1$d  ·  %2$d/%3$d за этот период</string>
+    <string name="goals_delete_cd">Удалить цель</string>
+
+    <string-array name="goal_completed_messages">
+        <item>Цель достигнута! Продолжай в том же духе!</item>
+        <item>Ты сделал это! Цель выполнена!</item>
+        <item>Вот что значит настойчивость. Цель достигнута!</item>
+        <item>Ещё одна цель позади. Ты неостановим!</item>
+        <item>Цель достигнута! Твой труд окупается.</item>
+        <item>Регулярность побеждает. Цель выполнена!</item>
+        <item>Миссия выполнена. Ты в огне!</item>
+        <item>Поставил и достиг. Отлично!</item>
+        <item>Одна цель позади. Ничто тебя не остановит!</item>
+        <item>Тяжёлый труд окупается. Цель достигнута!</item>
+    </string-array>
+
+    <string name="entry_unknown">Неизвестно</string>
+    <string name="cd_delete">Удалить</string>
+    <string name="cd_close">Закрыть</string>
+    <string name="entry_edit_title">Редактировать тренировку</string>
+    <string name="entry_add_title">Записать тренировку</string>
+    <string name="entry_duplicate_warning">Для этой даты уже существует тренировка. При сохранении она будет заменена.</string>
+    <string name="entry_workout_type_label">Тип тренировки</string>
+    <string name="entry_no_types">Типов пока нет — добавьте их на вкладке «Типы»</string>
+    <string name="entry_duration_label">Длительность</string>
+    <string name="entry_duration_unit">мин</string>
+    <string name="entry_calories_label">Калории</string>
+    <string name="entry_calories_unit">ккал</string>
+    <string name="entry_note_label">Заметка</string>
+    <string name="entry_note_hint">Как прошла тренировка?</string>
+    <string name="entry_delete_dialog_title">Удалить тренировку?</string>
+    <string name="entry_delete_dialog_message">Это действие нельзя отменить.</string>
+
+    <string name="types_title">Типы тренировок</string>
+    <string name="cd_add_type">Добавить тип тренировки</string>
+    <string name="types_empty_title">Нет типов тренировок</string>
+    <string name="types_empty_subtitle">Нажмите +, чтобы создать первый тип тренировки</string>
+
+    <string name="type_edit_title">Редактировать тип</string>
+    <string name="type_add_title">Добавить тип</string>
+    <string name="type_name_label">Название</string>
+    <string name="type_name_hint">напр.: Грудь, Кардио</string>
+    <string name="type_color_label">Цвет</string>
+    <string name="type_icon_label">Иконка</string>
+    <string name="type_rest_day_label">День отдыха</string>
+    <string name="type_rest_day_subtitle">Отметить этот тип как день отдыха</string>
+    <string name="type_delete_dialog_title">Удалить %s?</string>
+    <string name="type_delete_dialog_message">Также будут удалены все записи тренировок этого типа. Это действие нельзя отменить.</string>
+    <string name="type_change_rest_title">Изменить тип дня отдыха?</string>
+    <string name="type_change_rest_message">\"%1$s\" помечен как тип дня отдыха. Только один тип может иметь это обозначение. При продолжении оно будет снято с \"%1$s\".</string>
+
+    <string name="onboarding_skip">Пропустить</string>
+    <string name="onboarding_get_started">Начать</string>
+    <string name="onboarding_next">Далее</string>
+    <string name="onboarding_page0_title">Отслеживайте тренировки</string>
+    <string name="onboarding_page0_desc">Записывайте каждую тренировку с типом, длительностью и заметками. Оставайтесь регулярными и формируйте здоровые привычки.</string>
+    <string name="onboarding_page1_title">Ежемесячный обзор</string>
+    <string name="onboarding_page1_desc">Смотрите календарь тренировок одним взглядом. Отслеживайте дни отдыха и поддерживайте баланс.</string>
+    <string name="onboarding_page2_title">Ставьте цели</string>
+    <string name="onboarding_page2_desc">Ставьте ежемесячные или годовые цели, чтобы оставаться мотивированным. Следите за прогрессом на главном экране.</string>
+    <string name="onboarding_page3_title">Подробные отчёты</string>
+    <string name="onboarding_page3_desc">Визуализируйте прогресс с помощью графиков. Экспортируйте отчёты в Excel или PDF.</string>
+
+    <string name="reports_title">Статистика</string>
+    <string name="cd_previous">Назад</string>
+    <string name="cd_next">Вперёд</string>
+    <string name="reports_monthly">Ежемесячно</string>
+    <string name="reports_yearly">Ежегодно</string>
+    <string name="reports_annual">Ежегодно</string>
+    <string name="reports_no_workouts_month">Тренировок в этом месяце нет</string>
+    <string name="reports_no_workouts_year">Тренировок в этом году нет</string>
+    <string name="reports_start_logging">Начни записывать, чтобы видеть отчёты</string>
+    <string name="reports_stat_favourite">Любимый</string>
+    <string name="reports_stat_distribution">Распределение</string>
+    <string name="reports_rest_days_toggle">Дни отдыха</string>
+    <string name="reports_no_data">Нет данных для отображения</string>
+    <string name="reports_stat_active_months">Активных месяцев</string>
+    <string name="reports_stat_best_month">Лучший месяц</string>
+    <string name="reports_stat_avg_consistency">Ср. регулярность/мес.</string>
+    <string name="reports_stat_avg_workouts">Ср. тренировок/мес.</string>
+    <string name="reports_monthly_activity">Активность по месяцам</string>
+    <string name="reports_total">всего</string>
+
+    <string name="picker_select_month_year">Выбрать месяц и год</string>
+    <string name="cd_prev_year">Предыдущий год</string>
+    <string name="cd_next_year">Следующий год</string>
+    <string name="picker_select_year">Выбрать год</string>
+    <string name="month_jan">Янв</string>
+    <string name="month_feb">Фев</string>
+    <string name="month_mar">Мар</string>
+    <string name="month_apr">Апр</string>
+    <string name="month_may">Май</string>
+    <string name="month_jun">Июн</string>
+    <string name="month_jul">Июл</string>
+    <string name="month_aug">Авг</string>
+    <string name="month_sep">Сен</string>
+    <string name="month_oct">Окт</string>
+    <string name="month_nov">Ноя</string>
+    <string name="month_dec">Дек</string>
+
+    <string name="settings_title">Настройки</string>
+    <string name="settings_premium_toast">Premium активирован! Все функции разблокированы.</string>
+    <string name="settings_section_appearance">Внешний вид</string>
+    <string name="settings_theme">Тема</string>
+    <string name="settings_theme_auto">Авто</string>
+    <string name="settings_theme_light">Светлая</string>
+    <string name="settings_theme_dark">Тёмная</string>
+    <string name="settings_section_language">Язык</string>
+    <string name="settings_language">Язык</string>
+    <string name="settings_language_subtitle">Язык интерфейса приложения</string>
+    <string name="settings_section_data">Данные</string>
+    <string name="settings_export_excel">Экспорт в Excel</string>
+    <string name="settings_export_excel_subtitle">Экспортировать отчёт о тренировках как таблицу</string>
+    <string name="settings_export_pdf">Экспорт в PDF</string>
+    <string name="settings_export_pdf_subtitle">Экспортировать отчёт о тренировках в PDF</string>
+    <string name="settings_backup">Резервная копия</string>
+    <string name="settings_backup_subtitle">Экспортировать все данные в JSON-файл</string>
+    <string name="settings_restore">Восстановить данные</string>
+    <string name="settings_restore_subtitle">Импортировать данные из JSON-резервной копии</string>
+    <string name="settings_premium_feature">Функция Premium</string>
+    <string name="settings_section_notifications">Уведомления</string>
+    <string name="settings_notif_permission">Для напоминаний требуется разрешение на уведомления</string>
+    <string name="settings_daily_reminder">Ежедневное напоминание</string>
+    <string name="settings_daily_reminder_subtitle">Напоминать о записи тренировки</string>
+    <string name="settings_reminder_time">Время напоминания</string>
+    <string name="settings_backup_reminder">Напоминание о резервной копии</string>
+    <string name="settings_backup_reminder_subtitle">Напоминать о создании резервной копии</string>
+    <string name="settings_frequency">Частота</string>
+    <string name="settings_freq_daily">Ежедневно</string>
+    <string name="settings_freq_weekly">Еженедельно</string>
+    <string name="settings_freq_monthly">Ежемесячно</string>
+    <string name="settings_day_of_week">День недели</string>
+    <string name="settings_day_of_month">День месяца</string>
+    <string name="settings_section_about">О приложении</string>
+    <string name="settings_version">Версия %s</string>
+    <string name="settings_privacy_policy">Политика конфиденциальности</string>
+    <string name="settings_rate_app">Оценить приложение</string>
+    <string name="settings_reminder_time_title">Установить время напоминания</string>
+    <string name="settings_restore_title">Восстановить данные</string>
+    <string name="settings_restore_message">Это навсегда удалит все ваши текущие данные и заменит их данными из файла резервной копии.\n\nЭто действие нельзя отменить. Вы уверены, что хотите продолжить?</string>
+    <string name="settings_restore_btn">Восстановить</string>
+    <string name="settings_upgrade_premium">Перейти на Premium</string>
+    <string name="settings_upgrade_subtitle">Разблокируйте все функции с одноразовой покупкой</string>
+    <string name="settings_backup_data_title">Резервная копия</string>
+    <string name="settings_export_report_title">Экспортировать отчёт</string>
+    <string name="export_monthly_title">Ежемесячно</string>
+    <string name="export_monthly_desc">Выбрать данные за конкретный месяц</string>
+    <string name="export_yearly_title">Ежегодно</string>
+    <string name="export_yearly_desc">Выбрать данные за полный год</string>
+    <string name="export_select_month">Выбрать месяц</string>
+    <string name="export_select_year">Выбрать год</string>
+
+    <string name="msg_backup_saved">Резервная копия успешно сохранена</string>
+    <string name="msg_backup_failed">Ошибка резервного копирования: %s</string>
+    <string name="msg_restore_success">Данные успешно восстановлены</string>
+    <string name="msg_restore_invalid">Недопустимый файл резервной копии</string>
+    <string name="msg_restore_failed">Ошибка восстановления: %s</string>
+    <string name="msg_excel_exported">Excel успешно экспортирован</string>
+    <string name="msg_pdf_exported">PDF успешно экспортирован</string>
+    <string name="msg_export_failed">Ошибка экспорта: %s</string>
+
+    <string name="premium_title">Разблокировать Premium</string>
+    <string name="premium_subtitle">Единовременная покупка, пожизненный доступ</string>
+    <string name="premium_feature_backup">Резервное копирование &amp; восстановление</string>
+    <string name="premium_feature_backup_desc">Никогда не теряйте данные о тренировках</string>
+    <string name="premium_feature_no_ads">Убрать рекламу</string>
+    <string name="premium_feature_no_ads_desc">Наслаждайтесь приложением без рекламы</string>
+    <string name="premium_one_time">Единовременный платёж</string>
+    <string name="premium_unlock_btn">Разблокировать Premium</string>
+    <string name="premium_restore_btn">Восстановить покупки</string>
+    <string name="premium_secure_payment">Безопасная оплата через Google Play</string>
+    <string name="premium_unlocked_toast">Premium разблокирован! Спасибо!</string>
+    <string name="premium_canceled_toast">Покупка отменена</string>
+
+    <string name="overview_rest_days">Дни отдыха</string>
+    <string name="overview_top_type">Основной тип</string>
+    <string name="overview_all">Все</string>
+    <string name="overview_this_month">Тренировки в этом месяце</string>
+
+    <string name="lang_picker_title">Выбрать язык</string>
+    <string name="lang_en">English</string>
+    <string name="lang_es">Español</string>
+    <string name="lang_pt">Português</string>
+    <string name="lang_de">Deutsch</string>
+    <string name="lang_fr">Français</string>
+    <string name="lang_ru">Русский</string>
+    <string name="lang_sr">Srpski</string>
+</resources>

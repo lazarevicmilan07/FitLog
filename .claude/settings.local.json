@@ -49,7 +49,10 @@
       "Bash(export JAVA_HOME=\"/c/Program Files/Android/Android Studio/jbr\" && cd C:/ComData/Projekti/WorkoutLog && ./gradlew installDebug 2>&1 | tail -10)",
       "Bash(export JAVA_HOME=\"/c/Program Files/Android/Android Studio/jbr\" && cd C:/ComData/Projekti/WorkoutLog && ./gradlew :app:compileDebugKotlin 2>&1 | tail -10)",
       "Bash(export JAVA_HOME=\"/c/Program Files/Android/Android Studio/jbr\" && cd C:/ComData/Projekti/WorkoutLog && ./gradlew :app:compileDebugKotlin 2>&1 | tail -8)",
-      "Bash(export JAVA_HOME=\"/c/Program Files/Android/Android Studio/jbr\" && cd C:/ComData/Projekti/WorkoutLog && ./gradlew :app:compileDebugKotlin 2>&1 | tail -6)"
+      "Bash(export JAVA_HOME=\"/c/Program Files/Android/Android Studio/jbr\" && cd C:/ComData/Projekti/WorkoutLog && ./gradlew :app:compileDebugKotlin 2>&1 | tail -6)",
+      "Bash(mkdir -p ~/.claude/commands)",
+      "Bash(mv ~/.claude/skills/android-feature-builder.md ~/.claude/skills/playstore-optimization.md ~/.claude/skills/admob-integration-check.md ~/.claude/skills/user-feedback-analyzer.md ~/.claude/commands/)",
+      "Read(//c/Users/MilanLazarevic/.claude/**)"
     ]
   }
 }

@@ -45,10 +45,12 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.workoutlog.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -63,14 +65,14 @@ fun PremiumScreen(
         viewModel.events.collect { event ->
             when (event) {
                 is PremiumEvent.PurchaseSuccess -> {
-                    Toast.makeText(context, "Premium unlocked! Thank you!", Toast.LENGTH_LONG).show()
+                    Toast.makeText(context, context.getString(R.string.premium_unlocked_toast), Toast.LENGTH_LONG).show()
                     onNavigateBack()
                 }
                 is PremiumEvent.PurchaseError -> {
                     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
                 }
                 is PremiumEvent.PurchaseCanceled -> {
-                    Toast.makeText(context, "Purchase canceled", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, context.getString(R.string.premium_canceled_toast), Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -82,7 +84,7 @@ fun PremiumScreen(
                 title = { },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.Close, contentDescription = "Close")
+                        Icon(Icons.Default.Close, contentDescription = stringResource(R.string.cd_close))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -125,7 +127,7 @@ fun PremiumScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                text = "Unlock Premium",
+                text = stringResource(R.string.premium_title),
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold
             )
@@ -133,7 +135,7 @@ fun PremiumScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "One-time purchase, lifetime access",
+                text = stringResource(R.string.premium_subtitle),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
             )
@@ -152,13 +154,13 @@ fun PremiumScreen(
                 ) {
                     PremiumFeatureItem(
                         icon = Icons.Default.CloudSync,
-                        title = "Backup & Restore",
-                        description = "Never lose your workout data"
+                        title = stringResource(R.string.premium_feature_backup),
+                        description = stringResource(R.string.premium_feature_backup_desc)
                     )
                     PremiumFeatureItem(
                         icon = Icons.Default.Block,
-                        title = "Remove Ads",
-                        description = "Enjoy an ad-free experience"
+                        title = stringResource(R.string.premium_feature_no_ads),
+                        description = stringResource(R.string.premium_feature_no_ads_desc)
                     )
                 }
             }
@@ -173,7 +175,7 @@ fun PremiumScreen(
                     color = MaterialTheme.colorScheme.primary
                 )
                 Text(
-                    text = "One-time payment",
+                    text = stringResource(R.string.premium_one_time),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )
@@ -196,7 +198,7 @@ fun PremiumScreen(
                     )
                 } else {
                     Text(
-                        text = "Unlock Premium",
+                        text = stringResource(R.string.premium_unlock_btn),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -206,13 +208,13 @@ fun PremiumScreen(
             Spacer(modifier = Modifier.height(12.dp))
 
             TextButton(onClick = { viewModel.restorePurchases() }) {
-                Text("Restore Purchases")
+                Text(stringResource(R.string.premium_restore_btn))
             }
 
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "Secure payment via Google Play",
+                text = stringResource(R.string.premium_secure_payment),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                 textAlign = TextAlign.Center

@@ -38,9 +38,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.workoutlog.R
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.workoutlog.ui.components.EmptyState
 import com.workoutlog.ui.components.LoadingIndicator
@@ -85,14 +87,14 @@ fun WorkoutTypesScreen(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "Workout Types",
+                    text = stringResource(R.string.types_title),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
                 IconButton(onClick = { openAddSheet() }) {
                     Icon(
                         Icons.Default.Add,
-                        contentDescription = "Add workout type",
+                        contentDescription = stringResource(R.string.cd_add_type),
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
@@ -102,8 +104,8 @@ fun WorkoutTypesScreen(
                 LoadingIndicator(modifier = Modifier.weight(1f))
             } else if (state.types.isEmpty()) {
                 EmptyState(
-                    title = "No workout types",
-                    subtitle = "Tap + to create your first workout type",
+                    title = stringResource(R.string.types_empty_title),
+                    subtitle = stringResource(R.string.types_empty_subtitle),
                     modifier = Modifier.weight(1f)
                 )
             } else {

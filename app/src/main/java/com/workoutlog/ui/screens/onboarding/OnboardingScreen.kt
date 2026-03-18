@@ -19,6 +19,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.annotation.StringRes
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.FitnessCenter
@@ -34,38 +35,40 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.workoutlog.R
 import kotlinx.coroutines.launch
 
 data class OnboardingPage(
     val icon: ImageVector,
-    val title: String,
-    val description: String
+    @StringRes val titleRes: Int,
+    @StringRes val descriptionRes: Int
 )
 
 val onboardingPages = listOf(
     OnboardingPage(
         icon = Icons.Default.FitnessCenter,
-        title = "Track Your Workouts",
-        description = "Log every workout with type, duration, and notes. Stay consistent and build healthy habits."
+        titleRes = R.string.onboarding_page0_title,
+        descriptionRes = R.string.onboarding_page0_desc
     ),
     OnboardingPage(
         icon = Icons.Default.CalendarMonth,
-        title = "Monthly Overview",
-        description = "See your workout calendar at a glance. Track rest days and stay balanced."
+        titleRes = R.string.onboarding_page1_title,
+        descriptionRes = R.string.onboarding_page1_desc
     ),
     OnboardingPage(
         icon = Icons.Default.TrackChanges,
-        title = "Set Workout Goals",
-        description = "Set monthly or yearly goals to stay motivated. Track your progress right on the home screen."
+        titleRes = R.string.onboarding_page2_title,
+        descriptionRes = R.string.onboarding_page2_desc
     ),
     OnboardingPage(
         icon = Icons.Default.BarChart,
-        title = "Detailed Reports",
-        description = "Visualize your progress with charts. Export reports to Excel or PDF."
+        titleRes = R.string.onboarding_page3_title,
+        descriptionRes = R.string.onboarding_page3_desc
     )
 )
 
@@ -92,7 +95,7 @@ fun OnboardingScreen(
                 viewModel.completeOnboarding()
                 onComplete()
             }) {
-                Text("Skip")
+                Text(stringResource(R.string.onboarding_skip))
             }
         }
 
@@ -138,7 +141,7 @@ fun OnboardingScreen(
                     .fillMaxWidth()
                     .height(56.dp)
             ) {
-                Text("Get Started", style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(R.string.onboarding_get_started), style = MaterialTheme.typography.titleMedium)
             }
         } else {
             Button(
@@ -149,7 +152,7 @@ fun OnboardingScreen(
                     .fillMaxWidth()
                     .height(56.dp)
             ) {
-                Text("Next", style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(R.string.onboarding_next), style = MaterialTheme.typography.titleMedium)
             }
         }
 
@@ -174,14 +177,14 @@ fun OnboardingPageContent(page: OnboardingPage) {
         )
         Spacer(Modifier.height(32.dp))
         Text(
-            text = page.title,
+            text = stringResource(page.titleRes),
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center
         )
         Spacer(Modifier.height(16.dp))
         Text(
-            text = page.description,
+            text = stringResource(page.descriptionRes),
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurfaceVariant

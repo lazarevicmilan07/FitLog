@@ -38,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -45,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.workoutlog.R
 import com.workoutlog.ui.components.LoadingIndicator
 import com.workoutlog.ui.components.StatCard
 import com.workoutlog.ui.screens.home.WorkoutEntryItem
@@ -75,7 +77,7 @@ fun OverviewScreen(
                 onClick = { onAddEntry(null) },
                 containerColor = MaterialTheme.colorScheme.primary
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Add workout")
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.cd_add_workout))
             }
         }
     ) { padding ->
@@ -100,7 +102,7 @@ fun OverviewScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(onClick = { viewModel.previousMonth() }) {
-                        Icon(Icons.Default.ChevronLeft, contentDescription = "Previous month")
+                        Icon(Icons.Default.ChevronLeft, contentDescription = stringResource(R.string.cd_previous_month))
                     }
                     Text(
                         text = state.currentMonth.format(monthFormatter),
@@ -108,7 +110,7 @@ fun OverviewScreen(
                         fontWeight = FontWeight.SemiBold
                     )
                     IconButton(onClick = { viewModel.nextMonth() }) {
-                        Icon(Icons.Default.ChevronRight, contentDescription = "Next month")
+                        Icon(Icons.Default.ChevronRight, contentDescription = stringResource(R.string.cd_next_month))
                     }
                 }
             }
@@ -122,17 +124,17 @@ fun OverviewScreen(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     StatCard(
-                        label = "Workouts",
+                        label = stringResource(R.string.stat_workouts),
                         value = "${state.totalWorkouts}",
                         modifier = Modifier.weight(1f)
                     )
                     StatCard(
-                        label = "Rest Days",
+                        label = stringResource(R.string.overview_rest_days),
                         value = "${state.totalRestDays}",
                         modifier = Modifier.weight(1f)
                     )
                     StatCard(
-                        label = "Top Type",
+                        label = stringResource(R.string.overview_top_type),
                         value = state.mostCommonType?.name ?: "-",
                         modifier = Modifier.weight(1f)
                     )
@@ -149,7 +151,7 @@ fun OverviewScreen(
                         FilterChip(
                             selected = state.selectedFilter == null,
                             onClick = { viewModel.setFilter(null) },
-                            label = { Text("All") }
+                            label = { Text(stringResource(R.string.overview_all)) }
                         )
                     }
                     items(state.workoutTypes) { type ->
@@ -176,7 +178,7 @@ fun OverviewScreen(
             item {
                 Spacer(Modifier.height(16.dp))
                 Text(
-                    text = "Workouts this month",
+                    text = stringResource(R.string.overview_this_month),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.padding(horizontal = 16.dp)

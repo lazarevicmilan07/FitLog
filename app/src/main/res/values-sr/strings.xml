@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Workout Log</string>
+
+    <string name="nav_home">Početna</string>
+    <string name="nav_stats">Statistike</string>
+    <string name="nav_types">Tipovi</string>
+    <string name="nav_settings">Podešavanja</string>
+
+    <string name="btn_ok">OK</string>
+    <string name="btn_cancel">Otkaži</string>
+    <string name="btn_save">Sačuvaj</string>
+    <string name="btn_delete">Obriši</string>
+    <string name="btn_close">Zatvori</string>
+    <string name="btn_continue">Nastavi</string>
+    <string name="cd_back">Nazad</string>
+
+    <string name="home_title">Workout Log</string>
+    <string name="cd_filter">Filtriranje</string>
+    <string name="cd_add_workout">Dodaj trening</string>
+    <string name="cd_previous_month">Prethodni mesec</string>
+    <string name="cd_next_month">Sledeći mesec</string>
+    <string name="stat_workouts">Treninzi</string>
+    <string name="stat_consistency">Doslednost</string>
+    <string name="filter_by_type">Filtriraj po tipu treninga</string>
+    <string name="filter_clear_all">Očisti sve</string>
+
+    <string name="goals_title">Ciljevi</string>
+    <string name="cd_manage_goals">Upravljanje ciljevima</string>
+    <string name="goals_empty">Tapni + da postaviš cilj</string>
+    <string name="goals_all_workouts">Svi treninzi</string>
+    <string name="cd_goal_completed">Cilj ostvaren</string>
+    <string name="cd_goal_not_completed">Cilj nije ostvaren</string>
+    <string name="goals_period_monthly">Mesečno</string>
+    <string name="goals_period_yearly">Godišnje</string>
+    <string name="goals_complete_title">Cilj ostvaren!</string>
+    <string name="goals_period_label">Period</string>
+    <string name="goals_workout_type_label">Tip treninga</string>
+    <string name="goals_target_label">Cilj</string>
+    <string name="goals_edit_header">Izmeni cilj</string>
+    <string name="goals_new_header">Novi cilj</string>
+    <string name="goals_new_btn">Novi cilj</string>
+    <string name="goals_update_btn">Ažuriraj cilj</string>
+    <string name="goals_add_btn">Dodaj cilj</string>
+    <string name="goals_target_progress">Cilj %1$d  ·  %2$d/%3$d u ovom periodu</string>
+    <string name="goals_delete_cd">Obriši cilj</string>
+
+    <string-array name="goal_completed_messages">
+        <item>Cilj ostvaren! Nastavi ovim tempom!</item>
+        <item>Uspeo si! Cilj dostignut!</item>
+        <item>Tako izgleda posvećenost. Cilj ispunjen!</item>
+        <item>Još jedan cilj ostvaren. Nezaustavljiv si!</item>
+        <item>Cilj dostignut! Tvoj trud se isplati.</item>
+        <item>Doslednost pobeđuje. Cilj ostvaren!</item>
+        <item>Misija ispunjena. Sjajiš!</item>
+        <item>Postavio si i ostvario. Bravo!</item>
+        <item>Jedan cilj manje. Ništa te ne može zaustaviti!</item>
+        <item>Naporan rad se isplati. Cilj ispunjen!</item>
+    </string-array>
+
+    <string name="entry_unknown">Nepoznato</string>
+    <string name="cd_delete">Obriši</string>
+    <string name="cd_close">Zatvori</string>
+    <string name="entry_edit_title">Izmeni trening</string>
+    <string name="entry_add_title">Zabeleži trening</string>
+    <string name="entry_duplicate_warning">Za ovaj datum već postoji trening. Čuvanje će ga zameniti.</string>
+    <string name="entry_workout_type_label">Tip treninga</string>
+    <string name="entry_no_types">Još nema tipova — dodaj ih na kartici Tipovi</string>
+    <string name="entry_duration_label">Trajanje</string>
+    <string name="entry_duration_unit">min</string>
+    <string name="entry_calories_label">Kalorije</string>
+    <string name="entry_calories_unit">kcal</string>
+    <string name="entry_note_label">Beleška</string>
+    <string name="entry_note_hint">Kako je bio trening?</string>
+    <string name="entry_delete_dialog_title">Obrisati trening?</string>
+    <string name="entry_delete_dialog_message">Ova akcija se ne može poništiti.</string>
+
+    <string name="types_title">Tipovi treninga</string>
+    <string name="cd_add_type">Dodaj tip treninga</string>
+    <string name="types_empty_title">Nema tipova treninga</string>
+    <string name="types_empty_subtitle">Tapni + da kreiraš prvi tip treninga</string>
+
+    <string name="type_edit_title">Izmeni tip</string>
+    <string name="type_add_title">Dodaj tip</string>
+    <string name="type_name_label">Naziv</string>
+    <string name="type_name_hint">npr. Grudi, Kardio</string>
+    <string name="type_color_label">Boja</string>
+    <string name="type_icon_label">Ikonica</string>
+    <string name="type_rest_day_label">Dan odmora</string>
+    <string name="type_rest_day_subtitle">Označi ovaj tip kao dan odmora</string>
+    <string name="type_delete_dialog_title">Obrisati %s?</string>
+    <string name="type_delete_dialog_message">Time će biti obrisani i svi treninzi ovog tipa. Ova akcija se ne može poništiti.</string>
+    <string name="type_change_rest_title">Promeniti tip dana odmora?</string>
+    <string name="type_change_rest_message">\"%1$s\" je trenutno označen kao tip dana odmora. Samo jedan tip može imati ovu oznaku. Nastavkom će biti uklonjena sa \"%1$s\".</string>
+
+    <string name="onboarding_skip">Preskoči</string>
+    <string name="onboarding_get_started">Počni</string>
+    <string name="onboarding_next">Dalje</string>
+    <string name="onboarding_page0_title">Prati svoje treninge</string>
+    <string name="onboarding_page0_desc">Beleži svaki trening sa tipom, trajanjem i napomenama. Ostani dosledan i izgradi zdrave navike.</string>
+    <string name="onboarding_page1_title">Mesečni pregled</string>
+    <string name="onboarding_page1_desc">Pogledaj kalendar treninga jednim pogledom. Prati dane odmora i ostani uravnotežen.</string>
+    <string name="onboarding_page2_title">Postavi ciljeve treninga</string>
+    <string name="onboarding_page2_desc">Postavi mesečne ili godišnje ciljeve kako bi ostao motivisan. Prati napredak na početnom ekranu.</string>
+    <string name="onboarding_page3_title">Detaljni izveštaji</string>
+    <string name="onboarding_page3_desc">Vizualizuj napredak grafikonima. Izvezi izveštaje u Excel ili PDF.</string>
+
+    <string name="reports_title">Statistike</string>
+    <string name="cd_previous">Prethodni</string>
+    <string name="cd_next">Sledeći</string>
+    <string name="reports_monthly">Mesečno</string>
+    <string name="reports_yearly">Godišnje</string>
+    <string name="reports_annual">Godišnje</string>
+    <string name="reports_no_workouts_month">Nema treninga ovog meseca</string>
+    <string name="reports_no_workouts_year">Nema treninga ove godine</string>
+    <string name="reports_start_logging">Počni da beležiš da bi video izveštaje</string>
+    <string name="reports_stat_favourite">Omiljeni</string>
+    <string name="reports_stat_distribution">Raspodela</string>
+    <string name="reports_rest_days_toggle">Dani odmora</string>
+    <string name="reports_no_data">Nema podataka za prikaz</string>
+    <string name="reports_stat_active_months">Aktivni meseci</string>
+    <string name="reports_stat_best_month">Najbolji mesec</string>
+    <string name="reports_stat_avg_consistency">Pros. doslednost/mes.</string>
+    <string name="reports_stat_avg_workouts">Pros. treninga/mes.</string>
+    <string name="reports_monthly_activity">Mesečna aktivnost</string>
+    <string name="reports_total">ukupno</string>
+
+    <string name="picker_select_month_year">Odaberi mesec i godinu</string>
+    <string name="cd_prev_year">Prethodna godina</string>
+    <string name="cd_next_year">Sledeća godina</string>
+    <string name="picker_select_year">Odaberi godinu</string>
+    <string name="month_jan">Jan</string>
+    <string name="month_feb">Feb</string>
+    <string name="month_mar">Mar</string>
+    <string name="month_apr">Apr</string>
+    <string name="month_may">Maj</string>
+    <string name="month_jun">Jun</string>
+    <string name="month_jul">Jul</string>
+    <string name="month_aug">Avg</string>
+    <string name="month_sep">Sep</string>
+    <string name="month_oct">Okt</string>
+    <string name="month_nov">Nov</string>
+    <string name="month_dec">Dec</string>
+
+    <string name="settings_title">Podešavanja</string>
+    <string name="settings_premium_toast">Premium aktiviran! Sve funkcije otključane.</string>
+    <string name="settings_section_appearance">Izgled</string>
+    <string name="settings_theme">Tema</string>
+    <string name="settings_theme_auto">Auto</string>
+    <string name="settings_theme_light">Svetla</string>
+    <string name="settings_theme_dark">Tamna</string>
+    <string name="settings_section_language">Jezik</string>
+    <string name="settings_language">Jezik</string>
+    <string name="settings_language_subtitle">Jezik prikaza aplikacije</string>
+    <string name="settings_section_data">Podaci</string>
+    <string name="settings_export_excel">Izvezi u Excel</string>
+    <string name="settings_export_excel_subtitle">Izvezi izveštaj kao tabelu</string>
+    <string name="settings_export_pdf">Izvezi u PDF</string>
+    <string name="settings_export_pdf_subtitle">Izvezi izveštaj kao PDF dokument</string>
+    <string name="settings_backup">Rezervna kopija</string>
+    <string name="settings_backup_subtitle">Izvezi sve podatke u JSON fajl</string>
+    <string name="settings_restore">Obnovi podatke</string>
+    <string name="settings_restore_subtitle">Uvezi podatke iz JSON rezervne kopije</string>
+    <string name="settings_premium_feature">Premium funkcija</string>
+    <string name="settings_section_notifications">Obaveštenja</string>
+    <string name="settings_notif_permission">Potrebna dozvola za obaveštenja kako bi podsetnici radili</string>
+    <string name="settings_daily_reminder">Dnevni podsetnik</string>
+    <string name="settings_daily_reminder_subtitle">Podseti me da zabeležim trening</string>
+    <string name="settings_reminder_time">Vreme podsetnika</string>
+    <string name="settings_backup_reminder">Podsetnik za rezervnu kopiju</string>
+    <string name="settings_backup_reminder_subtitle">Podseti me da napravim rezervnu kopiju</string>
+    <string name="settings_frequency">Učestalost</string>
+    <string name="settings_freq_daily">Dnevno</string>
+    <string name="settings_freq_weekly">Nedeljno</string>
+    <string name="settings_freq_monthly">Mesečno</string>
+    <string name="settings_day_of_week">Dan u nedelji</string>
+    <string name="settings_day_of_month">Dan u mesecu</string>
+    <string name="settings_section_about">O aplikaciji</string>
+    <string name="settings_version">Verzija %s</string>
+    <string name="settings_privacy_policy">Politika privatnosti</string>
+    <string name="settings_rate_app">Oceni aplikaciju</string>
+    <string name="settings_reminder_time_title">Postavi vreme podsetnika</string>
+    <string name="settings_restore_title">Obnovi podatke</string>
+    <string name="settings_restore_message">Ovo će trajno izbrisati sve tvoje trenutne podatke i zameniti ih podacima iz rezervne kopije.\n\nOva akcija se ne može poništiti. Da li si siguran da želiš da nastaviš?</string>
+    <string name="settings_restore_btn">Obnovi</string>
+    <string name="settings_upgrade_premium">Nadogradi na Premium</string>
+    <string name="settings_upgrade_subtitle">Otključaj sve funkcije jednokratnom kupovinom</string>
+    <string name="settings_backup_data_title">Rezervna kopija</string>
+    <string name="settings_export_report_title">Izvezi izveštaj</string>
+    <string name="export_monthly_title">Mesečno</string>
+    <string name="export_monthly_desc">Odaberi podatke za određeni mesec</string>
+    <string name="export_yearly_title">Godišnje</string>
+    <string name="export_yearly_desc">Odaberi podatke za celu godinu</string>
+    <string name="export_select_month">Odaberi mesec</string>
+    <string name="export_select_year">Odaberi godinu</string>
+
+    <string name="msg_backup_saved">Rezervna kopija uspešno sačuvana</string>
+    <string name="msg_backup_failed">Greška pri pravljenju kopije: %s</string>
+    <string name="msg_restore_success">Podaci uspešno obnovljeni</string>
+    <string name="msg_restore_invalid">Nevažeći fajl rezervne kopije</string>
+    <string name="msg_restore_failed">Greška pri obnavljanju: %s</string>
+    <string name="msg_excel_exported">Excel uspešno izvezen</string>
+    <string name="msg_pdf_exported">PDF uspešno izvezen</string>
+    <string name="msg_export_failed">Greška pri izvozu: %s</string>
+
+    <string name="premium_title">Otključaj Premium</string>
+    <string name="premium_subtitle">Jednokratna kupovina, doživotni pristup</string>
+    <string name="premium_feature_backup">Rezervna kopija &amp; obnova</string>
+    <string name="premium_feature_backup_desc">Nikad ne izgubi podatke o treninzima</string>
+    <string name="premium_feature_no_ads">Ukloni reklame</string>
+    <string name="premium_feature_no_ads_desc">Uživaj u iskustvu bez reklama</string>
+    <string name="premium_one_time">Jednokratno plaćanje</string>
+    <string name="premium_unlock_btn">Otključaj Premium</string>
+    <string name="premium_restore_btn">Obnovi kupovine</string>
+    <string name="premium_secure_payment">Sigurno plaćanje putem Google Play</string>
+    <string name="premium_unlocked_toast">Premium otključan! Hvala!</string>
+    <string name="premium_canceled_toast">Kupovina otkazana</string>
+
+    <string name="overview_rest_days">Dani odmora</string>
+    <string name="overview_top_type">Glavni tip</string>
+    <string name="overview_all">Svi</string>
+    <string name="overview_this_month">Treninzi ovog meseca</string>
+
+    <string name="lang_picker_title">Odaberi jezik</string>
+    <string name="lang_en">English</string>
+    <string name="lang_es">Español</string>
+    <string name="lang_pt">Português</string>
+    <string name="lang_de">Deutsch</string>
+    <string name="lang_fr">Français</string>
+    <string name="lang_ru">Русский</string>
+    <string name="lang_sr">Srpski</string>
+</resources>

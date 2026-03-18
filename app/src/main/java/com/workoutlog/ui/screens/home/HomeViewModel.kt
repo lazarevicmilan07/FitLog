@@ -16,9 +16,12 @@ import com.workoutlog.domain.model.toDomain
 import com.workoutlog.domain.model.toEpochMilli
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
@@ -59,6 +62,12 @@ class HomeViewModel @Inject constructor(
 
     private val _currentMonth = MutableStateFlow(YearMonth.now())
     private val _selectedFilters = MutableStateFlow<Set<Long>>(emptySet())
+
+    private val _goalCompletedEvent = MutableSharedFlow<WorkoutGoal>(extraBufferCapacity = 1)
+    val goalCompletedEvent: SharedFlow<WorkoutGoal> = _goalCompletedEvent.asSharedFlow()
+
+    // Tracks the last known count per goal ID to detect when a goal crosses its target
+    private val _previousGoalCounts = mutableMapOf<Long, Int>()
 
     private val _goalProgressFlow = _currentMonth.flatMapLatest { month ->
         val yearStart = LocalDate.of(month.year, 1, 1).toEpochMilli()
@@ -137,6 +146,25 @@ class HomeViewModel @Inject constructor(
             goals = goalProgress
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), HomeUiState())
+
+    init {
+        viewModelScope.launch {
+            uiState.collect { state ->
+                if (state.isLoading) return@collect
+                state.goals.forEach { gwp ->
+                    val prevCount = _previousGoalCounts[gwp.goal.id]
+                    if (prevCount != null
+                        && prevCount < gwp.goal.targetCount
+                        && gwp.current >= gwp.goal.targetCount
+                        && !gwp.isPast
+                    ) {
+                        _goalCompletedEvent.tryEmit(gwp.goal)
+                    }
+                    _previousGoalCounts[gwp.goal.id] = gwp.current
+                }
+            }
+        }
+    }
 
     fun previousMonth() {
         _currentMonth.value = _currentMonth.value.minusMonths(1)

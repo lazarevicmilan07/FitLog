@@ -66,7 +66,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.workoutlog.R
 import com.workoutlog.domain.model.toEpochMilli
 import com.workoutlog.ui.components.LoadingIndicator
 import com.workoutlog.ui.theme.getWorkoutIcon
@@ -119,12 +121,12 @@ fun AddEditEntrySheet(
             IconButton(onClick = onDismiss) {
                 Icon(
                     Icons.Default.Close,
-                    contentDescription = "Close",
+                    contentDescription = stringResource(R.string.cd_close),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             Text(
-                text = if (state.isEditing) "Edit Workout" else "Log Workout",
+                text = if (state.isEditing) stringResource(R.string.entry_edit_title) else stringResource(R.string.entry_add_title),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.weight(1f),
@@ -212,7 +214,7 @@ fun AddEditEntrySheet(
                             modifier = Modifier.size(16.dp)
                         )
                         Text(
-                            text = "A workout already exists for this date. Saving will replace it.",
+                            text = stringResource(R.string.entry_duplicate_warning),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurface
                         )
@@ -222,7 +224,7 @@ fun AddEditEntrySheet(
                 // ── Workout type selector ─────────────────────────────────
                 Column(modifier = Modifier.padding(top = 20.dp)) {
                     Text(
-                        text = "Workout Type",
+                        text = stringResource(R.string.entry_workout_type_label),
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -232,7 +234,7 @@ fun AddEditEntrySheet(
 
                     if (state.workoutTypes.isEmpty()) {
                         Text(
-                            text = "No workout types yet — add some in Types tab",
+                            text = stringResource(R.string.entry_no_types),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(horizontal = 20.dp)
@@ -309,8 +311,8 @@ fun AddEditEntrySheet(
                     StatInputCard(
                         icon = { Icon(Icons.Default.Timer, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp)) },
                         iconBg = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
-                        label = "Duration",
-                        unit = "min",
+                        label = stringResource(R.string.entry_duration_label),
+                        unit = stringResource(R.string.entry_duration_unit),
                         value = state.durationMinutes,
                         onValueChange = viewModel::onDurationChanged,
                         modifier = Modifier.weight(1f)
@@ -319,8 +321,8 @@ fun AddEditEntrySheet(
                     StatInputCard(
                         icon = { Icon(Icons.Default.LocalFireDepartment, contentDescription = null, tint = Color(0xFFFF6B35), modifier = Modifier.size(18.dp)) },
                         iconBg = Color(0xFFFF6B35).copy(alpha = 0.12f),
-                        label = "Calories",
-                        unit = "kcal",
+                        label = stringResource(R.string.entry_calories_label),
+                        unit = stringResource(R.string.entry_calories_unit),
                         value = state.caloriesBurned,
                         onValueChange = viewModel::onCaloriesChanged,
                         modifier = Modifier.weight(1f)
@@ -330,7 +332,7 @@ fun AddEditEntrySheet(
                 // ── Note ──────────────────────────────────────────────────
                 Column(modifier = Modifier.padding(horizontal = 20.dp)) {
                     Text(
-                        text = "Note",
+                        text = stringResource(R.string.entry_note_label),
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -344,7 +346,7 @@ fun AddEditEntrySheet(
                             .height(96.dp),
                         placeholder = {
                             Text(
-                                "How was your workout?",
+                                stringResource(R.string.entry_note_hint),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                             )
                         },
@@ -381,7 +383,7 @@ fun AddEditEntrySheet(
                     ) {
                         Icon(Icons.Default.Delete, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(Modifier.width(6.dp))
-                        Text("Delete", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                        Text(stringResource(R.string.btn_delete), fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
                     }
                 }
                 Button(
@@ -400,7 +402,7 @@ fun AddEditEntrySheet(
                 ) {
                     Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(16.dp))
                     Spacer(Modifier.width(6.dp))
-                    Text("Save", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                    Text(stringResource(R.string.btn_save), fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
                 }
             }
         }
@@ -424,10 +426,10 @@ fun AddEditEntrySheet(
                         viewModel.onDateChanged(date)
                     }
                     showDatePicker = false
-                }) { Text("OK") }
+                }) { Text(stringResource(R.string.btn_ok)) }
             },
             dismissButton = {
-                TextButton(onClick = { showDatePicker = false }) { Text("Cancel") }
+                TextButton(onClick = { showDatePicker = false }) { Text(stringResource(R.string.btn_cancel)) }
             }
         ) {
             DatePicker(state = datePickerState)
@@ -438,16 +440,16 @@ fun AddEditEntrySheet(
     if (showDeleteConfirm) {
         AlertDialog(
             onDismissRequest = { showDeleteConfirm = false },
-            title = { Text("Delete workout?") },
-            text = { Text("This action cannot be undone.") },
+            title = { Text(stringResource(R.string.entry_delete_dialog_title)) },
+            text = { Text(stringResource(R.string.entry_delete_dialog_message)) },
             confirmButton = {
                 TextButton(onClick = {
                     viewModel.delete()
                     showDeleteConfirm = false
-                }) { Text("Delete", color = MaterialTheme.colorScheme.error) }
+                }) { Text(stringResource(R.string.btn_delete), color = MaterialTheme.colorScheme.error) }
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteConfirm = false }) { Text("Cancel") }
+                TextButton(onClick = { showDeleteConfirm = false }) { Text(stringResource(R.string.btn_cancel)) }
             }
         )
     }

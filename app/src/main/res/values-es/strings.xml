@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Workout Log</string>
+
+    <string name="nav_home">Inicio</string>
+    <string name="nav_stats">Estadísticas</string>
+    <string name="nav_types">Tipos</string>
+    <string name="nav_settings">Configuración</string>
+
+    <string name="btn_ok">Aceptar</string>
+    <string name="btn_cancel">Cancelar</string>
+    <string name="btn_save">Guardar</string>
+    <string name="btn_delete">Eliminar</string>
+    <string name="btn_close">Cerrar</string>
+    <string name="btn_continue">Continuar</string>
+    <string name="cd_back">Atrás</string>
+
+    <string name="home_title">Workout Log</string>
+    <string name="cd_filter">Filtrar</string>
+    <string name="cd_add_workout">Agregar entrenamiento</string>
+    <string name="cd_previous_month">Mes anterior</string>
+    <string name="cd_next_month">Mes siguiente</string>
+    <string name="stat_workouts">Entrenamientos</string>
+    <string name="stat_consistency">Consistencia</string>
+    <string name="filter_by_type">Filtrar por tipo de entrenamiento</string>
+    <string name="filter_clear_all">Limpiar todo</string>
+
+    <string name="goals_title">Metas</string>
+    <string name="cd_manage_goals">Gestionar metas</string>
+    <string name="goals_empty">Toca + para establecer una meta</string>
+    <string name="goals_all_workouts">Todos los entrenamientos</string>
+    <string name="cd_goal_completed">Meta completada</string>
+    <string name="cd_goal_not_completed">Meta no completada</string>
+    <string name="goals_period_monthly">Mensual</string>
+    <string name="goals_period_yearly">Anual</string>
+    <string name="goals_complete_title">¡Meta cumplida!</string>
+    <string name="goals_period_label">Período</string>
+    <string name="goals_workout_type_label">Tipo de entrenamiento</string>
+    <string name="goals_target_label">Objetivo</string>
+    <string name="goals_edit_header">Editar meta</string>
+    <string name="goals_new_header">Nueva meta</string>
+    <string name="goals_new_btn">Nueva meta</string>
+    <string name="goals_update_btn">Actualizar meta</string>
+    <string name="goals_add_btn">Agregar meta</string>
+    <string name="goals_target_progress">Objetivo %1$d  ·  %2$d/%3$d este período</string>
+    <string name="goals_delete_cd">Eliminar meta</string>
+
+    <string-array name="goal_completed_messages">
+        <item>¡Meta lograda! ¡Sigue con ese impulso!</item>
+        <item>¡Lo lograste! ¡Meta alcanzada!</item>
+        <item>Así se ve la dedicación. ¡Meta cumplida!</item>
+        <item>Una meta más. ¡Eres imparable!</item>
+        <item>¡Meta alcanzada! Tu esfuerzo está dando frutos.</item>
+        <item>La constancia gana. ¡Meta conseguida!</item>
+        <item>Misión cumplida. ¡Estás en llamas!</item>
+        <item>Lo propusiste y lo lograste. ¡Bien hecho!</item>
+        <item>Una meta menos. ¡Nada te detiene!</item>
+        <item>El trabajo duro da frutos. ¡Meta cumplida!</item>
+    </string-array>
+
+    <string name="entry_unknown">Desconocido</string>
+    <string name="cd_delete">Eliminar</string>
+    <string name="cd_close">Cerrar</string>
+    <string name="entry_edit_title">Editar entrenamiento</string>
+    <string name="entry_add_title">Registrar entrenamiento</string>
+    <string name="entry_duplicate_warning">Ya existe un entrenamiento para esta fecha. Al guardar se reemplazará.</string>
+    <string name="entry_workout_type_label">Tipo de entrenamiento</string>
+    <string name="entry_no_types">Aún no hay tipos — agrégalos en la pestaña Tipos</string>
+    <string name="entry_duration_label">Duración</string>
+    <string name="entry_duration_unit">min</string>
+    <string name="entry_calories_label">Calorías</string>
+    <string name="entry_calories_unit">kcal</string>
+    <string name="entry_note_label">Nota</string>
+    <string name="entry_note_hint">¿Cómo fue tu entrenamiento?</string>
+    <string name="entry_delete_dialog_title">¿Eliminar entrenamiento?</string>
+    <string name="entry_delete_dialog_message">Esta acción no se puede deshacer.</string>
+
+    <string name="types_title">Tipos de entrenamiento</string>
+    <string name="cd_add_type">Agregar tipo de entrenamiento</string>
+    <string name="types_empty_title">No hay tipos de entrenamiento</string>
+    <string name="types_empty_subtitle">Toca + para crear tu primer tipo de entrenamiento</string>
+
+    <string name="type_edit_title">Editar tipo</string>
+    <string name="type_add_title">Agregar tipo</string>
+    <string name="type_name_label">Nombre</string>
+    <string name="type_name_hint">p. ej. Pecho, Cardio</string>
+    <string name="type_color_label">Color</string>
+    <string name="type_icon_label">Ícono</string>
+    <string name="type_rest_day_label">Día de descanso</string>
+    <string name="type_rest_day_subtitle">Marcar este tipo como día de descanso</string>
+    <string name="type_delete_dialog_title">¿Eliminar %s?</string>
+    <string name="type_delete_dialog_message">Esto también eliminará todos los entrenamientos de este tipo. Esta acción no se puede deshacer.</string>
+    <string name="type_change_rest_title">¿Cambiar el tipo de día de descanso?</string>
+    <string name="type_change_rest_message">\"%1$s\" está marcado como tipo de día de descanso. Solo un tipo puede tener esta designación. Al continuar, se eliminará de \"%1$s\".</string>
+
+    <string name="onboarding_skip">Omitir</string>
+    <string name="onboarding_get_started">Empezar</string>
+    <string name="onboarding_next">Siguiente</string>
+    <string name="onboarding_page0_title">Registra tus entrenamientos</string>
+    <string name="onboarding_page0_desc">Anota cada entrenamiento con tipo, duración y notas. Mantén la constancia y crea hábitos saludables.</string>
+    <string name="onboarding_page1_title">Vista mensual</string>
+    <string name="onboarding_page1_desc">Consulta tu calendario de entrenamientos de un vistazo. Registra los días de descanso y mantén el equilibrio.</string>
+    <string name="onboarding_page2_title">Establece metas de entrenamiento</string>
+    <string name="onboarding_page2_desc">Define metas mensuales o anuales para mantenerte motivado. Sigue tu progreso en la pantalla principal.</string>
+    <string name="onboarding_page3_title">Informes detallados</string>
+    <string name="onboarding_page3_desc">Visualiza tu progreso con gráficos. Exporta informes a Excel o PDF.</string>
+
+    <string name="reports_title">Estadísticas</string>
+    <string name="cd_previous">Anterior</string>
+    <string name="cd_next">Siguiente</string>
+    <string name="reports_monthly">Mensual</string>
+    <string name="reports_yearly">Anual</string>
+    <string name="reports_annual">Anual</string>
+    <string name="reports_no_workouts_month">Sin entrenamientos este mes</string>
+    <string name="reports_no_workouts_year">Sin entrenamientos este año</string>
+    <string name="reports_start_logging">Empieza a registrar para ver los informes</string>
+    <string name="reports_stat_favourite">Favorito</string>
+    <string name="reports_stat_distribution">Distribución</string>
+    <string name="reports_rest_days_toggle">Días de descanso</string>
+    <string name="reports_no_data">Sin datos para mostrar</string>
+    <string name="reports_stat_active_months">Meses activos</string>
+    <string name="reports_stat_best_month">Mejor mes</string>
+    <string name="reports_stat_avg_consistency">Media mensual de consistencia</string>
+    <string name="reports_stat_avg_workouts">Media mensual de entrenamientos</string>
+    <string name="reports_monthly_activity">Actividad mensual</string>
+    <string name="reports_total">total</string>
+
+    <string name="picker_select_month_year">Seleccionar mes y año</string>
+    <string name="cd_prev_year">Año anterior</string>
+    <string name="cd_next_year">Año siguiente</string>
+    <string name="picker_select_year">Seleccionar año</string>
+    <string name="month_jan">Ene</string>
+    <string name="month_feb">Feb</string>
+    <string name="month_mar">Mar</string>
+    <string name="month_apr">Abr</string>
+    <string name="month_may">May</string>
+    <string name="month_jun">Jun</string>
+    <string name="month_jul">Jul</string>
+    <string name="month_aug">Ago</string>
+    <string name="month_sep">Sep</string>
+    <string name="month_oct">Oct</string>
+    <string name="month_nov">Nov</string>
+    <string name="month_dec">Dic</string>
+
+    <string name="settings_title">Configuración</string>
+    <string name="settings_premium_toast">¡Premium activado! Todas las funciones desbloqueadas.</string>
+    <string name="settings_section_appearance">Apariencia</string>
+    <string name="settings_theme">Tema</string>
+    <string name="settings_theme_auto">Auto</string>
+    <string name="settings_theme_light">Claro</string>
+    <string name="settings_theme_dark">Oscuro</string>
+    <string name="settings_section_language">Idioma</string>
+    <string name="settings_language">Idioma</string>
+    <string name="settings_language_subtitle">Idioma de la aplicación</string>
+    <string name="settings_section_data">Datos</string>
+    <string name="settings_export_excel">Exportar a Excel</string>
+    <string name="settings_export_excel_subtitle">Exportar informe como hoja de cálculo</string>
+    <string name="settings_export_pdf">Exportar a PDF</string>
+    <string name="settings_export_pdf_subtitle">Exportar informe como documento PDF</string>
+    <string name="settings_backup">Copia de seguridad</string>
+    <string name="settings_backup_subtitle">Exportar todos los datos a un archivo JSON</string>
+    <string name="settings_restore">Restaurar datos</string>
+    <string name="settings_restore_subtitle">Importar datos desde copia de seguridad</string>
+    <string name="settings_premium_feature">Función premium</string>
+    <string name="settings_section_notifications">Notificaciones</string>
+    <string name="settings_notif_permission">Se requiere permiso de notificación para los recordatorios</string>
+    <string name="settings_daily_reminder">Recordatorio diario</string>
+    <string name="settings_daily_reminder_subtitle">Recordarme registrar mi entrenamiento</string>
+    <string name="settings_reminder_time">Hora del recordatorio</string>
+    <string name="settings_backup_reminder">Recordatorio de copia de seguridad</string>
+    <string name="settings_backup_reminder_subtitle">Recordarme hacer una copia de seguridad</string>
+    <string name="settings_frequency">Frecuencia</string>
+    <string name="settings_freq_daily">Diario</string>
+    <string name="settings_freq_weekly">Semanal</string>
+    <string name="settings_freq_monthly">Mensual</string>
+    <string name="settings_day_of_week">Día de la semana</string>
+    <string name="settings_day_of_month">Día del mes</string>
+    <string name="settings_section_about">Acerca de</string>
+    <string name="settings_version">Versión %s</string>
+    <string name="settings_privacy_policy">Política de privacidad</string>
+    <string name="settings_rate_app">Valorar la app</string>
+    <string name="settings_reminder_time_title">Establecer hora del recordatorio</string>
+    <string name="settings_restore_title">Restaurar datos</string>
+    <string name="settings_restore_message">Esto eliminará permanentemente todos tus datos actuales y los reemplazará con los datos del archivo de copia de seguridad.\n\nEsta acción no se puede deshacer. ¿Estás seguro de que quieres continuar?</string>
+    <string name="settings_restore_btn">Restaurar</string>
+    <string name="settings_upgrade_premium">Cambiar a Premium</string>
+    <string name="settings_upgrade_subtitle">Desbloquea todas las funciones con una compra única</string>
+    <string name="settings_backup_data_title">Copia de seguridad</string>
+    <string name="settings_export_report_title">Exportar informe</string>
+    <string name="export_monthly_title">Mensual</string>
+    <string name="export_monthly_desc">Seleccionar datos de un mes específico</string>
+    <string name="export_yearly_title">Anual</string>
+    <string name="export_yearly_desc">Seleccionar datos de un año completo</string>
+    <string name="export_select_month">Seleccionar mes</string>
+    <string name="export_select_year">Seleccionar año</string>
+
+    <string name="msg_backup_saved">Copia de seguridad guardada con éxito</string>
+    <string name="msg_backup_failed">Error en la copia de seguridad: %s</string>
+    <string name="msg_restore_success">Datos restaurados con éxito</string>
+    <string name="msg_restore_invalid">Archivo de copia de seguridad no válido</string>
+    <string name="msg_restore_failed">Error al restaurar: %s</string>
+    <string name="msg_excel_exported">Excel exportado con éxito</string>
+    <string name="msg_pdf_exported">PDF exportado con éxito</string>
+    <string name="msg_export_failed">Error al exportar: %s</string>
+
+    <string name="premium_title">Desbloquear Premium</string>
+    <string name="premium_subtitle">Compra única, acceso de por vida</string>
+    <string name="premium_feature_backup">Copia de seguridad y restauración</string>
+    <string name="premium_feature_backup_desc">Nunca pierdas tus datos de entrenamiento</string>
+    <string name="premium_feature_no_ads">Eliminar anuncios</string>
+    <string name="premium_feature_no_ads_desc">Disfruta de una experiencia sin anuncios</string>
+    <string name="premium_one_time">Pago único</string>
+    <string name="premium_unlock_btn">Desbloquear Premium</string>
+    <string name="premium_restore_btn">Restaurar compras</string>
+    <string name="premium_secure_payment">Pago seguro a través de Google Play</string>
+    <string name="premium_unlocked_toast">¡Premium desbloqueado! ¡Gracias!</string>
+    <string name="premium_canceled_toast">Compra cancelada</string>
+
+    <string name="overview_rest_days">Días de descanso</string>
+    <string name="overview_top_type">Tipo más frecuente</string>
+    <string name="overview_all">Todos</string>
+    <string name="overview_this_month">Entrenamientos este mes</string>
+
+    <string name="lang_picker_title">Seleccionar idioma</string>
+    <string name="lang_en">English</string>
+    <string name="lang_es">Español</string>
+    <string name="lang_pt">Português</string>
+    <string name="lang_de">Deutsch</string>
+    <string name="lang_fr">Français</string>
+    <string name="lang_ru">Русский</string>
+    <string name="lang_sr">Srpski</string>
+</resources>

@@ -27,17 +27,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.workoutlog.R
 import java.time.LocalDate
 import java.time.YearMonth
-
-private val MONTH_LABELS = listOf(
-    "Jan", "Feb", "Mar", "Apr",
-    "May", "Jun", "Jul", "Aug",
-    "Sep", "Oct", "Nov", "Dec"
-)
 
 /**
  * Month + year picker dialog (MoneyTracker style).
@@ -57,7 +53,7 @@ fun MonthYearPickerDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                text = "Select Month and Year",
+                text = stringResource(R.string.picker_select_month_year),
                 style = MaterialTheme.typography.titleMedium
             )
         },
@@ -70,7 +66,7 @@ fun MonthYearPickerDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(onClick = { selectedYear-- }) {
-                        Icon(Icons.Default.ChevronLeft, contentDescription = "Previous year")
+                        Icon(Icons.Default.ChevronLeft, contentDescription = stringResource(R.string.cd_prev_year))
                     }
                     Text(
                         text = selectedYear.toString(),
@@ -78,7 +74,7 @@ fun MonthYearPickerDialog(
                         fontWeight = FontWeight.SemiBold
                     )
                     IconButton(onClick = { selectedYear++ }) {
-                        Icon(Icons.Default.ChevronRight, contentDescription = "Next year")
+                        Icon(Icons.Default.ChevronRight, contentDescription = stringResource(R.string.cd_next_year))
                     }
                 }
 
@@ -93,11 +89,11 @@ fun MonthYearPickerDialog(
         },
         confirmButton = {
             TextButton(onClick = { onConfirm(YearMonth.of(selectedYear, selectedMonth)) }) {
-                Text("OK")
+                Text(stringResource(R.string.btn_ok))
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.btn_cancel)) }
         }
     )
 }
@@ -120,7 +116,7 @@ fun YearPickerDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                text = "Select Year",
+                text = stringResource(R.string.picker_select_year),
                 style = MaterialTheme.typography.titleMedium
             )
         },
@@ -128,10 +124,10 @@ fun YearPickerDialog(
             YearGrid(years = years, selectedYear = selectedYear, onYearSelected = { selectedYear = it })
         },
         confirmButton = {
-            TextButton(onClick = { onConfirm(selectedYear) }) { Text("OK") }
+            TextButton(onClick = { onConfirm(selectedYear) }) { Text(stringResource(R.string.btn_ok)) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.btn_cancel)) }
         }
     )
 }
@@ -143,6 +139,14 @@ internal fun MonthGrid(
     selectedMonth: Int,
     onMonthSelected: (Int) -> Unit
 ) {
+    val monthLabels = listOf(
+        stringResource(R.string.month_jan), stringResource(R.string.month_feb),
+        stringResource(R.string.month_mar), stringResource(R.string.month_apr),
+        stringResource(R.string.month_may), stringResource(R.string.month_jun),
+        stringResource(R.string.month_jul), stringResource(R.string.month_aug),
+        stringResource(R.string.month_sep), stringResource(R.string.month_oct),
+        stringResource(R.string.month_nov), stringResource(R.string.month_dec)
+    )
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         for (row in 0..2) {
             Row(
@@ -162,7 +166,7 @@ internal fun MonthGrid(
                         shape = RoundedCornerShape(8.dp)
                     ) {
                         Text(
-                            text = MONTH_LABELS[monthIndex - 1],
+                            text = monthLabels[monthIndex - 1],
                             modifier = Modifier.padding(vertical = 12.dp),
                             textAlign = TextAlign.Center,
                             color = if (isSelected) MaterialTheme.colorScheme.onPrimary

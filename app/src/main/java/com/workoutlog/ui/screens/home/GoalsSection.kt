@@ -59,6 +59,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import com.workoutlog.R
 import com.workoutlog.domain.model.GoalPeriod
 import com.workoutlog.domain.model.WorkoutType
 import com.workoutlog.domain.model.label
@@ -66,11 +68,6 @@ import com.workoutlog.domain.model.label
 private fun GoalPeriod.accentColor(): Color = when (this) {
     GoalPeriod.MONTHLY -> Color(0xFF9C6ADE)  // purple
     GoalPeriod.YEARLY  -> Color(0xFFD4720A)  // burnt orange
-}
-
-private fun GoalPeriod.shortLabel(): String = when (this) {
-    GoalPeriod.MONTHLY -> "Monthly"
-    GoalPeriod.YEARLY  -> "Yearly"
 }
 
 private fun GoalPeriod.letter(): String = when (this) {
@@ -98,7 +95,7 @@ fun GoalsSection(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "Goals",
+                text = stringResource(R.string.goals_title),
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -110,7 +107,7 @@ fun GoalsSection(
             ) {
                 Icon(
                     Icons.Default.Add,
-                    contentDescription = "Manage goals",
+                    contentDescription = stringResource(R.string.cd_manage_goals),
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(16.dp)
                 )
@@ -119,7 +116,7 @@ fun GoalsSection(
 
         if (goals.isEmpty()) {
             Text(
-                text = "Tap + to set a goal",
+                text = stringResource(R.string.goals_empty),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                 modifier = Modifier.padding(start = 2.dp, bottom = 4.dp)
@@ -153,7 +150,8 @@ fun GoalProgressCard(
     } else 0f
     val isComplete = progress >= 1f
     val accentColor = goal.period.accentColor()
-    val typeName = goal.workoutType?.name ?: "All Workouts"
+    val allWorkoutsLabel = stringResource(R.string.goals_all_workouts)
+    val typeName = goal.workoutType?.name ?: allWorkoutsLabel
     val pct = (progress.coerceIn(0f, 1f) * 100).toInt()
 
     Column(
@@ -186,7 +184,7 @@ fun GoalProgressCard(
             }
             Spacer(Modifier.width(7.dp))
             Text(
-                text = "${goal.period.shortLabel()} · $typeName",
+                text = "${stringResource(when (goal.period) { GoalPeriod.MONTHLY -> R.string.goals_period_monthly; GoalPeriod.YEARLY -> R.string.goals_period_yearly })} · $typeName",
                 style = MaterialTheme.typography.labelMedium,
                 color = accentColor,
                 modifier = Modifier.weight(1f),
@@ -223,13 +221,13 @@ fun GoalProgressCard(
             when {
                 isComplete -> Icon(
                     imageVector = Icons.Filled.CheckCircle,
-                    contentDescription = "Goal completed",
+                    contentDescription = stringResource(R.string.cd_goal_completed),
                     tint = Color(0xFF4A9B6F),
                     modifier = Modifier.size(14.dp)
                 )
                 goalProgress.isPast -> Icon(
                     imageVector = Icons.Filled.Cancel,
-                    contentDescription = "Goal not completed",
+                    contentDescription = stringResource(R.string.cd_goal_not_completed),
                     tint = Color(0xFFE05252),
                     modifier = Modifier.size(14.dp)
                 )
@@ -284,7 +282,8 @@ fun GoalManagementSheet(
     }
 
     val nonRestTypes = workoutTypes.filter { !it.isRestDay }
-    val selectedTypeName = nonRestTypes.find { it.id == selectedTypeId }?.name ?: "All Workouts"
+    val allWorkoutsLabel = stringResource(R.string.goals_all_workouts)
+    val selectedTypeName = nonRestTypes.find { it.id == selectedTypeId }?.name ?: allWorkoutsLabel
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -305,7 +304,7 @@ fun GoalManagementSheet(
                 .padding(bottom = 8.dp)
         ) {
             Text(
-                text = "Goals",
+                text = stringResource(R.string.goals_title),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(bottom = 12.dp)
@@ -345,12 +344,12 @@ fun GoalManagementSheet(
                         Spacer(Modifier.width(10.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "${gp.goal.period.label()} · ${gp.goal.workoutType?.name ?: "All Workouts"}",
+                                text = "${gp.goal.period.label()} · ${gp.goal.workoutType?.name ?: allWorkoutsLabel}",
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Medium
                             )
                             Text(
-                                text = "Target ${gp.goal.targetCount}  ·  ${gp.current}/${gp.goal.targetCount} this period",
+                                text = stringResource(R.string.goals_target_progress, gp.goal.targetCount, gp.current, gp.goal.targetCount),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -364,7 +363,7 @@ fun GoalManagementSheet(
                         ) {
                             Icon(
                                 Icons.Default.Delete,
-                                contentDescription = "Delete goal",
+                                contentDescription = stringResource(R.string.goals_delete_cd),
                                 tint = MaterialTheme.colorScheme.error,
                                 modifier = Modifier.size(18.dp)
                             )
@@ -382,19 +381,19 @@ fun GoalManagementSheet(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = if (editingGoalId != null) "Edit Goal" else "New Goal",
+                    text = if (editingGoalId != null) stringResource(R.string.goals_edit_header) else stringResource(R.string.goals_new_header),
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold
                 )
                 if (editingGoalId != null) {
                     TextButton(onClick = { editingGoalId = null }) {
-                        Text("New Goal", style = MaterialTheme.typography.labelMedium)
+                        Text(stringResource(R.string.goals_new_btn), style = MaterialTheme.typography.labelMedium)
                     }
                 }
             }
 
             Text(
-                text = "Period",
+                text = stringResource(R.string.goals_period_label),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(bottom = 6.dp)
@@ -407,8 +406,8 @@ fun GoalManagementSheet(
                         label = {
                             Text(
                                 text = when (period) {
-                                    GoalPeriod.MONTHLY -> "Monthly"
-                                    GoalPeriod.YEARLY  -> "Yearly"
+                                    GoalPeriod.MONTHLY -> stringResource(R.string.goals_period_monthly)
+                                    GoalPeriod.YEARLY  -> stringResource(R.string.goals_period_yearly)
                                 },
                                 fontSize = 12.sp
                             )
@@ -420,7 +419,7 @@ fun GoalManagementSheet(
             Spacer(Modifier.height(12.dp))
 
             Text(
-                text = "Workout Type",
+                text = stringResource(R.string.goals_workout_type_label),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(bottom = 6.dp)
@@ -447,7 +446,7 @@ fun GoalManagementSheet(
                     onDismissRequest = { typeDropdownExpanded = false }
                 ) {
                     DropdownMenuItem(
-                        text = { Text("All Workouts") },
+                        text = { Text(allWorkoutsLabel) },
                         onClick = {
                             selectedTypeId = null
                             typeDropdownExpanded = false
@@ -468,7 +467,7 @@ fun GoalManagementSheet(
             Spacer(Modifier.height(12.dp))
 
             Text(
-                text = "Target",
+                text = stringResource(R.string.goals_target_label),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(bottom = 6.dp)
@@ -548,7 +547,7 @@ fun GoalManagementSheet(
                 containerColor = MaterialTheme.colorScheme.primary
             )
         ) {
-            Text(if (editingGoalId != null) "Update Goal" else "Add Goal")
+            Text(if (editingGoalId != null) stringResource(R.string.goals_update_btn) else stringResource(R.string.goals_add_btn))
         }
         } // end outer Column
     }

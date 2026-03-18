@@ -2,12 +2,17 @@ package com.workoutlog.ui.screens.settings
 
 import android.content.Context
 import android.net.Uri
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.workoutlog.R
 import com.workoutlog.data.datastore.ReminderPreferences
 import com.workoutlog.data.datastore.ReminderTime
 import com.workoutlog.data.datastore.SettingsDataStore
 import com.workoutlog.data.datastore.ThemeMode
+import com.workoutlog.notifications.BackupReminderManager
+import com.workoutlog.notifications.BackupReminderPreferences
+import com.workoutlog.notifications.BackupReminderSettings
 import com.workoutlog.notifications.ReminderManager
 import com.workoutlog.data.repository.WorkoutEntryRepository
 import com.workoutlog.data.repository.WorkoutGoalRepository
@@ -46,7 +51,7 @@ data class SettingsUiState(
 )
 
 sealed class SettingsEvent {
-    data class Message(val text: String) : SettingsEvent()
+    data class Message(@StringRes val resId: Int, val arg: String? = null) : SettingsEvent()
     data object ShowPremiumRequired : SettingsEvent()
 }
 
@@ -56,6 +61,8 @@ class SettingsViewModel @Inject constructor(
     private val settingsDataStore: SettingsDataStore,
     private val reminderPreferences: ReminderPreferences,
     private val reminderManager: ReminderManager,
+    private val backupReminderPreferences: BackupReminderPreferences,
+    private val backupReminderManager: BackupReminderManager,
     private val typeRepository: WorkoutTypeRepository,
     private val entryRepository: WorkoutEntryRepository,
     private val goalRepository: WorkoutGoalRepository
@@ -72,6 +79,9 @@ class SettingsViewModel @Inject constructor(
 
     val reminderTime: StateFlow<ReminderTime> = reminderPreferences.reminderTime
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ReminderTime(20, 0))
+
+    val backupReminderSettings: StateFlow<BackupReminderSettings> = backupReminderPreferences.settings
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), BackupReminderSettings())
 
     private val _events = MutableSharedFlow<SettingsEvent>()
     val events = _events.asSharedFlow()
@@ -131,6 +141,30 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    fun setBackupReminderEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            if (!settingsDataStore.isPremium.first()) {
+                _events.emit(SettingsEvent.ShowPremiumRequired)
+                return@launch
+            }
+            val updated = backupReminderPreferences.settings.first().copy(enabled = enabled)
+            backupReminderPreferences.save(updated)
+            if (enabled) backupReminderManager.scheduleReminder(updated)
+            else backupReminderManager.cancelReminder()
+        }
+    }
+
+    fun updateBackupReminderSettings(settings: BackupReminderSettings) {
+        viewModelScope.launch {
+            if (!settingsDataStore.isPremium.first()) {
+                _events.emit(SettingsEvent.ShowPremiumRequired)
+                return@launch
+            }
+            backupReminderPreferences.save(settings)
+            if (settings.enabled) backupReminderManager.scheduleReminder(settings)
+        }
+    }
+
     fun backup(uri: Uri, isMonthly: Boolean, year: Int, month: Int) {
         viewModelScope.launch {
             if (!settingsDataStore.isPremium.first()) {
@@ -154,9 +188,9 @@ class SettingsViewModel @Inject constructor(
                 }
                 val goals = goalRepository.getAll()
                 BackupUtil.createBackup(context, uri, types, entries, goals)
-                _events.emit(SettingsEvent.Message("Backup saved successfully"))
+                _events.emit(SettingsEvent.Message(R.string.msg_backup_saved))
             } catch (e: Exception) {
-                _events.emit(SettingsEvent.Message("Backup failed: ${e.message}"))
+                _events.emit(SettingsEvent.Message(R.string.msg_backup_failed, e.message))
             } finally {
                 _uiState.value = _uiState.value.copy(isBackingUp = false)
             }
@@ -180,12 +214,12 @@ class SettingsViewModel @Inject constructor(
                         goalRepository
                     )
                     loadSettings()
-                    _events.emit(SettingsEvent.Message("Data restored successfully"))
+                    _events.emit(SettingsEvent.Message(R.string.msg_restore_success))
                 } else {
-                    _events.emit(SettingsEvent.Message("Invalid backup file"))
+                    _events.emit(SettingsEvent.Message(R.string.msg_restore_invalid))
                 }
             } catch (e: Exception) {
-                _events.emit(SettingsEvent.Message("Restore failed: ${e.message}"))
+                _events.emit(SettingsEvent.Message(R.string.msg_restore_failed, e.message))
             } finally {
                 _uiState.value = _uiState.value.copy(isRestoring = false)
             }
@@ -205,9 +239,9 @@ class SettingsViewModel @Inject constructor(
                     val report = buildYearlyReport(year, typeMap)
                     ExportUtil.exportYearlyToExcel(context, uri, report)
                 }
-                _events.emit(SettingsEvent.Message("Excel exported successfully"))
+                _events.emit(SettingsEvent.Message(R.string.msg_excel_exported))
             } catch (e: Exception) {
-                _events.emit(SettingsEvent.Message("Export failed: ${e.message}"))
+                _events.emit(SettingsEvent.Message(R.string.msg_export_failed, e.message))
             } finally {
                 _uiState.value = _uiState.value.copy(isExportingExcel = false)
             }
@@ -227,9 +261,9 @@ class SettingsViewModel @Inject constructor(
                     val report = buildYearlyReport(year, typeMap)
                     ExportUtil.exportYearlyToPdf(context, uri, report)
                 }
-                _events.emit(SettingsEvent.Message("PDF exported successfully"))
+                _events.emit(SettingsEvent.Message(R.string.msg_pdf_exported))
             } catch (e: Exception) {
-                _events.emit(SettingsEvent.Message("Export failed: ${e.message}"))
+                _events.emit(SettingsEvent.Message(R.string.msg_export_failed, e.message))
             } finally {
                 _uiState.value = _uiState.value.copy(isExportingPdf = false)
             }
