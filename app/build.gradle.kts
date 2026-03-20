@@ -116,6 +116,9 @@ dependencies {
     // Google Play Billing (forced to satisfy Play Console minimum version requirement)
     implementation("com.android.billingclient:billing-ktx:7.1.1")
 
+    // Google Play In-App Update
+    implementation("com.google.android.play:app-update-ktx:2.1.0")
+
     // Charts - Vico
     implementation(libs.vico.compose.m3)
 
