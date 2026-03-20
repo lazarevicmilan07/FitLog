@@ -968,8 +968,8 @@ fun MonthlyBarChart(
     val monthLabels = listOf("J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D")
 
     Canvas(modifier = modifier) {
-        val labelAreaH = 26f
-        val valueAreaH = 30f
+        val labelAreaH = 36f
+        val valueAreaH = 38f
         val chartH = size.height - labelAreaH - valueAreaH
         val barSlotW = size.width / 12f
         val barW = barSlotW * 0.55f
@@ -998,12 +998,12 @@ fun MonthlyBarChart(
         }
 
         val labelPaint = android.graphics.Paint().apply {
-            textSize = 24f
+            textSize = 34f
             textAlign = android.graphics.Paint.Align.CENTER
             isAntiAlias = true
         }
         val valuePaint = android.graphics.Paint().apply {
-            textSize = 21f
+            textSize = 30f
             textAlign = android.graphics.Paint.Align.CENTER
             isAntiAlias = true
         }

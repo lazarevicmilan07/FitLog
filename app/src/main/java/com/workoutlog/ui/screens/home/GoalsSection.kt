@@ -63,7 +63,6 @@ import androidx.compose.ui.res.stringResource
 import com.workoutlog.R
 import com.workoutlog.domain.model.GoalPeriod
 import com.workoutlog.domain.model.WorkoutType
-import com.workoutlog.domain.model.label
 
 private fun GoalPeriod.accentColor(): Color = when (this) {
     GoalPeriod.MONTHLY -> Color(0xFF9C6ADE)  // purple
@@ -344,7 +343,7 @@ fun GoalManagementSheet(
                         Spacer(Modifier.width(10.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "${gp.goal.period.label()} · ${gp.goal.workoutType?.name ?: allWorkoutsLabel}",
+                                text = "${stringResource(when (gp.goal.period) { GoalPeriod.MONTHLY -> R.string.goals_period_monthly; GoalPeriod.YEARLY -> R.string.goals_period_yearly })} · ${gp.goal.workoutType?.name ?: allWorkoutsLabel}",
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Medium
                             )

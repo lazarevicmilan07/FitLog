@@ -19,11 +19,6 @@ fun GoalPeriod.getDateRangeForMonth(viewedMonth: YearMonth): Pair<Long, Long> {
            end.atStartOfDay(zoneId).toInstant().toEpochMilli()
 }
 
-fun GoalPeriod.label(): String = when (this) {
-    GoalPeriod.MONTHLY -> "This Month"
-    GoalPeriod.YEARLY -> "This Year"
-}
-
 data class WorkoutGoal(
     val id: Long = 0,
     val period: GoalPeriod,

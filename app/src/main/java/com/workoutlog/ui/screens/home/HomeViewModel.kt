@@ -11,7 +11,6 @@ import com.workoutlog.domain.model.WorkoutEntry
 import com.workoutlog.domain.model.WorkoutGoal
 import com.workoutlog.domain.model.WorkoutType
 import com.workoutlog.domain.model.getDateRangeForMonth
-import com.workoutlog.domain.model.label
 import com.workoutlog.domain.model.toDomain
 import com.workoutlog.domain.model.toEpochMilli
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -34,7 +33,6 @@ import javax.inject.Inject
 data class GoalWithProgress(
     val goal: WorkoutGoal,
     val current: Int,
-    val periodLabel: String,
     val isPast: Boolean = false
 )
 
@@ -94,7 +92,6 @@ class HomeViewModel @Inject constructor(
                 GoalWithProgress(
                     goal = goal,
                     current = count,
-                    periodLabel = goal.period.label(),
                     isPast = endMillis < nowMillis
                 )
             }.sortedBy { it.goal.period.ordinal }
