@@ -66,8 +66,10 @@ import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.MobileAds
 import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
+import com.google.android.play.core.appupdate.AppUpdateOptions
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.UpdateAvailability
+import android.app.Activity
 import com.workoutlog.BuildConfig
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -88,7 +90,6 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.material3.ripple
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.ui.res.stringResource
 import androidx.core.app.NotificationManagerCompat
@@ -105,9 +106,6 @@ class MainActivity : ComponentActivity() {
     private val openSettings = mutableStateOf(false)
 
     private lateinit var appUpdateManager: AppUpdateManager
-    private val updateResultLauncher = registerForActivityResult(
-        ActivityResultContracts.StartIntentSenderForResult()
-    ) { /* User cancelled or update failed — onResume will re-trigger if still in progress */ }
 
     override fun attachBaseContext(newBase: android.content.Context) {
         val lang = LanguagePreferences.getLanguage(newBase)
@@ -210,8 +208,8 @@ class MainActivity : ComponentActivity() {
             if (appUpdateInfo.updateAvailability() == UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS) {
                 appUpdateManager.startUpdateFlowForResult(
                     appUpdateInfo,
-                    AppUpdateType.IMMEDIATE,
-                    updateResultLauncher,
+                    this,
+                    AppUpdateOptions.newBuilder(AppUpdateType.IMMEDIATE).build(),
                     0
                 )
             }
@@ -226,8 +224,8 @@ class MainActivity : ComponentActivity() {
             ) {
                 appUpdateManager.startUpdateFlowForResult(
                     appUpdateInfo,
-                    AppUpdateType.IMMEDIATE,
-                    updateResultLauncher,
+                    this,
+                    AppUpdateOptions.newBuilder(AppUpdateType.IMMEDIATE).build(),
                     0
                 )
             }
