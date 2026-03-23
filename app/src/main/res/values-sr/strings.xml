@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Workout Log</string>
+    <string name="app_name">FitLog</string>
 
     <string name="nav_home">Početna</string>
     <string name="nav_stats">Statistike</string>
@@ -15,7 +15,7 @@
     <string name="btn_continue">Nastavi</string>
     <string name="cd_back">Nazad</string>
 
-    <string name="home_title">Workout Log</string>
+    <string name="home_title">FitLog</string>
     <string name="cd_filter">Filtriranje</string>
     <string name="cd_add_workout">Dodaj trening</string>
     <string name="cd_previous_month">Prethodni mesec</string>

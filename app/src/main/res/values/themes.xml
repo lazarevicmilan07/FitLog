@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.WorkoutLog" parent="android:Theme.Material.Light.NoActionBar">
+    <style name="Theme.FitLog" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
     </style>
 
-    <style name="Theme.WorkoutLog.Splash" parent="Theme.SplashScreen">
+    <style name="Theme.FitLog.Splash" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@android:color/black</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash</item>
         <item name="windowSplashScreenAnimationDuration">500</item>
-        <item name="postSplashScreenTheme">@style/Theme.WorkoutLog</item>
+        <item name="postSplashScreenTheme">@style/Theme.FitLog</item>
     </style>
 </resources>

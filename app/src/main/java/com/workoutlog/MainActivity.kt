@@ -93,6 +93,8 @@ import androidx.compose.material3.ripple
 import androidx.activity.viewModels
 import androidx.compose.ui.res.stringResource
 import androidx.core.app.NotificationManagerCompat
+import android.content.res.Configuration
+import java.util.Locale
 import com.workoutlog.data.preferences.LanguagePreferences
 import com.workoutlog.notifications.BackupReminderNotificationHelper
 import com.workoutlog.util.LocaleHelper
@@ -110,6 +112,18 @@ class MainActivity : ComponentActivity() {
     override fun attachBaseContext(newBase: android.content.Context) {
         val lang = LanguagePreferences.getLanguage(newBase)
         super.attachBaseContext(LocaleHelper.wrapContext(newBase, lang))
+    }
+
+    // On certain Android versions and OEM ROMs, AppCompatActivity calls
+    // applyOverrideConfiguration() after attachBaseContext(), re-applying the
+    // system configuration and silently discarding the locale we set above.
+    // Re-injecting the user's locale here prevents that override.
+    override fun applyOverrideConfiguration(overrideConfiguration: Configuration?) {
+        if (overrideConfiguration != null) {
+            val lang = LanguagePreferences.getLanguage(this)
+            overrideConfiguration.setLocale(Locale.forLanguageTag(lang))
+        }
+        super.applyOverrideConfiguration(overrideConfiguration)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

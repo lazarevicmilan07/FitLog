@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Workout Log</string>
+    <string name="app_name">FitLog</string>
 
     <!-- Bottom Navigation -->
     <string name="nav_home">Home</string>
@@ -18,7 +18,7 @@
     <string name="cd_back">Back</string>
 
     <!-- Home Screen -->
-    <string name="home_title">Workout Log</string>
+    <string name="home_title">FitLog</string>
     <string name="cd_filter">Filter</string>
     <string name="cd_add_workout">Add workout</string>
     <string name="cd_previous_month">Previous month</string>

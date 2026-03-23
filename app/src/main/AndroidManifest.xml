@@ -21,13 +21,13 @@
         android:xlargeScreens="false" />
 
     <application
-        android:name=".WorkoutLogApp"
+        android:name=".FitLog"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.WorkoutLog"
+        android:theme="@style/Theme.FitLog"
         tools:targetApi="35">
 
         <meta-data
@@ -38,7 +38,7 @@
             android:name=".MainActivity"
             android:exported="true"
             android:launchMode="singleTop"
-            android:theme="@style/Theme.WorkoutLog.Splash"
+            android:theme="@style/Theme.FitLog.Splash"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
