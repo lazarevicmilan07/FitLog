@@ -15,8 +15,8 @@ android {
         applicationId = "com.workoutlog"
         minSdk = 26
         targetSdk = 35
-        versionCode = 4
-        versionName = "1.1.1"
+        versionCode = 5
+        versionName = "1.1.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -35,6 +35,15 @@ android {
             )
             buildConfigField("String", "ADMOB_BANNER_ID", "\"ca-app-pub-7740019911335733/3000645653\"")
             manifestPlaceholders["ADMOB_APP_ID"] = "ca-app-pub-7740019911335733~1331062102"
+        }
+    }
+
+    bundle {
+        language {
+            // Disable per-language APK splits so all translations are always
+            // included in the download. Required for in-app language switching —
+            // without this, Play only delivers the device's system language resources.
+            enableSplit = false
         }
     }
 
