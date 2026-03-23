@@ -2,6 +2,7 @@ package com.workoutlog.ui.screens.settings
 
 import android.Manifest
 import android.app.Activity
+import android.content.ContextWrapper
 import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
@@ -1000,7 +1001,13 @@ fun SettingsScreen(
                                 .clickable {
                                     LanguagePreferences.setLanguage(context, lang.code)
                                     showLanguageDialog = false
-                                    (context as? Activity)?.recreate()
+                                    // On some OEM ROMs, LocalContext.current is a ContextWrapper
+                                    // (e.g. ContextThemeWrapper) rather than the Activity itself,
+                                    // so a direct cast fails and recreate() is never called.
+                                    // Traverse the wrapper chain to find the real Activity.
+                                    var ctx: android.content.Context = context
+                                    while (ctx is ContextWrapper && ctx !is Activity) ctx = ctx.baseContext
+                                    (ctx as? Activity)?.recreate()
                                 }
                                 .padding(vertical = 12.dp, horizontal = 4.dp),
                             verticalAlignment = Alignment.CenterVertically

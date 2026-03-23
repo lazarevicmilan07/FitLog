@@ -47,7 +47,7 @@ class WorkoutTypeRepository @Inject constructor(
                 WorkoutTypeEntity(name = "Shoulders", color = 0xFFFB8C00, icon = "fitness_center", isDefault = true),
                 WorkoutTypeEntity(name = "Arms", color = 0xFF8E24AA, icon = "fitness_center", isDefault = true),
                 WorkoutTypeEntity(name = "Cardio", color = 0xFFD81B60, icon = "directions_run", isDefault = true),
-                WorkoutTypeEntity(name = "Rest Day", color = 0xFF757575, icon = "hotel", isDefault = true),
+                WorkoutTypeEntity(name = "Rest Day", color = 0xFF757575, icon = "hotel", isDefault = true, isRestDay = true),
             )
             dao.insertAll(defaults)
         }
