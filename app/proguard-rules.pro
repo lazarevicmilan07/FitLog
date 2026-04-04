@@ -15,6 +15,12 @@
 -dontwarn org.apache.poi.**
 -keep class org.apache.poi.** { *; }
 
+# XMLBeans (required by poi-ooxml for XML serialization - missing this causes
+# NoClassDefFoundError at runtime when writing .xlsx files)
+-dontwarn org.apache.xmlbeans.**
+-keep class org.apache.xmlbeans.** { *; }
+-keep class schemaorg_apache_xmlbeans.** { *; }
+
 # iText
 -dontwarn com.itextpdf.**
 -keep class com.itextpdf.** { *; }

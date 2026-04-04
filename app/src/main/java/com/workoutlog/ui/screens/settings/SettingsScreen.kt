@@ -111,8 +111,8 @@ import com.workoutlog.data.datastore.ThemeMode
 import com.workoutlog.notifications.BackupMonthlyOption
 import com.workoutlog.notifications.BackupReminderFrequency
 import com.workoutlog.notifications.BackupReminderSettings
-import com.workoutlog.ui.components.MonthGrid
-import com.workoutlog.ui.components.YearGrid
+import com.workoutlog.ui.components.MultiSelectMonthGrid
+import com.workoutlog.ui.components.MultiSelectYearGrid
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
@@ -173,8 +173,8 @@ fun SettingsScreen(
     var showExportDialog by remember { mutableStateOf(false) }
     var pendingExportFormat by remember { mutableStateOf("excel") } // "excel", "pdf", "backup"
     var pendingIsMonthly by remember { mutableStateOf(true) }
-    var pendingExportYear by remember { mutableIntStateOf(LocalDate.now().year) }
-    var pendingExportMonth by remember { mutableIntStateOf(LocalDate.now().monthValue) }
+    var pendingSelectedMonths by remember { mutableStateOf<List<YearMonth>>(emptyList()) }
+    var pendingSelectedYears by remember { mutableStateOf<List<Int>>(emptyList()) }
 
     // Restore confirmation dialog state
     var showRestoreConfirmDialog by remember { mutableStateOf(false) }
@@ -183,7 +183,7 @@ fun SettingsScreen(
     val backupLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("application/json")
     ) { uri ->
-        uri?.let { viewModel.backup(it, pendingIsMonthly, pendingExportYear, pendingExportMonth) }
+        uri?.let { viewModel.backup(it, pendingIsMonthly, pendingSelectedMonths, pendingSelectedYears) }
     }
 
     val restoreLauncher = rememberLauncherForActivityResult(
@@ -197,13 +197,13 @@ fun SettingsScreen(
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
     ) { uri ->
-        uri?.let { viewModel.exportToExcel(it, pendingIsMonthly, pendingExportYear, pendingExportMonth) }
+        uri?.let { viewModel.exportToExcel(it, pendingIsMonthly, pendingSelectedMonths, pendingSelectedYears) }
     }
 
     val pdfLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("application/pdf")
     ) { uri ->
-        uri?.let { viewModel.exportToPdf(it, pendingIsMonthly, pendingExportYear, pendingExportMonth) }
+        uri?.let { viewModel.exportToPdf(it, pendingIsMonthly, pendingSelectedMonths, pendingSelectedYears) }
     }
 
     LaunchedEffect(Unit) {
@@ -819,32 +819,32 @@ fun SettingsScreen(
         ExportPeriodPickerDialog(
             title = dialogTitle,
             onDismiss = { showExportDialog = false },
-            onConfirm = { isMonthly, year, month ->
+            onConfirm = { isMonthly, months, years ->
                 pendingIsMonthly = isMonthly
-                pendingExportYear = year
-                pendingExportMonth = month
+                pendingSelectedMonths = months
+                pendingSelectedYears = years
                 showExportDialog = false
+
+                fun monthlyFilename(ext: String): String {
+                    return if (months.size == 1) {
+                        "WorkoutLog_${months[0].year}_${"%02d".format(months[0].monthValue)}.$ext"
+                    } else {
+                        val first = months.first(); val last = months.last()
+                        "WorkoutLog_${first.year}_${"%02d".format(first.monthValue)}_to_${last.year}_${"%02d".format(last.monthValue)}.$ext"
+                    }
+                }
+                fun yearlyFilename(ext: String): String {
+                    return if (years.size == 1) "WorkoutLog_${years[0]}_Yearly.$ext"
+                    else "WorkoutLog_${years.first()}_to_${years.last()}_Yearly.$ext"
+                }
+
                 when (pendingExportFormat) {
-                    "excel" -> {
-                        val filename = if (isMonthly)
-                            "WorkoutLog_${year}_${String.format("%02d", month)}.xlsx"
-                        else
-                            "WorkoutLog_${year}_Yearly.xlsx"
-                        excelLauncher.launch(filename)
-                    }
-                    "pdf" -> {
-                        val filename = if (isMonthly)
-                            "WorkoutLog_${year}_${String.format("%02d", month)}.pdf"
-                        else
-                            "WorkoutLog_${year}_Yearly.pdf"
-                        pdfLauncher.launch(filename)
-                    }
+                    "excel" -> excelLauncher.launch(if (isMonthly) monthlyFilename("xlsx") else yearlyFilename("xlsx"))
+                    "pdf"   -> pdfLauncher.launch(if (isMonthly) monthlyFilename("pdf") else yearlyFilename("pdf"))
                     "backup" -> {
-                        val filename = if (isMonthly)
-                            "WorkoutLog_Backup_${year}_${String.format("%02d", month)}.json"
-                        else
-                            "WorkoutLog_Backup_${year}.json"
-                        backupLauncher.launch(filename)
+                        val fname = if (isMonthly) monthlyFilename("json").replace("WorkoutLog_", "WorkoutLog_Backup_")
+                                    else yearlyFilename("json").replace("WorkoutLog_", "WorkoutLog_Backup_").replace("_Yearly", "")
+                        backupLauncher.launch(fname)
                     }
                 }
             }
@@ -1084,97 +1084,134 @@ fun SettingsScreen(
 private fun ExportPeriodPickerDialog(
     title: String,
     onDismiss: () -> Unit,
-    onConfirm: (isMonthly: Boolean, year: Int, month: Int) -> Unit
+    onConfirm: (isMonthly: Boolean, selectedMonths: List<YearMonth>, selectedYears: List<Int>) -> Unit
 ) {
     var step by rememberSaveable { mutableIntStateOf(1) }
     var isMonthly by rememberSaveable { mutableStateOf(true) }
-    var selectedMonth by rememberSaveable { mutableIntStateOf(LocalDate.now().monthValue) }
-    var selectedYear by rememberSaveable { mutableIntStateOf(LocalDate.now().year) }
+
+    var selectedMonthPairs by remember { mutableStateOf(setOf<Pair<Int, Int>>()) }
+    var selectedYearSet by remember { mutableStateOf(setOf<Int>()) }
+    var navYear by rememberSaveable { mutableIntStateOf(LocalDate.now().year) }
 
     val baseYear = LocalDate.now().year
     val years = ((baseYear - 10)..(baseYear + 5)).toList()
+
+    val stepTitle = when (step) {
+        1    -> title
+        else -> if (isMonthly) stringResource(R.string.export_select_month)
+                else stringResource(R.string.export_select_year)
+    }
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                if (step == 2) {
+                if (step > 1) {
                     IconButton(onClick = { step = 1 }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
-                        )
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                     Spacer(modifier = Modifier.width(8.dp))
                 }
-                Text(
-                    text = if (step == 1) title
-                           else if (isMonthly) stringResource(R.string.export_select_month)
-                           else stringResource(R.string.export_select_year),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
-                )
+                Text(stepTitle, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
             }
         },
         text = {
             when (step) {
-                1 -> {
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        PeriodTypeOption(
-                            icon = Icons.Default.CalendarToday,
-                            title = stringResource(R.string.export_monthly_title),
-                            description = stringResource(R.string.export_monthly_desc),
-                            onClick = { isMonthly = true; step = 2 }
-                        )
-                        PeriodTypeOption(
-                            icon = Icons.Default.CalendarMonth,
-                            title = stringResource(R.string.export_yearly_title),
-                            description = stringResource(R.string.export_yearly_desc),
-                            onClick = { isMonthly = false; step = 2 }
-                        )
-                    }
+                1 -> Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    PeriodTypeOption(
+                        icon = Icons.Default.CalendarToday,
+                        title = stringResource(R.string.export_monthly_title),
+                        description = stringResource(R.string.export_monthly_desc),
+                        onClick = {
+                            isMonthly = true
+                            selectedMonthPairs = emptySet()
+                            step = 2
+                        }
+                    )
+                    PeriodTypeOption(
+                        icon = Icons.Default.CalendarMonth,
+                        title = stringResource(R.string.export_yearly_title),
+                        description = stringResource(R.string.export_yearly_desc),
+                        onClick = {
+                            isMonthly = false
+                            selectedYearSet = emptySet()
+                            step = 2
+                        }
+                    )
                 }
-                else -> {
-                    if (isMonthly) {
-                        Column {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                IconButton(onClick = { selectedYear-- }) {
-                                    Icon(Icons.Default.ChevronLeft, contentDescription = "Previous year")
-                                }
-                                Text(
-                                    text = selectedYear.toString(),
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.SemiBold
-                                )
-                                IconButton(onClick = { selectedYear++ }) {
-                                    Icon(Icons.Default.ChevronRight, contentDescription = "Next year")
-                                }
+                else -> if (isMonthly) {
+                    val selectedInNavYear = selectedMonthPairs
+                        .filter { it.first == navYear }.map { it.second }.toSet()
+                    Column {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            IconButton(onClick = { navYear-- }) {
+                                Icon(Icons.Default.ChevronLeft, contentDescription = "Previous year")
                             }
-                            Spacer(modifier = Modifier.height(16.dp))
-                            MonthGrid(
-                                selectedMonth = selectedMonth,
-                                onMonthSelected = { selectedMonth = it }
+                            Text(navYear.toString(), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                            IconButton(onClick = { navYear++ }) {
+                                Icon(Icons.Default.ChevronRight, contentDescription = "Next year")
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(12.dp))
+                        MultiSelectMonthGrid(
+                            selectedMonths = selectedInNavYear,
+                            onToggle = { month ->
+                                val key = navYear to month
+                                selectedMonthPairs = if (key in selectedMonthPairs)
+                                    selectedMonthPairs - key else selectedMonthPairs + key
+                            }
+                        )
+                        if (selectedMonthPairs.isNotEmpty()) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = stringResource(R.string.export_n_selected, selectedMonthPairs.size),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = TextAlign.End
                             )
                         }
-                    } else {
-                        YearGrid(
+                    }
+                } else {
+                    Column {
+                        MultiSelectYearGrid(
                             years = years,
-                            selectedYear = selectedYear,
-                            onYearSelected = { selectedYear = it }
+                            selectedYears = selectedYearSet,
+                            onToggle = { yr ->
+                                selectedYearSet = if (yr in selectedYearSet)
+                                    selectedYearSet - yr else selectedYearSet + yr
+                            }
                         )
+                        if (selectedYearSet.isNotEmpty()) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = stringResource(R.string.export_n_selected, selectedYearSet.size),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = TextAlign.End
+                            )
+                        }
                     }
                 }
             }
         },
         confirmButton = {
             if (step == 2) {
-                TextButton(onClick = {
-                    if (isMonthly) onConfirm(true, selectedYear, selectedMonth)
-                    else onConfirm(false, selectedYear, 0)
+                val canConfirm = if (isMonthly) selectedMonthPairs.isNotEmpty() else selectedYearSet.isNotEmpty()
+                TextButton(enabled = canConfirm, onClick = {
+                    if (isMonthly) {
+                        val months = selectedMonthPairs
+                            .sortedWith(compareBy({ it.first }, { it.second }))
+                            .map { (y, m) -> YearMonth.of(y, m) }
+                        onConfirm(true, months, emptyList())
+                    } else {
+                        onConfirm(false, emptyList(), selectedYearSet.sorted())
+                    }
                 }) { Text(stringResource(R.string.btn_ok)) }
             }
         },

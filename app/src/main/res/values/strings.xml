@@ -208,6 +208,7 @@
     <string name="export_yearly_desc">Select data for a full year</string>
     <string name="export_select_month">Select Month</string>
     <string name="export_select_year">Select Year</string>
+    <string name="export_n_selected">%d selected</string>
 
     <!-- Messages emitted from ViewModel (resolved in UI layer) -->
     <string name="msg_backup_saved">Backup saved successfully</string>

@@ -194,6 +194,7 @@
     <string name="export_yearly_desc">Seleccionar datos de un año completo</string>
     <string name="export_select_month">Seleccionar mes</string>
     <string name="export_select_year">Seleccionar año</string>
+    <string name="export_n_selected">%d seleccionado(s)</string>
 
     <string name="msg_backup_saved">Copia de seguridad guardada con éxito</string>
     <string name="msg_backup_failed">Error en la copia de seguridad: %s</string>

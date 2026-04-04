@@ -194,6 +194,7 @@
     <string name="export_yearly_desc">Выбрать данные за полный год</string>
     <string name="export_select_month">Выбрать месяц</string>
     <string name="export_select_year">Выбрать год</string>
+    <string name="export_n_selected">%d выбрано</string>
 
     <string name="msg_backup_saved">Резервная копия успешно сохранена</string>
     <string name="msg_backup_failed">Ошибка резервного копирования: %s</string>

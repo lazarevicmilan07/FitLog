@@ -165,7 +165,7 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun backup(uri: Uri, isMonthly: Boolean, year: Int, month: Int) {
+    fun backup(uri: Uri, isMonthly: Boolean, months: List<YearMonth>, years: List<Int>) {
         viewModelScope.launch {
             if (!settingsDataStore.isPremium.first()) {
                 _events.emit(SettingsEvent.ShowPremiumRequired)
@@ -175,16 +175,19 @@ class SettingsViewModel @Inject constructor(
             try {
                 val types = typeRepository.getAll()
                 val entries = if (isMonthly) {
-                    val ym = YearMonth.of(year, month)
-                    entryRepository.getEntriesBetweenDates(
-                        ym.atDay(1).toEpochMilli(),
-                        ym.atEndOfMonth().toEpochMilli()
-                    )
+                    months.flatMap { ym ->
+                        entryRepository.getEntriesBetweenDates(
+                            ym.atDay(1).toEpochMilli(),
+                            ym.atEndOfMonth().toEpochMilli()
+                        )
+                    }.distinctBy { it.id }
                 } else {
-                    entryRepository.getEntriesBetweenDates(
-                        LocalDate.of(year, 1, 1).toEpochMilli(),
-                        LocalDate.of(year, 12, 31).toEpochMilli()
-                    )
+                    years.flatMap { year ->
+                        entryRepository.getEntriesBetweenDates(
+                            LocalDate.of(year, 1, 1).toEpochMilli(),
+                            LocalDate.of(year, 12, 31).toEpochMilli()
+                        )
+                    }.distinctBy { it.id }
                 }
                 val goals = goalRepository.getAll()
                 BackupUtil.createBackup(context, uri, types, entries, goals)
@@ -226,21 +229,21 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun exportToExcel(uri: Uri, isMonthly: Boolean, year: Int, month: Int) {
+    fun exportToExcel(uri: Uri, isMonthly: Boolean, months: List<YearMonth>, years: List<Int>) {
         _uiState.value = _uiState.value.copy(isExportingExcel = true)
         viewModelScope.launch {
             try {
                 val types = typeRepository.getAll().map { it.toDomain() }
                 val typeMap = types.associateBy { it.id }
                 if (isMonthly) {
-                    val report = buildMonthlyReport(year, month, typeMap)
-                    ExportUtil.exportMonthlyToExcel(context, uri, report)
+                    val reports = months.map { buildMonthlyReport(it.year, it.monthValue, typeMap) }
+                    ExportUtil.exportMonthlyToExcel(context, uri, reports)
                 } else {
-                    val report = buildYearlyReport(year, typeMap)
-                    ExportUtil.exportYearlyToExcel(context, uri, report)
+                    val reports = years.map { buildYearlyReport(it, typeMap) }
+                    ExportUtil.exportYearlyToExcel(context, uri, reports)
                 }
                 _events.emit(SettingsEvent.Message(R.string.msg_excel_exported))
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 _events.emit(SettingsEvent.Message(R.string.msg_export_failed, e.message))
             } finally {
                 _uiState.value = _uiState.value.copy(isExportingExcel = false)
@@ -248,21 +251,21 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun exportToPdf(uri: Uri, isMonthly: Boolean, year: Int, month: Int) {
+    fun exportToPdf(uri: Uri, isMonthly: Boolean, months: List<YearMonth>, years: List<Int>) {
         _uiState.value = _uiState.value.copy(isExportingPdf = true)
         viewModelScope.launch {
             try {
                 val types = typeRepository.getAll().map { it.toDomain() }
                 val typeMap = types.associateBy { it.id }
                 if (isMonthly) {
-                    val report = buildMonthlyReport(year, month, typeMap)
-                    ExportUtil.exportMonthlyToPdf(context, uri, report)
+                    val reports = months.map { buildMonthlyReport(it.year, it.monthValue, typeMap) }
+                    ExportUtil.exportMonthlyToPdf(context, uri, reports)
                 } else {
-                    val report = buildYearlyReport(year, typeMap)
-                    ExportUtil.exportYearlyToPdf(context, uri, report)
+                    val reports = years.map { buildYearlyReport(it, typeMap) }
+                    ExportUtil.exportYearlyToPdf(context, uri, reports)
                 }
                 _events.emit(SettingsEvent.Message(R.string.msg_pdf_exported))
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 _events.emit(SettingsEvent.Message(R.string.msg_export_failed, e.message))
             } finally {
                 _uiState.value = _uiState.value.copy(isExportingPdf = false)
@@ -291,7 +294,7 @@ class SettingsViewModel @Inject constructor(
         return MonthlyReport(
             year = year,
             month = month,
-            totalWorkouts = entries.size,
+            totalWorkouts = domainEntries.count { it.workoutType?.isRestDay != true },
             totalRestDays = restDaysCount,
             totalDuration = totalDuration,
             totalCalories = totalCalories,
@@ -313,15 +316,14 @@ class SettingsViewModel @Inject constructor(
         val entries = entryRepository.getEntriesBetweenDates(startDate, endDate)
         val typeCounts = entryRepository.getWorkoutTypeCountsBetween(startDate, endDate)
 
-        val monthlyGroups = entries.groupBy {
-            java.time.Instant.ofEpochMilli(it.date)
-                .atZone(java.time.ZoneId.systemDefault()).monthValue
-        }
+        val domainYearEntries = entries.map { it.toDomain(typeMap[it.workoutTypeId]) }
+
+        val monthlyGroups = domainYearEntries
+            .filter { it.workoutType?.isRestDay != true }
+            .groupBy { it.date.monthValue }
         val monthlyCounts = (1..12).map { month ->
             MonthlyCountData(month, monthlyGroups[month]?.size ?: 0)
         }
-
-        val domainYearEntries = entries.map { it.toDomain(typeMap[it.workoutTypeId]) }
         val yearlyRestDays = domainYearEntries
             .filter { it.workoutType?.isRestDay == true }
             .map { it.date }
@@ -330,7 +332,7 @@ class SettingsViewModel @Inject constructor(
 
         return YearlyReport(
             year = year,
-            totalWorkouts = entries.size,
+            totalWorkouts = domainYearEntries.count { it.workoutType?.isRestDay != true },
             totalRestDays = yearlyRestDays,
             monthlyCounts = monthlyCounts,
             workoutTypeCounts = typeCounts.mapNotNull { tc ->

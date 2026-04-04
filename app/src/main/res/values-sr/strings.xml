@@ -194,6 +194,7 @@
     <string name="export_yearly_desc">Odaberi podatke za celu godinu</string>
     <string name="export_select_month">Odaberi mesec</string>
     <string name="export_select_year">Odaberi godinu</string>
+    <string name="export_n_selected">%d izabrano</string>
 
     <string name="msg_backup_saved">Rezervna kopija uspešno sačuvana</string>
     <string name="msg_backup_failed">Greška pri pravljenju kopije: %s</string>
