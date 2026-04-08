@@ -50,8 +50,8 @@ class OverviewViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(currentMonth = yearMonth, isLoading = true)
 
         viewModelScope.launch {
-            val startDate = yearMonth.atDay(1).toEpochMilli()
-            val endDate = yearMonth.atEndOfMonth().toEpochMilli()
+            val startDate = yearMonth.atDay(1).minusDays(6).toEpochMilli()
+            val endDate = yearMonth.atEndOfMonth().plusDays(6).toEpochMilli()
 
             val types = typeRepository.getAll().map { it.toDomain() }
             val typeMap = types.associateBy { it.id }
@@ -64,13 +64,16 @@ class OverviewViewModel @Inject constructor(
 
             val entriesByDate = filteredEntries.groupBy { it.date }
 
-            // Use isRestDay flag for rest day count and favourite calculation
-            val restDays = entries
+            // Scope stats to current month only (entries may include overflow days for the calendar)
+            val monthEntries = entries.filter {
+                it.date.year == yearMonth.year && it.date.monthValue == yearMonth.monthValue
+            }
+            val restDays = monthEntries
                 .filter { it.workoutType?.isRestDay == true }
                 .map { it.date }
                 .distinct()
                 .size
-            val realWorkoutEntries = entries.filter { it.workoutType?.isRestDay != true }
+            val realWorkoutEntries = monthEntries.filter { it.workoutType?.isRestDay != true }
 
             val typeCounts = realWorkoutEntries.groupBy { it.workoutTypeId }.mapValues { it.value.size }
             val mostCommonTypeId = typeCounts.maxByOrNull { it.value }?.key
@@ -79,7 +82,7 @@ class OverviewViewModel @Inject constructor(
                 isLoading = false,
                 entries = entries,
                 workoutTypes = types,
-                totalWorkouts = entries.size,
+                totalWorkouts = monthEntries.size,
                 totalRestDays = restDays,
                 mostCommonType = mostCommonTypeId?.let { typeMap[it] },
                 entriesByDate = entriesByDate

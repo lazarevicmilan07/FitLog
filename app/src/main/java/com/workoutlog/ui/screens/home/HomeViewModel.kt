@@ -103,8 +103,8 @@ class HomeViewModel @Inject constructor(
         _selectedFilters,
         typeRepository.getAllFlow(),
         _currentMonth.flatMapLatest { month ->
-            val startDate = month.atDay(1).toEpochMilli()
-            val endDate = month.atEndOfMonth().toEpochMilli()
+            val startDate = month.atDay(1).minusDays(6).toEpochMilli()
+            val endDate = month.atEndOfMonth().plusDays(6).toEpochMilli()
             entryRepository.getEntriesBetweenDatesFlow(startDate, endDate)
         },
         _goalProgressFlow
@@ -118,8 +118,11 @@ class HomeViewModel @Inject constructor(
 
         val entriesByDate = filteredEntries.groupBy { it.date }
 
-        val workoutCount = allEntries.count { it.workoutType?.isRestDay != true }
-        val totalEntries = allEntries.size
+        val monthOnlyEntries = allEntries.filter {
+            it.date.year == month.year && it.date.monthValue == month.monthValue
+        }
+        val workoutCount = monthOnlyEntries.count { it.workoutType?.isRestDay != true }
+        val totalEntries = monthOnlyEntries.size
         val today = LocalDate.now()
         val currentYearMonth = YearMonth.now()
         val daysElapsed = when {

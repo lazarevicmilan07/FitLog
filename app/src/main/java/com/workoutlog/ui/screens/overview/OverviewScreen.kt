@@ -36,6 +36,7 @@ import androidx.compose.runtime.remember
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -170,6 +171,11 @@ fun OverviewScreen(
                     yearMonth = state.currentMonth,
                     entriesByDate = state.entriesByDate,
                     onDateClick = { date -> onAddEntry(date.toString()) },
+                    onOtherMonthClick = { date ->
+                        val clickedMonth = YearMonth.from(date)
+                        if (clickedMonth < state.currentMonth) viewModel.previousMonth()
+                        else viewModel.nextMonth()
+                    },
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
             }
@@ -205,12 +211,16 @@ fun MonthCalendar(
     yearMonth: YearMonth,
     entriesByDate: Map<LocalDate, List<com.workoutlog.domain.model.WorkoutEntry>>,
     onDateClick: (LocalDate) -> Unit,
+    onOtherMonthClick: (LocalDate) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val firstDay = yearMonth.atDay(1)
     val daysInMonth = yearMonth.lengthOfMonth()
     val startDayOfWeek = firstDay.dayOfWeek.value // 1=Monday
     val today = LocalDate.now()
+    val prevMonth = yearMonth.minusMonths(1)
+    val nextMonth = yearMonth.plusMonths(1)
+    val leadingCount = startDayOfWeek - 1
 
     Column(modifier = modifier) {
         // Day of week headers
@@ -300,7 +310,66 @@ fun MonthCalendar(
                             }
                         }
                     } else {
-                        Spacer(Modifier.weight(1f))
+                        val overflowDate: LocalDate = if (dayNum <= 0) {
+                            prevMonth.atDay(prevMonth.lengthOfMonth() + dayNum)
+                        } else {
+                            nextMonth.atDay(dayNum - daysInMonth)
+                        }
+
+                        val overflowEntries = entriesByDate[overflowDate]
+                        val hasOverflowEntries = overflowEntries != null
+                        val overflowEntryColor = overflowEntries?.firstOrNull()?.workoutType?.color
+                        val overflowEntryName = overflowEntries?.firstOrNull()?.workoutType?.name
+
+                        val overflowBgColor = if (hasOverflowEntries && overflowEntryColor != null)
+                            overflowEntryColor.copy(alpha = 0.55f) else Color.Transparent
+                        val isDarkThemeOverflow = MaterialTheme.colorScheme.background.red < 0.5f
+                        val overflowTextColor = if (hasOverflowEntries)
+                            (if (isDarkThemeOverflow) Color.White else Color.Black)
+                        else MaterialTheme.colorScheme.onSurface
+
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .aspectRatio(1f)
+                                .alpha(0.38f)
+                                .padding(1.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(overflowBgColor)
+                                .border(
+                                    width = 0.5.dp,
+                                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.18f),
+                                    shape = RoundedCornerShape(8.dp)
+                                )
+                                .clickable { onOtherMonthClick(overflowDate) },
+                            contentAlignment = Alignment.TopCenter
+                        ) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier.padding(horizontal = 1.dp, vertical = 2.dp)
+                            ) {
+                                Text(
+                                    text = "${overflowDate.dayOfMonth}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontWeight = if (hasOverflowEntries) FontWeight.Bold else FontWeight.Normal,
+                                    color = overflowTextColor,
+                                    fontSize = 11.sp,
+                                    lineHeight = 12.sp
+                                )
+                                if (overflowEntryName != null) {
+                                    Text(
+                                        text = overflowEntryName,
+                                        fontSize = 9.sp,
+                                        lineHeight = 10.sp,
+                                        maxLines = 2,
+                                        overflow = TextOverflow.Ellipsis,
+                                        color = overflowTextColor.copy(alpha = 0.85f),
+                                        textAlign = TextAlign.Center,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }

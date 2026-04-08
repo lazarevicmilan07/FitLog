@@ -362,6 +362,11 @@ fun HomeScreen(
                                     openAddSheet(date.toString())
                                 }
                             },
+                            onOtherMonthClick = { date ->
+                                val clickedMonth = YearMonth.from(date)
+                                if (clickedMonth < state.currentMonth) scope.launch { doAnimatePrevious() }
+                                else scope.launch { doAnimateNext() }
+                            },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 4.dp)
