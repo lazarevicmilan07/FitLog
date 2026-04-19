@@ -1,6 +1,7 @@
 package com.workoutlog.ui.screens.reports
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
@@ -802,6 +803,12 @@ fun DonutChart(
     val total = data.sumOf { it.count }
     val strokeWidth = 70f
 
+    val animProgress = remember(data) { Animatable(0f) }
+    LaunchedEffect(data) {
+        animProgress.snapTo(0f)
+        animProgress.animateTo(1f, tween(700, easing = FastOutSlowInEasing))
+    }
+
     Box(
         modifier = modifier
             .clip(CircleShape)
@@ -840,18 +847,23 @@ fun DonutChart(
             val topLeft = Offset((size.width - diameter) / 2f, (size.height - diameter) / 2f)
             val arcSize = Size(diameter, diameter)
             var startAngle = -90f
+            val totalFilled = 360f * animProgress.value
             data.forEachIndexed { index, item ->
                 val sweep = (item.count / total.toFloat()) * 360f
                 val alpha = if (selectedIndex == -1 || selectedIndex == index) 1f else 0.2f
-                drawArc(
-                    color = item.workoutType.color.copy(alpha = alpha),
-                    startAngle = startAngle,
-                    sweepAngle = sweep - 1.5f,
-                    useCenter = false,
-                    topLeft = topLeft,
-                    size = arcSize,
-                    style = Stroke(width = strokeWidth, cap = StrokeCap.Butt)
-                )
+                val relativeStart = startAngle + 90f
+                val visibleSweep = (totalFilled - relativeStart).coerceIn(0f, sweep - 1.5f)
+                if (visibleSweep > 0f) {
+                    drawArc(
+                        color = item.workoutType.color.copy(alpha = alpha),
+                        startAngle = startAngle,
+                        sweepAngle = visibleSweep,
+                        useCenter = false,
+                        topLeft = topLeft,
+                        size = arcSize,
+                        style = Stroke(width = strokeWidth, cap = StrokeCap.Butt)
+                    )
+                }
                 startAngle += sweep
             }
         }

@@ -30,7 +30,8 @@ object DatabaseModule {
                 WorkoutDatabase.MIGRATION_2_3,
                 WorkoutDatabase.MIGRATION_3_4,
                 WorkoutDatabase.MIGRATION_4_5,
-                WorkoutDatabase.MIGRATION_5_6
+                WorkoutDatabase.MIGRATION_5_6,
+                WorkoutDatabase.MIGRATION_6_7
             )
             .build()
     }

@@ -15,11 +15,15 @@ interface WorkoutGoalDao {
     @Query("""
         SELECT * FROM workout_goals
         WHERE isActive = 1
+          AND showOnDashboard = 1
           AND boundYear = :year
           AND (period = 'YEARLY' OR boundMonth = :month)
         ORDER BY createdAt ASC
     """)
     fun getGoalsForMonthFlow(year: Int, month: Int): Flow<List<WorkoutGoalEntity>>
+
+    @Query("UPDATE workout_goals SET showOnDashboard = :show WHERE id = :id")
+    suspend fun updateShowOnDashboard(id: Long, show: Boolean)
 
     @Query("SELECT * FROM workout_goals WHERE id = :id")
     suspend fun getById(id: Long): WorkoutGoalEntity?
@@ -41,4 +45,10 @@ interface WorkoutGoalDao {
 
     @Query("DELETE FROM workout_goals")
     suspend fun deleteAll()
+
+    @Query("""
+        SELECT * FROM workout_goals
+        ORDER BY boundYear DESC, COALESCE(boundMonth, 13) DESC, createdAt DESC
+    """)
+    fun getAllGoalsFlow(): Flow<List<WorkoutGoalEntity>>
 }

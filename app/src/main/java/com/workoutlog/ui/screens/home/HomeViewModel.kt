@@ -2,6 +2,7 @@ package com.workoutlog.ui.screens.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.workoutlog.data.datastore.SettingsDataStore
 import com.workoutlog.data.local.entity.WorkoutGoalEntity
 import com.workoutlog.data.repository.WorkoutEntryRepository
 import com.workoutlog.data.repository.WorkoutGoalRepository
@@ -47,7 +48,8 @@ data class HomeUiState(
     val daysElapsed: Int = 0,
     val workoutPercentage: Int = 0,
     val selectedFilters: Set<Long> = emptySet(),
-    val goals: List<GoalWithProgress> = emptyList()
+    val goals: List<GoalWithProgress> = emptyList(),
+    val showGoalsOnDashboard: Boolean = true
 )
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -55,7 +57,8 @@ data class HomeUiState(
 class HomeViewModel @Inject constructor(
     private val entryRepository: WorkoutEntryRepository,
     private val typeRepository: WorkoutTypeRepository,
-    private val goalRepository: WorkoutGoalRepository
+    private val goalRepository: WorkoutGoalRepository,
+    private val settingsDataStore: SettingsDataStore
 ) : ViewModel() {
 
     private val _currentMonth = MutableStateFlow(YearMonth.now())
@@ -98,7 +101,7 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    val uiState: StateFlow<HomeUiState> = combine(
+    private val _baseUiState = combine(
         _currentMonth,
         _selectedFilters,
         typeRepository.getAllFlow(),
@@ -145,6 +148,13 @@ class HomeViewModel @Inject constructor(
             selectedFilters = filters,
             goals = goalProgress
         )
+    }
+
+    val uiState: StateFlow<HomeUiState> = combine(
+        _baseUiState,
+        settingsDataStore.showGoalsOnDashboard
+    ) { state, showGoals ->
+        state.copy(showGoalsOnDashboard = showGoals)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), HomeUiState())
 
     init {

@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.workoutlog.ui.screens.goals.GoalsScreen
 import com.workoutlog.ui.screens.home.HomeScreen
 import com.workoutlog.ui.screens.onboarding.OnboardingScreen
 import com.workoutlog.ui.screens.reports.ReportsScreen
@@ -21,8 +22,9 @@ private const val ANIM_DURATION = 300
 private fun getNavIndex(route: String?): Int = when (route) {
     Screen.Home.route -> 0
     Screen.Stats.route, Screen.StatsMonthly.route, Screen.StatsYearly.route -> 1
-    Screen.WorkoutTypes.route -> 2
-    Screen.Settings.route -> 3
+    Screen.Goals.route -> 2
+    Screen.WorkoutTypes.route -> 3
+    Screen.Settings.route -> 4
     else -> -1
 }
 
@@ -73,6 +75,10 @@ fun NavGraph(
 
         composable(Screen.Stats.route) {
             ReportsScreen()
+        }
+
+        composable(Screen.Goals.route) {
+            GoalsScreen()
         }
 
         composable(Screen.WorkoutTypes.route) {

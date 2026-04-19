@@ -11,6 +11,7 @@ data class WorkoutGoalEntity(
     val workoutTypeId: Long?,   // null = all non-rest-day types
     val isActive: Boolean = true,
     val createdAt: Long = System.currentTimeMillis(),
-    val boundYear: Int = 0,     // year the goal belongs to
-    val boundMonth: Int? = null // month for WEEKLY/MONTHLY goals; null for YEARLY
+    val boundYear: Int = 0,
+    val boundMonth: Int? = null,
+    val showOnDashboard: Boolean = true
 )

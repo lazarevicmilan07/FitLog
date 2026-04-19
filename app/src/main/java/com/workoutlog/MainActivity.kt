@@ -279,6 +279,7 @@ fun MainContent(
     val bottomBarRoutes = setOf(
         Screen.Home.route,
         Screen.Stats.route,
+        Screen.Goals.route,
         Screen.WorkoutTypes.route,
         Screen.Settings.route
     )

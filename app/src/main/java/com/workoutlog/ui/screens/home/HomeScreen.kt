@@ -343,12 +343,16 @@ fun HomeScreen(
                             )
                         }
 
-                        // Goals section — above calendar
-                        GoalsSection(
-                            goals = state.goals,
-                            onManageClick = { editGoalId = null; showGoalSheet = true },
-                            onGoalClick = { id -> editGoalId = id; showGoalSheet = true }
-                        )
+                        // Goals section — above calendar (shown only if enabled in Goals screen)
+                        if (state.showGoalsOnDashboard) {
+                            GoalsSection(
+                                goals = state.goals,
+                                onManageClick = { editGoalId = null; showGoalSheet = true },
+                                onGoalClick = { id -> editGoalId = id; showGoalSheet = true }
+                            )
+                        } else {
+                            Spacer(Modifier.height(94.dp))
+                        }
 
                         // Calendar grid — natural height via aspectRatio cells
                         MonthCalendar(

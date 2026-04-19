@@ -26,4 +26,8 @@ class WorkoutGoalRepository @Inject constructor(
     suspend fun insertAll(goals: List<WorkoutGoalEntity>) = dao.insertAll(goals)
 
     suspend fun deleteAll() = dao.deleteAll()
+
+    fun getAllGoalsFlow(): Flow<List<WorkoutGoalEntity>> = dao.getAllGoalsFlow()
+
+    suspend fun updateShowOnDashboard(id: Long, show: Boolean) = dao.updateShowOnDashboard(id, show)
 }
