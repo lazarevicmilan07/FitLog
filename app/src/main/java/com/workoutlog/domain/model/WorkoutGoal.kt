@@ -26,7 +26,9 @@ data class WorkoutGoal(
     val workoutTypeId: Long?,
     val workoutType: WorkoutType? = null,
     val isActive: Boolean = true,
-    val showOnDashboard: Boolean = true
+    val showOnDashboard: Boolean = true,
+    val boundYear: Int = 0,
+    val boundMonth: Int? = null
 )
 
 fun WorkoutGoalEntity.toDomain(workoutType: WorkoutType? = null) = WorkoutGoal(
@@ -36,14 +38,8 @@ fun WorkoutGoalEntity.toDomain(workoutType: WorkoutType? = null) = WorkoutGoal(
     workoutTypeId = workoutTypeId,
     workoutType = workoutType,
     isActive = isActive,
-    showOnDashboard = showOnDashboard
+    showOnDashboard = showOnDashboard,
+    boundYear = boundYear,
+    boundMonth = boundMonth
 )
 
-fun WorkoutGoal.toEntity() = WorkoutGoalEntity(
-    id = id,
-    period = period.name,
-    targetCount = targetCount,
-    workoutTypeId = workoutTypeId,
-    isActive = isActive,
-    showOnDashboard = showOnDashboard
-)

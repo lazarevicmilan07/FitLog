@@ -37,19 +37,32 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.workoutlog.R
+import com.workoutlog.domain.model.GoalPeriod
 import java.time.Month
 import java.time.format.TextStyle
 import java.util.Locale
 
-private val MonthlyAccent   = Color(0xFF9C6ADE)
-private val YearlyAccent    = Color(0xFFD4720A)
+internal val MonthlyAccent   = Color(0xFF9C6ADE)
+internal val YearlyAccent    = Color(0xFFD4720A)
 internal val HitColor        = Color(0xFF4A9B6F)
 internal val MissColor       = Color(0xFFE05252)
 internal val InProgressColor = Color(0xFFF59E0B)
+
+internal fun GoalPeriod.accentColor(): Color = when (this) {
+    GoalPeriod.MONTHLY -> MonthlyAccent
+    GoalPeriod.YEARLY  -> YearlyAccent
+}
+
+internal fun GoalPeriod.letter(): String = when (this) {
+    GoalPeriod.MONTHLY -> "M"
+    GoalPeriod.YEARLY  -> "Y"
+}
 
 @Composable
 fun MonthlyGoalTypeCard(
@@ -235,7 +248,7 @@ private fun GoalTypeCardShell(
                         modifier = Modifier.size(13.dp)
                     )
                     Text(
-                        text = "Home",
+                        text = stringResource(R.string.goals_home_toggle),
                         fontSize = 11.sp,
                         lineHeight = 11.sp,
                         fontWeight = if (dashActive) FontWeight.SemiBold else FontWeight.Normal,

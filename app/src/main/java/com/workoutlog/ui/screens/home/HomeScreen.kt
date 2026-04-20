@@ -464,7 +464,7 @@ fun HomeScreen(
             goals = state.goals,
             workoutTypes = state.workoutTypes,
             onAddGoal = { period, target, typeId, boundYM, showOnHome -> viewModel.addGoal(period, target, typeId, boundYM, showOnHome) },
-            onUpdateGoal = { id, period, target, typeId -> viewModel.updateGoal(id, period, target, typeId) },
+            onUpdateGoal = { id, period, target, typeId, boundYM, showOnHome -> viewModel.updateGoal(id, period, target, typeId, boundYM, showOnHome) },
             onDeleteGoal = { goalId -> viewModel.deleteGoal(goalId) },
             onDismiss = { showGoalSheet = false; editGoalId = null },
             initialEditGoalId = editGoalId,

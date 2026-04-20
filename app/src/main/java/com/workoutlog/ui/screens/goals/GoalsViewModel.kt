@@ -96,7 +96,7 @@ data class GoalsUiState(
     val yearlyPeriodStart: Int = YearMonth.now().year - 5,
     val yearlyGoalGroups: List<YearlyGoalTypeGroup> = emptyList(),
     val historyYearGroups: List<HistoryYearGroup> = emptyList(),
-    val currentPeriodGoals: List<GoalWithProgress> = emptyList(),
+    val allGoals: List<GoalWithProgress> = emptyList(),
     val workoutTypes: List<WorkoutType> = emptyList()
 )
 
@@ -193,7 +193,7 @@ class GoalsViewModel @Inject constructor(
                         achieved = slot.achieved,
                         target = slot.goal.targetCount,
                         isHit = slot.isHit,
-                        isActive = YearMonth.of(monthlyYear, m) == currentYM,
+                        isActive = !slot.isPast,
                         hasGoal = true
                     )
                 } else {
@@ -209,8 +209,7 @@ class GoalsViewModel @Inject constructor(
                 activeGoalId = toggleComputed?.goal?.id,
                 activeShowOnDashboard = toggleComputed?.goal?.showOnDashboard ?: true
             )
-        }.sortedWith(compareBy({ it.workoutTypeId == null }, { it.workoutTypeName }))
-            .sortedByDescending { it.workoutTypeId == null }
+        }.sortedWith(compareByDescending<MonthlyGoalTypeGroup> { it.workoutTypeId == null }.thenBy { it.workoutTypeName })
 
         // Yearly goal groups
         val yearlyComputed = data.computed.filter { it.goal.period == GoalPeriod.YEARLY }
@@ -240,7 +239,7 @@ class GoalsViewModel @Inject constructor(
                         achieved = slot.achieved,
                         target = slot.goal.targetCount,
                         isHit = slot.isHit,
-                        isActive = y == currentYM.year,
+                        isActive = !slot.isPast,
                         hasGoal = true
                     )
                 } else {
@@ -258,13 +257,7 @@ class GoalsViewModel @Inject constructor(
             )
         }.sortedByDescending { it.workoutTypeId == null }
 
-        // History — includes current year's started periods (not future years)
-        val historyComputed = data.computed.filter { g ->
-            when (g.goal.period) {
-                GoalPeriod.MONTHLY -> g.boundYM <= currentYM
-                GoalPeriod.YEARLY  -> g.boundYM.year <= currentYM.year
-            }
-        }
+        val historyComputed = data.computed
         val pastGoals = historyComputed
             .sortedWith(
                 compareByDescending<GoalComputed> { it.boundYM.year }
@@ -311,9 +304,8 @@ class GoalsViewModel @Inject constructor(
                 HistoryYearGroup(year = year, periodGroups = periodGroups)
             }
 
-        val currentPeriodGoals = data.computed
-            .filter { !it.isPast }
-            .map { GoalWithProgress(goal = it.goal, current = it.achieved, isPast = false) }
+        val allGoals = data.computed
+            .map { GoalWithProgress(goal = it.goal, current = it.achieved, isPast = it.isPast) }
 
         GoalsUiState(
             isLoading = false,
@@ -322,7 +314,7 @@ class GoalsViewModel @Inject constructor(
             yearlyPeriodStart = periodStart,
             yearlyGoalGroups = yearlyGoalGroups,
             historyYearGroups = historyYearGroups,
-            currentPeriodGoals = currentPeriodGoals,
+            allGoals = allGoals,
             workoutTypes = data.typeMap.values.toList()
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), GoalsUiState())
@@ -355,14 +347,17 @@ class GoalsViewModel @Inject constructor(
         }
     }
 
-    fun updateGoal(goalId: Long, period: GoalPeriod, targetCount: Int, workoutTypeId: Long?) {
+    fun updateGoal(goalId: Long, period: GoalPeriod, targetCount: Int, workoutTypeId: Long?, boundYearMonth: YearMonth, showOnDashboard: Boolean) {
         viewModelScope.launch {
             val existing = goalRepository.getById(goalId) ?: return@launch
             goalRepository.update(
                 existing.copy(
                     period = period.name,
                     targetCount = targetCount,
-                    workoutTypeId = workoutTypeId
+                    workoutTypeId = workoutTypeId,
+                    boundYear = boundYearMonth.year,
+                    boundMonth = if (period == GoalPeriod.YEARLY) null else boundYearMonth.monthValue,
+                    showOnDashboard = showOnDashboard
                 )
             )
         }

@@ -67,7 +67,6 @@ import kotlin.math.roundToInt
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.workoutlog.R
-import com.workoutlog.domain.model.GoalPeriod
 import com.workoutlog.ui.components.LoadingIndicator
 import com.workoutlog.ui.components.YearPickerDialog
 import com.workoutlog.ui.screens.home.GoalManagementSheet
@@ -343,10 +342,10 @@ fun GoalsScreen(
 
     if (showGoalSheet) {
         GoalManagementSheet(
-            goals = state.currentPeriodGoals,
+            goals = state.allGoals,
             workoutTypes = state.workoutTypes,
             onAddGoal = { period, target, typeId, boundYM, showOnHome -> viewModel.addGoal(period, target, typeId, boundYM, showOnHome) },
-            onUpdateGoal = { id, period, target, typeId -> viewModel.updateGoal(id, period, target, typeId) },
+            onUpdateGoal = { id, period, target, typeId, boundYM, showOnHome -> viewModel.updateGoal(id, period, target, typeId, boundYM, showOnHome) },
             onDeleteGoal = { goalId -> viewModel.deleteGoal(goalId) },
             onDismiss = { showGoalSheet = false; editGoalId = null },
             initialEditGoalId = editGoalId
@@ -563,10 +562,7 @@ private fun GoalHistoryList(
                     verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     yearGroup.periodGroups.forEach { periodGroup ->
-                        val periodColor = when (periodGroup.period) {
-                            GoalPeriod.MONTHLY -> Color(0xFF9C6ADE)
-                            GoalPeriod.YEARLY  -> Color(0xFFD4720A)
-                        }
+                        val periodColor = periodGroup.period.accentColor()
 
                         // Period card with colored left strip
                         Row(
@@ -636,9 +632,6 @@ private fun GoalHistoryList(
     }
 }
 
-private val HistoryInProgressColor = Color(0xFFF59E0B)
-private val HistoryHitColor        = Color(0xFF4A9B6F)
-private val HistoryMissColor       = Color(0xFFE05252)
 
 @Composable
 private fun HistoryStatusDot(
@@ -664,15 +657,12 @@ private fun HistoryStatusDot(
 
 @Composable
 private fun HistoryRow(item: PastGoalPeriod) {
-    val accentColor = when (item.goal.period) {
-        GoalPeriod.MONTHLY -> Color(0xFF9C6ADE)
-        GoalPeriod.YEARLY  -> Color(0xFFD4720A)
-    }
+    val accentColor = item.goal.period.accentColor()
     val allWorkoutsLabel = stringResource(R.string.goals_all_workouts)
     val statusColor = when {
-        item.isInProgress -> HistoryInProgressColor
-        item.isHit        -> HistoryHitColor
-        else              -> HistoryMissColor
+        item.isInProgress -> InProgressColor
+        item.isHit        -> HitColor
+        else              -> MissColor
     }
     val pct = if (item.goal.targetCount > 0) item.achieved * 100 / item.goal.targetCount else 0
 
@@ -683,9 +673,9 @@ private fun HistoryRow(item: PastGoalPeriod) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         when {
-            item.isInProgress -> HistoryStatusDot(HistoryInProgressColor, Icons.Default.MoreHoriz, Color.Black.copy(alpha = 0.75f))
-            item.isHit        -> HistoryStatusDot(HistoryHitColor,        Icons.Default.Check,     Color.White)
-            else              -> HistoryStatusDot(HistoryMissColor,        Icons.Default.Close,     Color.White)
+            item.isInProgress -> HistoryStatusDot(InProgressColor, Icons.Default.MoreHoriz, Color.Black.copy(alpha = 0.75f))
+            item.isHit        -> HistoryStatusDot(HitColor,        Icons.Default.Check,     Color.White)
+            else              -> HistoryStatusDot(MissColor,        Icons.Default.Close,     Color.White)
         }
         Spacer(Modifier.size(10.dp))
         Text(

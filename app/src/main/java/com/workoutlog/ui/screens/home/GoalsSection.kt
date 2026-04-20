@@ -71,18 +71,12 @@ import com.workoutlog.domain.model.GoalPeriod
 import com.workoutlog.domain.model.WorkoutType
 import com.workoutlog.ui.components.MonthYearPickerDialog
 import com.workoutlog.ui.components.YearPickerDialog
+import com.workoutlog.ui.screens.goals.HitColor
+import com.workoutlog.ui.screens.goals.MissColor
+import com.workoutlog.ui.screens.goals.accentColor
+import com.workoutlog.ui.screens.goals.letter
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
-
-private fun GoalPeriod.accentColor(): Color = when (this) {
-    GoalPeriod.MONTHLY -> Color(0xFF9C6ADE)  // purple
-    GoalPeriod.YEARLY  -> Color(0xFFD4720A)  // burnt orange
-}
-
-private fun GoalPeriod.letter(): String = when (this) {
-    GoalPeriod.MONTHLY -> "M"
-    GoalPeriod.YEARLY  -> "Y"
-}
 
 
 @Composable
@@ -231,13 +225,13 @@ fun GoalProgressCard(
                 isComplete -> Icon(
                     imageVector = Icons.Filled.CheckCircle,
                     contentDescription = stringResource(R.string.cd_goal_completed),
-                    tint = Color(0xFF4A9B6F),
+                    tint = HitColor,
                     modifier = Modifier.size(14.dp)
                 )
                 goalProgress.isPast -> Icon(
                     imageVector = Icons.Filled.Cancel,
                     contentDescription = stringResource(R.string.cd_goal_not_completed),
-                    tint = Color(0xFFE05252),
+                    tint = MissColor,
                     modifier = Modifier.size(14.dp)
                 )
                 else -> Text(
@@ -260,7 +254,7 @@ fun GoalManagementSheet(
     goals: List<GoalWithProgress>,
     workoutTypes: List<WorkoutType>,
     onAddGoal: (GoalPeriod, Int, Long?, YearMonth, Boolean) -> Unit,
-    onUpdateGoal: (Long, GoalPeriod, Int, Long?) -> Unit,
+    onUpdateGoal: (Long, GoalPeriod, Int, Long?, YearMonth, Boolean) -> Unit,
     onDeleteGoal: (Long) -> Unit,
     onDismiss: () -> Unit,
     initialEditGoalId: Long? = null,
@@ -283,6 +277,11 @@ fun GoalManagementSheet(
             selectedTypeId = eg.goal.workoutTypeId
             targetCount = eg.goal.targetCount
             targetText = eg.goal.targetCount.toString()
+            showOnHome = eg.goal.showOnDashboard
+            boundYearMonth = YearMonth.of(
+                eg.goal.boundYear.takeIf { it > 0 } ?: YearMonth.now().year,
+                eg.goal.boundMonth ?: 1
+            )
         } else {
             selectedPeriod = GoalPeriod.MONTHLY
             selectedTypeId = null
@@ -300,6 +299,19 @@ fun GoalManagementSheet(
     val boundDisplayLabel = when (selectedPeriod) {
         GoalPeriod.MONTHLY -> boundYearMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy"))
         GoalPeriod.YEARLY  -> boundYearMonth.year.toString()
+    }
+
+    val displayedGoals = remember(goals, boundYearMonth, selectedPeriod) {
+        goals.filter { gwp ->
+            when (gwp.goal.period) {
+                GoalPeriod.MONTHLY ->
+                    selectedPeriod == GoalPeriod.MONTHLY &&
+                    gwp.goal.boundYear == boundYearMonth.year &&
+                    gwp.goal.boundMonth == boundYearMonth.monthValue
+                GoalPeriod.YEARLY ->
+                    gwp.goal.boundYear == boundYearMonth.year
+            }
+        }
     }
 
     Dialog(
@@ -352,8 +364,8 @@ fun GoalManagementSheet(
                         .padding(top = 12.dp, bottom = 8.dp)
                 ) {
                     // Existing goals list
-                    if (goals.isNotEmpty()) {
-                        goals.forEach { gp ->
+                    if (displayedGoals.isNotEmpty()) {
+                        displayedGoals.forEach { gp ->
                             val goalAccent = gp.goal.period.accentColor()
                             val isEditing = editingGoalId == gp.goal.id
                             Row(
@@ -458,75 +470,73 @@ fun GoalManagementSheet(
                         }
                     }
 
-                    // Date picker + Home toggle side by side (add mode only)
-                    if (editingGoalId == null) {
-                        Spacer(Modifier.height(8.dp))
-                        Text(
-                            text = "For",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(bottom = 6.dp)
-                        )
+                    // Date picker + Home toggle side by side
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = stringResource(R.string.goals_for_label),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(bottom = 6.dp)
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        // Left half: date picker
                         Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            modifier = Modifier
+                                .weight(1f)
+                                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(10.dp))
+                                .clip(RoundedCornerShape(10.dp))
+                                .clickable { showBoundPicker = true }
+                                .padding(horizontal = 12.dp, vertical = 14.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            // Left half: date picker
-                            Row(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(10.dp))
-                                    .clip(RoundedCornerShape(10.dp))
-                                    .clickable { showBoundPicker = true }
-                                    .padding(horizontal = 12.dp, vertical = 14.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Text(
-                                    text = boundDisplayLabel,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    fontWeight = FontWeight.Medium,
-                                    color = accent
-                                )
-                                Icon(
-                                    imageVector = Icons.Default.DateRange,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                                    modifier = Modifier.size(18.dp)
-                                )
-                            }
+                            Text(
+                                text = boundDisplayLabel,
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Medium,
+                                color = accent
+                            )
+                            Icon(
+                                imageVector = Icons.Default.DateRange,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
 
-                            // Right half: Home on/off toggle pill
-                            Row(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .border(
-                                        1.dp,
-                                        if (showOnHome) accent.copy(alpha = 0.5f)
-                                        else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-                                        RoundedCornerShape(10.dp)
-                                    )
-                                    .clip(RoundedCornerShape(10.dp))
-                                    .background(if (showOnHome) accent.copy(alpha = 0.12f) else Color.Transparent)
-                                    .clickable { showOnHome = !showOnHome }
-                                    .padding(horizontal = 12.dp, vertical = 14.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.BarChart,
-                                    contentDescription = null,
-                                    tint = if (showOnHome) accent else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
-                                    modifier = Modifier.size(14.dp)
+                        // Right half: Home on/off toggle pill
+                        Row(
+                            modifier = Modifier
+                                .weight(1f)
+                                .border(
+                                    1.dp,
+                                    if (showOnHome) accent.copy(alpha = 0.5f)
+                                    else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                                    RoundedCornerShape(10.dp)
                                 )
-                                Spacer(Modifier.width(6.dp))
-                                Text(
-                                    text = "Home",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    fontWeight = if (showOnHome) FontWeight.SemiBold else FontWeight.Normal,
-                                    color = if (showOnHome) accent else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
-                                )
-                            }
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(if (showOnHome) accent.copy(alpha = 0.12f) else Color.Transparent)
+                                .clickable { showOnHome = !showOnHome }
+                                .padding(horizontal = 12.dp, vertical = 14.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.BarChart,
+                                contentDescription = null,
+                                tint = if (showOnHome) accent else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+                                modifier = Modifier.size(14.dp)
+                            )
+                            Spacer(Modifier.width(6.dp))
+                            Text(
+                                text = stringResource(R.string.goals_home_toggle),
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = if (showOnHome) FontWeight.SemiBold else FontWeight.Normal,
+                                color = if (showOnHome) accent else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+                            )
                         }
                     }
 
@@ -639,7 +649,7 @@ fun GoalManagementSheet(
                     onClick = {
                         val eid = editingGoalId
                         if (eid != null) {
-                            onUpdateGoal(eid, selectedPeriod, targetCount, selectedTypeId)
+                            onUpdateGoal(eid, selectedPeriod, targetCount, selectedTypeId, boundYearMonth, showOnHome)
                             onDismiss()
                         } else {
                             onAddGoal(selectedPeriod, targetCount, selectedTypeId, boundYearMonth, showOnHome)

@@ -219,14 +219,17 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun updateGoal(goalId: Long, period: GoalPeriod, targetCount: Int, workoutTypeId: Long?) {
+    fun updateGoal(goalId: Long, period: GoalPeriod, targetCount: Int, workoutTypeId: Long?, boundYearMonth: YearMonth, showOnDashboard: Boolean) {
         viewModelScope.launch {
             val existing = goalRepository.getById(goalId) ?: return@launch
             goalRepository.update(
                 existing.copy(
                     period = period.name,
                     targetCount = targetCount,
-                    workoutTypeId = workoutTypeId
+                    workoutTypeId = workoutTypeId,
+                    boundYear = boundYearMonth.year,
+                    boundMonth = if (period == GoalPeriod.YEARLY) null else boundYearMonth.monthValue,
+                    showOnDashboard = showOnDashboard
                 )
             )
         }

@@ -74,7 +74,12 @@
       "PowerShell($env:JAVA_HOME = \"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\jbr\"; cd C:\\\\SideProjects\\\\FitLog; ./gradlew assembleDebug 2>&1 | Select-Object -Last 20)",
       "PowerShell($env:JAVA_HOME = \"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\jbr\"; cd C:\\\\SideProjects\\\\FitLog; ./gradlew assembleDebug 2>&1 | Select-Object -Last 15)",
       "PowerShell($env:JAVA_HOME = \"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\jbr\"; cd C:\\\\SideProjects\\\\FitLog; ./gradlew assembleDebug 2>&1 | Select-Object -Last 12)",
-      "PowerShell($env:JAVA_HOME = \"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\jbr\"; cd C:\\\\SideProjects\\\\FitLog; ./gradlew assembleDebug 2>&1 | Select-Object -Last 10)"
+      "PowerShell($env:JAVA_HOME = \"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\jbr\"; cd C:\\\\SideProjects\\\\FitLog; ./gradlew assembleDebug 2>&1 | Select-Object -Last 10)",
+      "Bash(cmd.exe /c \"gradlew.bat :app:compileDebugKotlin 2>&1\")",
+      "PowerShell(Get-Command *)",
+      "PowerShell($env:JAVA_HOME = \"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\jbr\"; $env:PATH = \"$env:JAVA_HOME\\\\bin;$env:PATH\"; Set-Location C:\\\\SideProjects\\\\FitLog; .\\\\gradlew.bat :app:compileDebugKotlin 2>&1 | Select-Object -Last 50)",
+      "PowerShell($env:JAVA_HOME = \"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\jbr\"; $env:PATH = \"$env:JAVA_HOME\\\\bin;$env:PATH\"; Set-Location C:\\\\SideProjects\\\\FitLog; .\\\\gradlew.bat :app:compileDebugKotlin 2>&1 | Select-Object -Last 20)",
+      "PowerShell($env:JAVA_HOME = \"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\jbr\"; $env:PATH = \"$env:JAVA_HOME\\\\bin;$env:PATH\"; Set-Location C:\\\\SideProjects\\\\FitLog; .\\\\gradlew.bat :app:compileDebugKotlin 2>&1 | Select-Object -Last 10)"
     ]
   }
 }
