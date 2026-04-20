@@ -177,6 +177,10 @@ class GoalsViewModel @Inject constructor(
             val activeComputed = monthlyComputed.find {
                 it.goal.workoutTypeId == typeId && it.boundYM == currentYM
             }
+            val toggleComputed = activeComputed
+                ?: monthlyComputed
+                    .filter { it.goal.workoutTypeId == typeId && it.boundYM.year == monthlyYear }
+                    .maxByOrNull { it.boundYM.monthValue }
             val months = (1..12).map { m ->
                 val slot = monthlyComputed.find {
                     it.goal.workoutTypeId == typeId &&
@@ -202,8 +206,8 @@ class GoalsViewModel @Inject constructor(
                 workoutTypeName = typeName,
                 year = monthlyYear,
                 months = months,
-                activeGoalId = activeComputed?.goal?.id,
-                activeShowOnDashboard = activeComputed?.goal?.showOnDashboard ?: true
+                activeGoalId = toggleComputed?.goal?.id,
+                activeShowOnDashboard = toggleComputed?.goal?.showOnDashboard ?: true
             )
         }.sortedWith(compareBy({ it.workoutTypeId == null }, { it.workoutTypeName }))
             .sortedByDescending { it.workoutTypeId == null }
@@ -222,6 +226,10 @@ class GoalsViewModel @Inject constructor(
             val activeComputed = yearlyComputed.find {
                 it.goal.workoutTypeId == typeId && it.boundYM.year == currentYM.year
             }
+            val toggleComputed = activeComputed
+                ?: yearlyComputed
+                    .filter { it.goal.workoutTypeId == typeId && it.boundYM.year in periodStart..periodEnd }
+                    .maxByOrNull { it.boundYM.year }
             val years = (periodStart..periodEnd).map { y ->
                 val slot = yearlyComputed.find {
                     it.goal.workoutTypeId == typeId && it.boundYM.year == y
@@ -245,8 +253,8 @@ class GoalsViewModel @Inject constructor(
                 workoutTypeName = typeName,
                 periodStart = periodStart,
                 years = years,
-                activeGoalId = activeComputed?.goal?.id,
-                activeShowOnDashboard = activeComputed?.goal?.showOnDashboard ?: true
+                activeGoalId = toggleComputed?.goal?.id,
+                activeShowOnDashboard = toggleComputed?.goal?.showOnDashboard ?: true
             )
         }.sortedByDescending { it.workoutTypeId == null }
 
@@ -332,16 +340,16 @@ class GoalsViewModel @Inject constructor(
         }
     }
 
-    fun addGoal(period: GoalPeriod, targetCount: Int, workoutTypeId: Long?) {
+    fun addGoal(period: GoalPeriod, targetCount: Int, workoutTypeId: Long?, boundYearMonth: YearMonth, showOnHome: Boolean) {
         viewModelScope.launch {
-            val now = YearMonth.now()
             goalRepository.insert(
                 com.workoutlog.data.local.entity.WorkoutGoalEntity(
                     period = period.name,
                     targetCount = targetCount,
                     workoutTypeId = workoutTypeId,
-                    boundYear = now.year,
-                    boundMonth = if (period == GoalPeriod.YEARLY) null else now.monthValue
+                    boundYear = boundYearMonth.year,
+                    boundMonth = if (period == GoalPeriod.YEARLY) null else boundYearMonth.monthValue,
+                    showOnDashboard = showOnHome
                 )
             )
         }

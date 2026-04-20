@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -20,13 +21,18 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.border
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -37,11 +43,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -63,6 +69,10 @@ import androidx.compose.ui.res.stringResource
 import com.workoutlog.R
 import com.workoutlog.domain.model.GoalPeriod
 import com.workoutlog.domain.model.WorkoutType
+import com.workoutlog.ui.components.MonthYearPickerDialog
+import com.workoutlog.ui.components.YearPickerDialog
+import java.time.YearMonth
+import java.time.format.DateTimeFormatter
 
 private fun GoalPeriod.accentColor(): Color = when (this) {
     GoalPeriod.MONTHLY -> Color(0xFF9C6ADE)  // purple
@@ -249,22 +259,23 @@ fun GoalProgressCard(
 fun GoalManagementSheet(
     goals: List<GoalWithProgress>,
     workoutTypes: List<WorkoutType>,
-    onAddGoal: (GoalPeriod, Int, Long?) -> Unit,
+    onAddGoal: (GoalPeriod, Int, Long?, YearMonth, Boolean) -> Unit,
     onUpdateGoal: (Long, GoalPeriod, Int, Long?) -> Unit,
     onDeleteGoal: (Long) -> Unit,
     onDismiss: () -> Unit,
-    initialEditGoalId: Long? = null
+    initialEditGoalId: Long? = null,
+    initialBoundYearMonth: YearMonth = YearMonth.now()
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-
     var editingGoalId by remember { mutableStateOf(initialEditGoalId) }
     var selectedPeriod by remember { mutableStateOf(GoalPeriod.MONTHLY) }
     var selectedTypeId by remember { mutableStateOf<Long?>(null) }
     var targetCount by remember { mutableIntStateOf(3) }
     var targetText by remember { mutableStateOf("3") }
     var typeDropdownExpanded by remember { mutableStateOf(false) }
+    var boundYearMonth by remember { mutableStateOf(initialBoundYearMonth) }
+    var showOnHome by remember { mutableStateOf(true) }
+    var showBoundPicker by remember { mutableStateOf(false) }
 
-    // Pre-fill or reset form whenever editingGoalId changes
     LaunchedEffect(editingGoalId) {
         val eg = goals.find { it.goal.id == editingGoalId }
         if (eg != null) {
@@ -277,277 +288,389 @@ fun GoalManagementSheet(
             selectedTypeId = null
             targetCount = 3
             targetText = "3"
+            boundYearMonth = initialBoundYearMonth
+            showOnHome = true
         }
     }
 
     val nonRestTypes = workoutTypes.filter { !it.isRestDay }
     val allWorkoutsLabel = stringResource(R.string.goals_all_workouts)
     val selectedTypeName = nonRestTypes.find { it.id == selectedTypeId }?.name ?: allWorkoutsLabel
+    val accent = selectedPeriod.accentColor()
+    val boundDisplayLabel = when (selectedPeriod) {
+        GoalPeriod.MONTHLY -> boundYearMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy"))
+        GoalPeriod.YEARLY  -> boundYearMonth.year.toString()
+    }
 
-    ModalBottomSheet(
+    Dialog(
         onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        contentWindowInsets = { WindowInsets(0) }
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            dismissOnBackPress = true,
+            dismissOnClickOutside = false
+        )
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .imePadding()
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
         ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f, fill = false)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp)
-                .padding(bottom = 8.dp)
-        ) {
-            Text(
-                text = stringResource(R.string.goals_title),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 12.dp)
-            )
-
-            // Existing goals
-            if (goals.isNotEmpty()) {
-                goals.forEach { gp ->
-                    val accent = gp.goal.period.accentColor()
-                    val isEditing = editingGoalId == gp.goal.id
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(
-                                if (isEditing) accent.copy(alpha = 0.08f)
-                                else Color.Transparent
-                            )
-                            .clickable { editingGoalId = gp.goal.id }
-                            .padding(vertical = 6.dp, horizontal = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(32.dp)
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(accent.copy(alpha = 0.12f)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = gp.goal.period.letter(),
-                                fontWeight = FontWeight.ExtraBold,
-                                color = accent,
-                                fontSize = 12.sp
-                            )
-                        }
-                        Spacer(Modifier.width(10.dp))
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = "${stringResource(when (gp.goal.period) { GoalPeriod.MONTHLY -> R.string.goals_period_monthly; GoalPeriod.YEARLY -> R.string.goals_period_yearly })} · ${gp.goal.workoutType?.name ?: allWorkoutsLabel}",
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Medium
-                            )
-                            Text(
-                                text = stringResource(R.string.goals_target_progress, gp.goal.targetCount, gp.current, gp.goal.targetCount),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                        IconButton(
-                            onClick = {
-                                if (isEditing) editingGoalId = null
-                                onDeleteGoal(gp.goal.id)
-                            },
-                            modifier = Modifier.size(36.dp)
-                        ) {
-                            Icon(
-                                Icons.Default.Delete,
-                                contentDescription = stringResource(R.string.goals_delete_cd),
-                                tint = MaterialTheme.colorScheme.error,
-                                modifier = Modifier.size(18.dp)
-                            )
-                        }
-                    }
-                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
-                }
-                Spacer(Modifier.height(16.dp))
-            }
-
-            // Add / Edit goal form header
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .imePadding()
             ) {
-                Text(
-                    text = if (editingGoalId != null) stringResource(R.string.goals_edit_header) else stringResource(R.string.goals_new_header),
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold
-                )
-                if (editingGoalId != null) {
-                    TextButton(onClick = { editingGoalId = null }) {
-                        Text(stringResource(R.string.goals_new_btn), style = MaterialTheme.typography.labelMedium)
-                    }
-                }
-            }
-
-            Text(
-                text = stringResource(R.string.goals_period_label),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(bottom = 6.dp)
-            )
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                GoalPeriod.entries.forEach { period ->
-                    FilterChip(
-                        selected = selectedPeriod == period,
-                        onClick = { selectedPeriod = period },
-                        label = {
-                            Text(
-                                text = when (period) {
-                                    GoalPeriod.MONTHLY -> stringResource(R.string.goals_period_monthly)
-                                    GoalPeriod.YEARLY  -> stringResource(R.string.goals_period_yearly)
-                                },
-                                fontSize = 12.sp
-                            )
-                        }
-                    )
-                }
-            }
-
-            Spacer(Modifier.height(12.dp))
-
-            Text(
-                text = stringResource(R.string.goals_workout_type_label),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(bottom = 6.dp)
-            )
-            ExposedDropdownMenuBox(
-                expanded = typeDropdownExpanded,
-                onExpandedChange = { typeDropdownExpanded = it }
-            ) {
-                OutlinedTextField(
-                    value = selectedTypeName,
-                    onValueChange = {},
-                    readOnly = true,
-                    trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = typeDropdownExpanded)
-                    },
+                // Top bar — matches GoalsScreen header style
+                Row(
                     modifier = Modifier
-                        .menuAnchor(MenuAnchorType.PrimaryNotEditable)
-                        .fillMaxWidth(),
-                    textStyle = MaterialTheme.typography.bodyMedium,
-                    shape = RoundedCornerShape(10.dp)
-                )
-                ExposedDropdownMenu(
-                    expanded = typeDropdownExpanded,
-                    onDismissRequest = { typeDropdownExpanded = false }
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.08f))
+                        .padding(start = 16.dp, top = 6.dp, end = 6.dp, bottom = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    DropdownMenuItem(
-                        text = { Text(allWorkoutsLabel) },
-                        onClick = {
-                            selectedTypeId = null
-                            typeDropdownExpanded = false
-                        }
+                    Text(
+                        text = stringResource(R.string.goals_title),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.weight(1f)
                     )
-                    nonRestTypes.forEach { type ->
-                        DropdownMenuItem(
-                            text = { Text(type.name) },
-                            onClick = {
-                                selectedTypeId = type.id
-                                typeDropdownExpanded = false
-                            }
+                    IconButton(onClick = onDismiss) {
+                        Icon(
+                            Icons.Default.Close,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
-            }
 
-            Spacer(Modifier.height(12.dp))
+                // Scrollable form content
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 20.dp)
+                        .padding(top = 12.dp, bottom = 8.dp)
+                ) {
+                    // Existing goals list
+                    if (goals.isNotEmpty()) {
+                        goals.forEach { gp ->
+                            val goalAccent = gp.goal.period.accentColor()
+                            val isEditing = editingGoalId == gp.goal.id
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(
+                                        if (isEditing) goalAccent.copy(alpha = 0.08f)
+                                        else Color.Transparent
+                                    )
+                                    .clickable { editingGoalId = gp.goal.id }
+                                    .padding(vertical = 6.dp, horizontal = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(32.dp)
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .background(goalAccent.copy(alpha = 0.12f)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = gp.goal.period.letter(),
+                                        fontWeight = FontWeight.ExtraBold,
+                                        color = goalAccent,
+                                        fontSize = 12.sp
+                                    )
+                                }
+                                Spacer(Modifier.width(10.dp))
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = "${stringResource(when (gp.goal.period) { GoalPeriod.MONTHLY -> R.string.goals_period_monthly; GoalPeriod.YEARLY -> R.string.goals_period_yearly })} · ${gp.goal.workoutType?.name ?: allWorkoutsLabel}",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.goals_target_progress, gp.goal.targetCount, gp.current, gp.goal.targetCount),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                                IconButton(
+                                    onClick = {
+                                        if (isEditing) editingGoalId = null
+                                        onDeleteGoal(gp.goal.id)
+                                    },
+                                    modifier = Modifier.size(36.dp)
+                                ) {
+                                    Icon(
+                                        Icons.Default.Delete,
+                                        contentDescription = stringResource(R.string.goals_delete_cd),
+                                        tint = MaterialTheme.colorScheme.error,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
+                            }
+                            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
+                        }
+                        Spacer(Modifier.height(16.dp))
+                    }
 
-            Text(
-                text = stringResource(R.string.goals_target_label),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(bottom = 6.dp)
-            )
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                IconButton(
+                    // Form section header
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = if (editingGoalId != null) stringResource(R.string.goals_edit_header) else stringResource(R.string.goals_new_header),
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        if (editingGoalId != null) {
+                            TextButton(onClick = { editingGoalId = null }) {
+                                Text(stringResource(R.string.goals_new_btn), style = MaterialTheme.typography.labelMedium)
+                            }
+                        }
+                    }
+
+                    // Period type chips
+                    Text(
+                        text = stringResource(R.string.goals_period_label),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(bottom = 6.dp)
+                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        GoalPeriod.entries.forEach { period ->
+                            FilterChip(
+                                selected = selectedPeriod == period,
+                                onClick = { selectedPeriod = period },
+                                label = {
+                                    Text(
+                                        text = when (period) {
+                                            GoalPeriod.MONTHLY -> stringResource(R.string.goals_period_monthly)
+                                            GoalPeriod.YEARLY  -> stringResource(R.string.goals_period_yearly)
+                                        },
+                                        fontSize = 12.sp
+                                    )
+                                }
+                            )
+                        }
+                    }
+
+                    // Date picker + Home toggle side by side (add mode only)
+                    if (editingGoalId == null) {
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            text = "For",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(bottom = 6.dp)
+                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            // Left half: date picker
+                            Row(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(10.dp))
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .clickable { showBoundPicker = true }
+                                    .padding(horizontal = 12.dp, vertical = 14.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(
+                                    text = boundDisplayLabel,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.Medium,
+                                    color = accent
+                                )
+                                Icon(
+                                    imageVector = Icons.Default.DateRange,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+
+                            // Right half: Home on/off toggle pill
+                            Row(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .border(
+                                        1.dp,
+                                        if (showOnHome) accent.copy(alpha = 0.5f)
+                                        else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                                        RoundedCornerShape(10.dp)
+                                    )
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .background(if (showOnHome) accent.copy(alpha = 0.12f) else Color.Transparent)
+                                    .clickable { showOnHome = !showOnHome }
+                                    .padding(horizontal = 12.dp, vertical = 14.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.BarChart,
+                                    contentDescription = null,
+                                    tint = if (showOnHome) accent else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+                                    modifier = Modifier.size(14.dp)
+                                )
+                                Spacer(Modifier.width(6.dp))
+                                Text(
+                                    text = "Home",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = if (showOnHome) FontWeight.SemiBold else FontWeight.Normal,
+                                    color = if (showOnHome) accent else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(Modifier.height(12.dp))
+
+                    // Workout type dropdown
+                    Text(
+                        text = stringResource(R.string.goals_workout_type_label),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(bottom = 6.dp)
+                    )
+                    ExposedDropdownMenuBox(
+                        expanded = typeDropdownExpanded,
+                        onExpandedChange = { typeDropdownExpanded = it }
+                    ) {
+                        OutlinedTextField(
+                            value = selectedTypeName,
+                            onValueChange = {},
+                            readOnly = true,
+                            trailingIcon = {
+                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = typeDropdownExpanded)
+                            },
+                            modifier = Modifier
+                                .menuAnchor(MenuAnchorType.PrimaryNotEditable)
+                                .fillMaxWidth(),
+                            textStyle = MaterialTheme.typography.bodyMedium,
+                            shape = RoundedCornerShape(10.dp)
+                        )
+                        ExposedDropdownMenu(
+                            expanded = typeDropdownExpanded,
+                            onDismissRequest = { typeDropdownExpanded = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text(allWorkoutsLabel) },
+                                onClick = {
+                                    selectedTypeId = null
+                                    typeDropdownExpanded = false
+                                }
+                            )
+                            nonRestTypes.forEach { type ->
+                                DropdownMenuItem(
+                                    text = { Text(type.name) },
+                                    onClick = {
+                                        selectedTypeId = type.id
+                                        typeDropdownExpanded = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(Modifier.height(12.dp))
+
+                    // Target count
+                    Text(
+                        text = stringResource(R.string.goals_target_label),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(bottom = 6.dp)
+                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        IconButton(
+                            onClick = {
+                                if (targetCount > 1) {
+                                    targetCount--
+                                    targetText = targetCount.toString()
+                                }
+                            },
+                            modifier = Modifier.size(40.dp)
+                        ) {
+                            Text("−", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
+                        }
+                        OutlinedTextField(
+                            value = targetText,
+                            onValueChange = { input ->
+                                val digits = input.filter { it.isDigit() }
+                                targetText = digits
+                                val num = digits.toIntOrNull()
+                                if (num != null && num in 1..365) targetCount = num
+                            },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            singleLine = true,
+                            textStyle = MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center
+                            ),
+                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier.width(80.dp)
+                        )
+                        IconButton(
+                            onClick = {
+                                if (targetCount < 365) {
+                                    targetCount++
+                                    targetText = targetCount.toString()
+                                }
+                            },
+                            modifier = Modifier.size(40.dp)
+                        ) {
+                            Text("+", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
+                        }
+                    }
+                } // end scrollable Column
+
+                // Save / Update button
+                Button(
                     onClick = {
-                        if (targetCount > 1) {
-                            targetCount--
-                            targetText = targetCount.toString()
+                        val eid = editingGoalId
+                        if (eid != null) {
+                            onUpdateGoal(eid, selectedPeriod, targetCount, selectedTypeId)
+                            onDismiss()
+                        } else {
+                            onAddGoal(selectedPeriod, targetCount, selectedTypeId, boundYearMonth, showOnHome)
                         }
                     },
-                    modifier = Modifier.size(40.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .navigationBarsPadding()
+                        .padding(horizontal = 20.dp)
+                        .padding(top = 12.dp, bottom = 12.dp),
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                 ) {
-                    Text(
-                        text = "−",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-                OutlinedTextField(
-                    value = targetText,
-                    onValueChange = { input ->
-                        val digits = input.filter { it.isDigit() }
-                        targetText = digits
-                        val num = digits.toIntOrNull()
-                        if (num != null && num in 1..365) targetCount = num
-                    },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    singleLine = true,
-                    textStyle = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center
-                    ),
-                    shape = RoundedCornerShape(8.dp),
-                    modifier = Modifier.width(80.dp)
-                )
-                IconButton(
-                    onClick = {
-                        if (targetCount < 365) {
-                            targetCount++
-                            targetText = targetCount.toString()
-                        }
-                    },
-                    modifier = Modifier.size(40.dp)
-                ) {
-                    Text(
-                        text = "+",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.primary
-                    )
+                    Text(if (editingGoalId != null) stringResource(R.string.goals_update_btn) else stringResource(R.string.goals_add_btn))
                 }
             }
-
-        } // end scrollable Column
-
-        Button(
-            onClick = {
-                val eid = editingGoalId
-                if (eid != null) {
-                    onUpdateGoal(eid, selectedPeriod, targetCount, selectedTypeId)
-                    onDismiss()
-                } else {
-                    onAddGoal(selectedPeriod, targetCount, selectedTypeId)
-                }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .navigationBarsPadding()
-                .padding(horizontal = 20.dp)
-                .padding(top = 12.dp, bottom = 12.dp),
-            shape = RoundedCornerShape(10.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary
-            )
-        ) {
-            Text(if (editingGoalId != null) stringResource(R.string.goals_update_btn) else stringResource(R.string.goals_add_btn))
         }
-        } // end outer Column
+    }
+
+    if (showBoundPicker) {
+        when (selectedPeriod) {
+            GoalPeriod.MONTHLY -> MonthYearPickerDialog(
+                currentMonth = boundYearMonth,
+                onDismiss = { showBoundPicker = false },
+                onConfirm = { boundYearMonth = it; showBoundPicker = false }
+            )
+            GoalPeriod.YEARLY -> YearPickerDialog(
+                currentYear = boundYearMonth.year,
+                onDismiss = { showBoundPicker = false },
+                onConfirm = { boundYearMonth = YearMonth.of(it, 1); showBoundPicker = false }
+            )
+        }
     }
 }

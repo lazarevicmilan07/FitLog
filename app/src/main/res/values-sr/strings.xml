@@ -16,7 +16,7 @@
     <string name="btn_continue">Nastavi</string>
     <string name="cd_back">Nazad</string>
 
-    <string name="home_title">Dashboard</string>
+    <string name="home_title">Početna</string>
     <string name="cd_filter">Filtriranje</string>
     <string name="cd_add_workout">Dodaj trening</string>
     <string name="cd_previous_month">Prethodni mesec</string>
@@ -27,6 +27,7 @@
     <string name="filter_clear_all">Očisti sve</string>
 
     <string name="goals_title">Ciljevi</string>
+    <string name="goals_screen_title">Ciljevi</string>
     <string name="cd_manage_goals">Upravljanje ciljevima</string>
     <string name="goals_empty">Tapni + da postaviš cilj</string>
     <string name="goals_all_workouts">Svi treninzi</string>

@@ -65,7 +65,16 @@
       "Bash(sed -i 's|<string name=\"export_select_year\">Selecionar ano</string>|<string name=\"export_select_year\">Selecionar ano</string>\\\\n    <string name=\"export_select_start_month\">Selecionar mês de início</string>\\\\n    <string name=\"export_select_start_year\">Selecionar ano de início</string>\\\\n    <string name=\"export_select_end_month\">Selecionar mês de fim</string>\\\\n    <string name=\"export_select_end_year\">Selecionar ano de fim</string>|' C:/ComData/Projekti/FitLog/app/src/main/res/values-pt/strings.xml)",
       "Bash(sed -i 's|<string name=\"btn_cancel\">Cancelar</string>|<string name=\"btn_cancel\">Cancelar</string>\\\\n    <string name=\"btn_next\">Próximo</string>|' C:/ComData/Projekti/FitLog/app/src/main/res/values-pt/strings.xml)",
       "Bash(sed -i 's|<string name=\"export_select_year\">Выбрать год</string>|<string name=\"export_select_year\">Выбрать год</string>\\\\n    <string name=\"export_select_start_month\">Выбрать начальный месяц</string>\\\\n    <string name=\"export_select_start_year\">Выбрать начальный год</string>\\\\n    <string name=\"export_select_end_month\">Выбрать конечный месяц</string>\\\\n    <string name=\"export_select_end_year\">Выбрать конечный год</string>|' C:/ComData/Projekti/FitLog/app/src/main/res/values-ru/strings.xml)",
-      "Bash(./gradlew :app:compileDebugKotlin)"
+      "Bash(./gradlew :app:compileDebugKotlin)",
+      "Bash(cmd /c \"gradlew.bat assembleDebug 2>&1\")",
+      "PowerShell($env:JAVA_HOME = \"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\jbr\"; $env:PATH = \"$env:JAVA_HOME\\\\bin;$env:PATH\"; cd C:\\\\SideProjects\\\\FitLog; .\\\\gradlew.bat assembleDebug 2>&1 | Select-Object -Last 40)",
+      "PowerShell($env:JAVA_HOME = \"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\jbr\"; $env:PATH = \"$env:JAVA_HOME\\\\bin;$env:PATH\"; cd C:\\\\SideProjects\\\\FitLog; .\\\\gradlew.bat assembleDebug 2>&1 | Select-Object -Last 20)",
+      "PowerShell($env:JAVA_HOME = \"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\jbr\"; $env:PATH = \"$env:JAVA_HOME\\\\bin;$env:PATH\"; cd C:\\\\SideProjects\\\\FitLog; .\\\\gradlew.bat assembleDebug 2>&1 | Select-Object -Last 15)",
+      "PowerShell(tail *)",
+      "PowerShell($env:JAVA_HOME = \"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\jbr\"; cd C:\\\\SideProjects\\\\FitLog; ./gradlew assembleDebug 2>&1 | Select-Object -Last 20)",
+      "PowerShell($env:JAVA_HOME = \"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\jbr\"; cd C:\\\\SideProjects\\\\FitLog; ./gradlew assembleDebug 2>&1 | Select-Object -Last 15)",
+      "PowerShell($env:JAVA_HOME = \"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\jbr\"; cd C:\\\\SideProjects\\\\FitLog; ./gradlew assembleDebug 2>&1 | Select-Object -Last 12)",
+      "PowerShell($env:JAVA_HOME = \"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\jbr\"; cd C:\\\\SideProjects\\\\FitLog; ./gradlew assembleDebug 2>&1 | Select-Object -Last 10)"
     ]
   }
 }

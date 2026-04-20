@@ -3,6 +3,7 @@ package com.workoutlog.ui.screens.goals
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -11,9 +12,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -53,6 +56,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -77,6 +81,7 @@ fun GoalsScreen(
     var editGoalId by remember { mutableStateOf<Long?>(null) }
     var isMonthlyCollapsed by remember { mutableStateOf(false) }
     var isYearlyCollapsed by remember { mutableStateOf(false) }
+    var isHistoryCollapsed by remember { mutableStateOf(false) }
     var showMonthlyYearPicker by remember { mutableStateOf(false) }
     var showYearlyYearPicker by remember { mutableStateOf(false) }
 
@@ -308,20 +313,27 @@ fun GoalsScreen(
 
                 Spacer(Modifier.height(24.dp))
 
-                // History section
-                SectionLabel(text = stringResource(R.string.goals_section_history))
-                Spacer(Modifier.height(8.dp))
+                // History section — collapsible
+                CollapsibleSectionHeader(
+                    text = stringResource(R.string.goals_section_history),
+                    isCollapsed = isHistoryCollapsed,
+                    onToggle = { isHistoryCollapsed = !isHistoryCollapsed }
+                )
 
-                if (state.historyYearGroups.isEmpty()) {
-                    EmptyGoalsHint(
-                        text = stringResource(R.string.goals_empty_history),
-                        modifier = Modifier.padding(horizontal = 16.dp)
-                    )
-                } else {
-                    GoalHistoryList(
-                        historyYearGroups = state.historyYearGroups,
-                        modifier = Modifier.padding(horizontal = 16.dp)
-                    )
+                if (!isHistoryCollapsed) {
+                    Spacer(Modifier.height(8.dp))
+
+                    if (state.historyYearGroups.isEmpty()) {
+                        EmptyGoalsHint(
+                            text = stringResource(R.string.goals_empty_history),
+                            modifier = Modifier.padding(horizontal = 16.dp)
+                        )
+                    } else {
+                        GoalHistoryList(
+                            historyYearGroups = state.historyYearGroups,
+                            modifier = Modifier.padding(horizontal = 16.dp)
+                        )
+                    }
                 }
 
                 Spacer(Modifier.height(24.dp))
@@ -333,7 +345,7 @@ fun GoalsScreen(
         GoalManagementSheet(
             goals = state.currentPeriodGoals,
             workoutTypes = state.workoutTypes,
-            onAddGoal = { period, target, typeId -> viewModel.addGoal(period, target, typeId) },
+            onAddGoal = { period, target, typeId, boundYM, showOnHome -> viewModel.addGoal(period, target, typeId, boundYM, showOnHome) },
             onUpdateGoal = { id, period, target, typeId -> viewModel.updateGoal(id, period, target, typeId) },
             onDeleteGoal = { goalId -> viewModel.deleteGoal(goalId) },
             onDismiss = { showGoalSheet = false; editGoalId = null },
@@ -378,17 +390,28 @@ private fun CollapsibleSectionHeader(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(8.dp))
-            .clickable(onClick = onToggle)
-            .padding(start = 16.dp, end = 12.dp, top = 4.dp, bottom = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+            .height(IntrinsicSize.Min)
+            .clip(RoundedCornerShape(10.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f), RoundedCornerShape(10.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
+            .clickable(onClick = onToggle),
+        verticalAlignment = Alignment.CenterVertically
     ) {
+        Box(
+            modifier = Modifier
+                .width(3.dp)
+                .fillMaxHeight()
+                .background(MaterialTheme.colorScheme.primary)
+        )
+        Spacer(Modifier.width(10.dp))
         Text(
             text = text,
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier
+                .weight(1f)
+                .padding(vertical = 8.dp)
         )
         Icon(
             imageVector = if (isCollapsed) Icons.Default.ExpandMore else Icons.Default.ExpandLess,
@@ -396,6 +419,7 @@ private fun CollapsibleSectionHeader(
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.size(18.dp)
         )
+        Spacer(Modifier.width(12.dp))
     }
 }
 
@@ -412,21 +436,25 @@ private fun YearSelector(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
-        IconButton(onClick = onPrevious, modifier = Modifier.size(32.dp)) {
+        IconButton(onClick = onPrevious, modifier = Modifier.size(28.dp)) {
             Icon(Icons.Default.ChevronLeft, contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary)
         }
-        Text(
-            text = year.toString(),
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface,
+        Box(
             modifier = Modifier
-                .clip(RoundedCornerShape(8.dp))
+                .clip(RoundedCornerShape(20.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f))
                 .clickable(onClick = onYearClick)
                 .padding(horizontal = 16.dp, vertical = 4.dp)
-        )
-        IconButton(onClick = onNext, modifier = Modifier.size(32.dp)) {
+        ) {
+            Text(
+                text = year.toString(),
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+        IconButton(onClick = onNext, modifier = Modifier.size(28.dp)) {
             Icon(Icons.Default.ChevronRight, contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary)
         }
@@ -447,21 +475,25 @@ private fun PeriodSelector(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
-        IconButton(onClick = onPrevious, modifier = Modifier.size(32.dp)) {
+        IconButton(onClick = onPrevious, modifier = Modifier.size(28.dp)) {
             Icon(Icons.Default.ChevronLeft, contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary)
         }
-        Text(
-            text = "$periodStart – $periodEnd",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface,
+        Box(
             modifier = Modifier
-                .clip(RoundedCornerShape(8.dp))
+                .clip(RoundedCornerShape(20.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f))
                 .clickable(onClick = onPeriodClick)
                 .padding(horizontal = 16.dp, vertical = 4.dp)
-        )
-        IconButton(onClick = onNext, modifier = Modifier.size(32.dp)) {
+        ) {
+            Text(
+                text = "$periodStart – $periodEnd",
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+        IconButton(onClick = onNext, modifier = Modifier.size(28.dp)) {
             Icon(Icons.Default.ChevronRight, contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary)
         }
@@ -469,21 +501,10 @@ private fun PeriodSelector(
 }
 
 @Composable
-private fun SectionLabel(text: String) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.titleSmall,
-        fontWeight = FontWeight.SemiBold,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(horizontal = 16.dp)
-    )
-}
-
-@Composable
 private fun EmptyGoalsHint(text: String, modifier: Modifier = Modifier) {
     Text(
-        text = text,
-        style = MaterialTheme.typography.bodyMedium,
+        text = "• $text",
+        style = MaterialTheme.typography.bodyMedium.copy(fontStyle = FontStyle.Italic),
         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
         modifier = modifier.padding(vertical = 8.dp)
     )
@@ -496,25 +517,36 @@ private fun GoalHistoryList(
 ) {
     val collapsedYears = remember { mutableStateMapOf<Int, Boolean>() }
 
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(6.dp)) {
         historyYearGroups.forEach { yearGroup ->
             val isYearCollapsed = collapsedYears[yearGroup.year] ?: false
 
-            // Year header
+            // Year header — prominent accent-strip row
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(8.dp))
-                    .clickable { collapsedYears[yearGroup.year] = !isYearCollapsed }
-                    .padding(vertical = 6.dp, horizontal = 4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                    .height(IntrinsicSize.Min)
+                    .clip(RoundedCornerShape(10.dp))
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f), RoundedCornerShape(10.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
+                    .clickable { collapsedYears[yearGroup.year] = !isYearCollapsed },
+                verticalAlignment = Alignment.CenterVertically
             ) {
+                Box(
+                    modifier = Modifier
+                        .width(3.dp)
+                        .fillMaxHeight()
+                        .background(MaterialTheme.colorScheme.primary)
+                )
+                Spacer(Modifier.width(10.dp))
                 Text(
                     text = yearGroup.year.toString(),
-                    style = MaterialTheme.typography.labelMedium,
+                    style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(vertical = 8.dp)
                 )
                 Icon(
                     imageVector = if (isYearCollapsed) Icons.Default.ExpandMore else Icons.Default.ExpandLess,
@@ -522,51 +554,83 @@ private fun GoalHistoryList(
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(16.dp)
                 )
+                Spacer(Modifier.width(12.dp))
             }
 
             if (!isYearCollapsed) {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    yearGroup.periodGroups.forEachIndexed { pIndex, periodGroup ->
-                        // Period type label (Monthly / Yearly)
+                Column(
+                    modifier = Modifier.padding(start = 8.dp, top = 4.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    yearGroup.periodGroups.forEach { periodGroup ->
                         val periodColor = when (periodGroup.period) {
                             GoalPeriod.MONTHLY -> Color(0xFF9C6ADE)
                             GoalPeriod.YEARLY  -> Color(0xFFD4720A)
                         }
-                        Text(
-                            text = periodGroup.periodLabel,
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = periodColor,
-                            modifier = Modifier.padding(
-                                start = 4.dp,
-                                top = if (pIndex == 0) 0.dp else 10.dp,
-                                bottom = 2.dp
-                            )
-                        )
 
-                        periodGroup.monthGroups.forEach { monthGroup ->
-                            // Month label (only for monthly goals with a real month)
-                            if (monthGroup.monthLabel.isNotEmpty()) {
+                        // Period card with colored left strip
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(IntrinsicSize.Min)
+                                .clip(RoundedCornerShape(10.dp))
+                                .border(1.dp, periodColor.copy(alpha = 0.3f), RoundedCornerShape(10.dp))
+                                .background(periodColor.copy(alpha = 0.05f))
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .width(3.dp)
+                                    .fillMaxHeight()
+                                    .background(periodColor.copy(alpha = 0.7f))
+                            )
+                            Column(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(start = 10.dp, end = 10.dp, top = 8.dp, bottom = 8.dp)
+                            ) {
                                 Text(
-                                    text = monthGroup.monthLabel,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                                    modifier = Modifier.padding(start = 8.dp, top = 4.dp, bottom = 2.dp)
+                                    text = periodGroup.periodLabel,
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = periodColor
                                 )
-                            }
-                            monthGroup.items.forEachIndexed { itemIndex, item ->
-                                HistoryRow(item = item)
-                                if (itemIndex < monthGroup.items.lastIndex) {
-                                    HorizontalDivider(
-                                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
-                                        modifier = Modifier.padding(start = 44.dp)
-                                    )
+                                periodGroup.monthGroups.forEach { monthGroup ->
+                                    if (monthGroup.monthLabel.isNotEmpty()) {
+                                        Spacer(Modifier.height(8.dp))
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            modifier = Modifier.padding(bottom = 2.dp)
+                                        ) {
+                                            Text(
+                                                text = monthGroup.monthLabel,
+                                                style = MaterialTheme.typography.labelSmall,
+                                                fontWeight = FontWeight.Medium,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                            )
+                                            Spacer(Modifier.width(6.dp))
+                                            Box(
+                                                modifier = Modifier
+                                                    .weight(1f)
+                                                    .height(1.dp)
+                                                    .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
+                                            )
+                                        }
+                                    }
+                                    monthGroup.items.forEachIndexed { itemIndex, item ->
+                                        HistoryRow(item = item)
+                                        if (itemIndex < monthGroup.items.lastIndex) {
+                                            HorizontalDivider(
+                                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f),
+                                                modifier = Modifier.padding(start = 32.dp)
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
                 }
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(4.dp))
             }
         }
     }
@@ -610,11 +674,12 @@ private fun HistoryRow(item: PastGoalPeriod) {
         item.isHit        -> HistoryHitColor
         else              -> HistoryMissColor
     }
+    val pct = if (item.goal.targetCount > 0) item.achieved * 100 / item.goal.targetCount else 0
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp, horizontal = 4.dp),
+            .padding(vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         when {
@@ -622,26 +687,28 @@ private fun HistoryRow(item: PastGoalPeriod) {
             item.isHit        -> HistoryStatusDot(HistoryHitColor,        Icons.Default.Check,     Color.White)
             else              -> HistoryStatusDot(HistoryMissColor,        Icons.Default.Close,     Color.White)
         }
-        Spacer(Modifier.size(12.dp))
-        Column(modifier = Modifier.weight(1f)) {
+        Spacer(Modifier.size(10.dp))
+        Text(
+            text = item.goal.workoutType?.name ?: allWorkoutsLabel,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Medium,
+            color = accentColor,
+            modifier = Modifier.weight(1f),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(6.dp))
+                .background(statusColor.copy(alpha = 0.12f))
+                .padding(horizontal = 7.dp, vertical = 3.dp)
+        ) {
             Text(
-                text = item.periodLabel,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Medium,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                text = item.goal.workoutType?.name ?: allWorkoutsLabel,
-                style = MaterialTheme.typography.labelSmall,
-                color = accentColor
+                text = "${item.achieved}/${item.goal.targetCount} · $pct%",
+                style = MaterialTheme.typography.bodySmall,
+                fontWeight = FontWeight.SemiBold,
+                color = statusColor
             )
         }
-        Text(
-            text = stringResource(R.string.goals_history_item_hit, item.achieved, item.goal.targetCount),
-            style = MaterialTheme.typography.bodySmall,
-            fontWeight = FontWeight.SemiBold,
-            color = statusColor
-        )
     }
 }

@@ -1,10 +1,12 @@
 package com.workoutlog.ui.screens.goals
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -18,12 +20,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.MoreHoriz
+import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -141,124 +142,168 @@ private fun GoalTypeCardShell(
 ) {
     var isCollapsed by remember { mutableStateOf(false) }
 
-    Column(
+    Row(
         modifier = modifier
             .fillMaxWidth()
+            .height(IntrinsicSize.Min)
             .clip(RoundedCornerShape(12.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
             .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f))
     ) {
-        // Header row
-        Row(
+        // Left accent strip
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .clickable { isCollapsed = !isCollapsed }
-                .padding(start = 12.dp, top = 8.dp, bottom = 8.dp, end = 4.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
+                .width(3.dp)
+                .fillMaxHeight()
+                .background(accentColor.copy(alpha = 0.7f))
+        )
+
+        Column(modifier = Modifier.weight(1f)) {
+            // Header row
+            Row(
                 modifier = Modifier
-                    .size(22.dp)
-                    .clip(RoundedCornerShape(6.dp))
-                    .background(accentColor.copy(alpha = 0.18f)),
-                contentAlignment = Alignment.Center
+                    .fillMaxWidth()
+                    .clickable { isCollapsed = !isCollapsed }
+                    .padding(start = 10.dp, top = 8.dp, bottom = 8.dp, end = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
+                Box(
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clip(RoundedCornerShape(7.dp))
+                        .background(accentColor.copy(alpha = 0.18f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = periodBadge,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = accentColor,
+                        fontSize = 11.sp,
+                        lineHeight = 11.sp
+                    )
+                }
+                Spacer(Modifier.width(8.dp))
                 Text(
-                    text = periodBadge,
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = accentColor,
-                    fontSize = 10.sp
+                    text = typeName,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.weight(1f)
                 )
-            }
-            Spacer(Modifier.width(8.dp))
-            Text(
-                text = typeName,
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.weight(1f)
-            )
-            // Per-goal dashboard toggle (only when there's an active goal)
-            if (activeGoalId != null) {
-                IconButton(
-                    onClick = { onToggleDashboard(activeGoalId, !activeShowOnDashboard) },
-                    modifier = Modifier.size(32.dp)
+                // Compact X/Y chip — visible even when collapsed
+                if (activeSlot != null) {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(accentColor.copy(alpha = 0.15f))
+                            .padding(horizontal = 8.dp, vertical = 5.dp)
+                    ) {
+                        Text(
+                            text = "${activeSlot.achieved}/${activeSlot.target}",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = accentColor,
+                            lineHeight = 11.sp
+                        )
+                    }
+                    Spacer(Modifier.width(4.dp))
+                }
+                // Per-goal dashboard toggle pill — always shown, clickable when any goal exists
+                val dashActive = activeGoalId != null && activeShowOnDashboard
+                Row(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(10.dp))
+                        .then(
+                            if (dashActive)
+                                Modifier.background(accentColor.copy(alpha = 0.15f))
+                            else
+                                Modifier.border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(10.dp))
+                        )
+                        .then(
+                            if (activeGoalId != null)
+                                Modifier.clickable { onToggleDashboard(activeGoalId, !dashActive) }
+                            else
+                                Modifier
+                        )
+                        .padding(horizontal = 8.dp, vertical = 5.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Dashboard,
+                        imageVector = Icons.Default.BarChart,
                         contentDescription = null,
-                        tint = if (activeShowOnDashboard) accentColor else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
-                        modifier = Modifier.size(14.dp)
+                        tint = if (dashActive) accentColor else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+                        modifier = Modifier.size(13.dp)
+                    )
+                    Text(
+                        text = "Home",
+                        fontSize = 11.sp,
+                        lineHeight = 11.sp,
+                        fontWeight = if (dashActive) FontWeight.SemiBold else FontWeight.Normal,
+                        color = if (dashActive) accentColor else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+                    )
+                }
+                Spacer(Modifier.width(4.dp))
+                // Collapse indicator (no separate click — Row handles it)
+                Box(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .padding(8.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = if (isCollapsed) Icons.Default.ExpandMore else Icons.Default.ExpandLess,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                        modifier = Modifier.size(16.dp)
                     )
                 }
             }
-            IconButton(
-                onClick = { isCollapsed = !isCollapsed },
-                modifier = Modifier.size(32.dp)
-            ) {
-                Icon(
-                    imageVector = if (isCollapsed) Icons.Default.ExpandMore else Icons.Default.ExpandLess,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                    modifier = Modifier.size(16.dp)
-                )
-            }
-        }
 
-        if (!isCollapsed) {
-            Column(modifier = Modifier.padding(start = 12.dp, end = 12.dp, bottom = 12.dp)) {
-                // Active progress bar — dashboard style (Box-based, not LinearProgressIndicator)
-                if (activeSlot != null) {
-                    val progress = if (activeSlot.target > 0)
-                        (activeSlot.achieved.toFloat() / activeSlot.target).coerceIn(0f, 1f)
-                    else 0f
-                    val pct = (progress * 100).toInt()
+            if (!isCollapsed) {
+                Column(modifier = Modifier.padding(start = 10.dp, end = 10.dp, bottom = 12.dp)) {
+                    // Active progress bar
+                    if (activeSlot != null) {
+                        val progress = if (activeSlot.target > 0)
+                            (activeSlot.achieved.toFloat() / activeSlot.target).coerceIn(0f, 1f)
+                        else 0f
+                        val pct = (progress * 100).toInt()
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
                         Text(
                             text = activeSlot.label,
                             style = MaterialTheme.typography.labelSmall,
                             color = accentColor,
                             fontWeight = FontWeight.Medium
                         )
-                        Text(
-                            text = "${activeSlot.achieved} / ${activeSlot.target}",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    Spacer(Modifier.height(4.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(5.dp)
-                                .clip(RoundedCornerShape(3.dp))
-                                .background(accentColor.copy(alpha = 0.18f))
-                        ) {
+                        Spacer(Modifier.height(4.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
                             Box(
                                 modifier = Modifier
-                                    .fillMaxHeight()
-                                    .fillMaxWidth(fraction = progress)
-                                    .background(accentColor)
+                                    .weight(1f)
+                                    .height(6.dp)
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .background(accentColor.copy(alpha = 0.18f))
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxHeight()
+                                        .fillMaxWidth(fraction = progress)
+                                        .background(accentColor)
+                                )
+                            }
+                            Spacer(Modifier.width(6.dp))
+                            Text(
+                                text = "$pct%",
+                                fontWeight = FontWeight.SemiBold,
+                                color = accentColor,
+                                fontSize = 10.sp,
+                                lineHeight = 10.sp
                             )
                         }
-                        Spacer(Modifier.width(6.dp))
-                        Text(
-                            text = "$pct%",
-                            fontWeight = FontWeight.SemiBold,
-                            color = accentColor,
-                            fontSize = 10.sp,
-                            lineHeight = 10.sp
-                        )
+                        Spacer(Modifier.height(12.dp))
                     }
-                    Spacer(Modifier.height(12.dp))
-                }
 
-                content()
+                    content()
+                }
             }
         }
     }
@@ -286,7 +331,7 @@ private fun SlotRow(slots: List<SlotData>) {
 private fun SlotStatusDot(background: Color, icon: ImageVector, iconTint: Color) {
     Box(
         modifier = Modifier
-            .size(16.dp)
+            .size(18.dp)
             .clip(CircleShape)
             .background(background),
         contentAlignment = Alignment.Center
@@ -295,7 +340,7 @@ private fun SlotStatusDot(background: Color, icon: ImageVector, iconTint: Color)
             imageVector = icon,
             contentDescription = null,
             tint = iconTint,
-            modifier = Modifier.size(10.dp)
+            modifier = Modifier.size(11.dp)
         )
     }
 }
@@ -313,12 +358,13 @@ private fun SlotCell(
         modifier = modifier
     ) {
         when {
-            !hasGoal -> Box(modifier = Modifier.size(16.dp), contentAlignment = Alignment.Center) {
+            !hasGoal -> Box(modifier = Modifier.size(18.dp), contentAlignment = Alignment.Center) {
                 Box(
                     modifier = Modifier
-                        .size(4.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.15f))
+                        .width(16.dp)
+                        .height(5.dp)
+                        .clip(RoundedCornerShape(3.dp))
+                        .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.12f))
                 )
             }
             isActive -> SlotStatusDot(InProgressColor, Icons.Default.MoreHoriz, Color.Black.copy(alpha = 0.75f))
@@ -329,7 +375,6 @@ private fun SlotCell(
         Text(
             text = if (hasGoal) label else "",
             style = MaterialTheme.typography.labelSmall,
-            fontSize = 9.sp,
             color = when {
                 !hasGoal -> Color.Transparent
                 isActive -> InProgressColor

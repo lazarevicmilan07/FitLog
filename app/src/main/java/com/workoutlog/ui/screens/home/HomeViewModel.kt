@@ -204,16 +204,16 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun addGoal(period: GoalPeriod, targetCount: Int, workoutTypeId: Long?) {
+    fun addGoal(period: GoalPeriod, targetCount: Int, workoutTypeId: Long?, boundYearMonth: YearMonth, showOnHome: Boolean) {
         viewModelScope.launch {
-            val month = _currentMonth.value
             goalRepository.insert(
                 WorkoutGoalEntity(
                     period = period.name,
                     targetCount = targetCount,
                     workoutTypeId = workoutTypeId,
-                    boundYear = month.year,
-                    boundMonth = if (period == GoalPeriod.YEARLY) null else month.monthValue
+                    boundYear = boundYearMonth.year,
+                    boundMonth = if (period == GoalPeriod.YEARLY) null else boundYearMonth.monthValue,
+                    showOnDashboard = showOnHome
                 )
             )
         }

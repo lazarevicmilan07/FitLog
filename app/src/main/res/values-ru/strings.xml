@@ -16,7 +16,7 @@
     <string name="btn_continue">Продолжить</string>
     <string name="cd_back">Назад</string>
 
-    <string name="home_title">Dashboard</string>
+    <string name="home_title">Главная</string>
     <string name="cd_filter">Фильтр</string>
     <string name="cd_add_workout">Добавить тренировку</string>
     <string name="cd_previous_month">Предыдущий месяц</string>
@@ -27,6 +27,7 @@
     <string name="filter_clear_all">Очистить всё</string>
 
     <string name="goals_title">Цели</string>
+    <string name="goals_screen_title">Цели</string>
     <string name="cd_manage_goals">Управление целями</string>
     <string name="goals_empty">Нажмите +, чтобы установить цель</string>
     <string name="goals_all_workouts">Все тренировки</string>

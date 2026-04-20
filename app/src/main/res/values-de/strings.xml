@@ -16,7 +16,7 @@
     <string name="btn_continue">Weiter</string>
     <string name="cd_back">Zurück</string>
 
-    <string name="home_title">Dashboard</string>
+    <string name="home_title">Startseite</string>
     <string name="cd_filter">Filtern</string>
     <string name="cd_add_workout">Training hinzufügen</string>
     <string name="cd_previous_month">Vorheriger Monat</string>
@@ -27,6 +27,7 @@
     <string name="filter_clear_all">Auswahl aufheben</string>
 
     <string name="goals_title">Ziele</string>
+    <string name="goals_screen_title">Ziele</string>
     <string name="cd_manage_goals">Ziele verwalten</string>
     <string name="goals_empty">Tippe auf +, um ein Ziel festzulegen</string>
     <string name="goals_all_workouts">Alle Trainings</string>

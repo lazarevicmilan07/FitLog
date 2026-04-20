@@ -463,11 +463,12 @@ fun HomeScreen(
         GoalManagementSheet(
             goals = state.goals,
             workoutTypes = state.workoutTypes,
-            onAddGoal = { period, target, typeId -> viewModel.addGoal(period, target, typeId) },
+            onAddGoal = { period, target, typeId, boundYM, showOnHome -> viewModel.addGoal(period, target, typeId, boundYM, showOnHome) },
             onUpdateGoal = { id, period, target, typeId -> viewModel.updateGoal(id, period, target, typeId) },
             onDeleteGoal = { goalId -> viewModel.deleteGoal(goalId) },
             onDismiss = { showGoalSheet = false; editGoalId = null },
-            initialEditGoalId = editGoalId
+            initialEditGoalId = editGoalId,
+            initialBoundYearMonth = state.currentMonth
         )
     }
 }
