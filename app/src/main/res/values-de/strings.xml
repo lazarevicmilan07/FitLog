@@ -5,6 +5,7 @@
 
     <string name="nav_home">Startseite</string>
     <string name="nav_stats">Statistiken</string>
+    <string name="nav_goals">Ziele</string>
     <string name="nav_types">Typen</string>
     <string name="nav_settings">Einstellungen</string>
 
@@ -46,6 +47,26 @@
     <string name="goals_add_btn">Ziel hinzufügen</string>
     <string name="goals_target_progress">Ziel %1$d  ·  %2$d/%3$d in diesem Zeitraum</string>
     <string name="goals_delete_cd">Ziel löschen</string>
+    <string name="goals_stat_active">Aktiv</string>
+    <string name="goals_stat_completed">Erreicht</string>
+    <string name="goals_stat_total">Gesamt</string>
+    <string name="goals_stat_success_rate">Erfolgsrate</string>
+    <string name="goals_section_active">Aktive Ziele</string>
+    <string name="goals_section_history">Verlauf</string>
+    <string name="goals_empty_active">Keine Ziele für diesen Zeitraum.\nTippe auf +, um eines zu erstellen.</string>
+    <string name="goals_empty_history">Noch keine vergangenen Zeiträume.</string>
+    <string name="goals_status_completed">Erreicht</string>
+    <string name="goals_status_on_track">Auf Kurs</string>
+    <string name="goals_status_at_risk">Gefährdet</string>
+    <string name="goals_status_failed">Nicht erreicht</string>
+    <string name="goals_streak_label">%d in Folge</string>
+    <string name="goals_history_item_hit">%1$d / %2$d</string>
+    <string name="goals_show_on_dashboard">Auf dem Dashboard anzeigen</string>
+    <string name="goals_show_on_dashboard_subtitle">Ziele-Bereich auf dem Startbildschirm einblenden</string>
+    <string name="toggle_on">An</string>
+    <string name="toggle_off">Aus</string>
+    <string name="goals_for_label">Für</string>
+    <string name="goals_home_toggle">Start</string>
 
     <string-array name="goal_completed_messages">
         <item>Ziel geknackt! Behalte diesen Schwung!</item>

@@ -5,6 +5,7 @@
 
     <string name="nav_home">Início</string>
     <string name="nav_stats">Estatísticas</string>
+    <string name="nav_goals">Metas</string>
     <string name="nav_types">Tipos</string>
     <string name="nav_settings">Configurações</string>
 
@@ -46,6 +47,26 @@
     <string name="goals_add_btn">Adicionar meta</string>
     <string name="goals_target_progress">Alvo %1$d  ·  %2$d/%3$d neste período</string>
     <string name="goals_delete_cd">Excluir meta</string>
+    <string name="goals_stat_active">Ativas</string>
+    <string name="goals_stat_completed">Concluídas</string>
+    <string name="goals_stat_total">Total</string>
+    <string name="goals_stat_success_rate">Taxa de sucesso</string>
+    <string name="goals_section_active">Metas ativas</string>
+    <string name="goals_section_history">Histórico</string>
+    <string name="goals_empty_active">Nenhuma meta para este período.\nToque + para criar uma.</string>
+    <string name="goals_empty_history">Ainda não há períodos anteriores.</string>
+    <string name="goals_status_completed">Concluída</string>
+    <string name="goals_status_on_track">No caminho certo</string>
+    <string name="goals_status_at_risk">Em risco</string>
+    <string name="goals_status_failed">Não alcançada</string>
+    <string name="goals_streak_label">%d seguidas</string>
+    <string name="goals_history_item_hit">%1$d / %2$d</string>
+    <string name="goals_show_on_dashboard">Mostrar no painel</string>
+    <string name="goals_show_on_dashboard_subtitle">Exibir a seção de metas na tela inicial</string>
+    <string name="toggle_on">Sim</string>
+    <string name="toggle_off">Não</string>
+    <string name="goals_for_label">Para</string>
+    <string name="goals_home_toggle">Início</string>
 
     <string-array name="goal_completed_messages">
         <item>Meta batida! Continue com esse ritmo!</item>

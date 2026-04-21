@@ -4,16 +4,20 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -32,7 +36,9 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Surface
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetValue
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -46,8 +52,6 @@ import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -297,7 +301,7 @@ fun GoalManagementSheet(
     val selectedTypeName = nonRestTypes.find { it.id == selectedTypeId }?.name ?: allWorkoutsLabel
     val accent = selectedPeriod.accentColor()
     val boundDisplayLabel = when (selectedPeriod) {
-        GoalPeriod.MONTHLY -> boundYearMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy"))
+        GoalPeriod.MONTHLY -> boundYearMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy")).replaceFirstChar { it.uppercase() }
         GoalPeriod.YEARLY  -> boundYearMonth.year.toString()
     }
 
@@ -314,31 +318,43 @@ fun GoalManagementSheet(
         }
     }
 
-    Dialog(
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true,
+        confirmValueChange = { it != SheetValue.Hidden }
+    )
+
+    ModalBottomSheet(
         onDismissRequest = onDismiss,
-        properties = DialogProperties(
-            usePlatformDefaultWidth = false,
-            dismissOnBackPress = true,
-            dismissOnClickOutside = false
-        )
+        sheetState = sheetState,
+        dragHandle = null,
+        shape = RoundedCornerShape(0.dp),
+        contentWindowInsets = { WindowInsets(0) },
     ) {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
+        val noDownDrag = remember {
+            object : NestedScrollConnection {
+                override fun onPostScroll(
+                    consumed: Offset,
+                    available: Offset,
+                    source: NestedScrollSource
+                ): Offset = if (available.y > 0) available else Offset.Zero
+            }
+        }
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight()
+                .nestedScroll(noDownDrag)
+                .statusBarsPadding()
+                .imePadding()
         ) {
-            Column(
+            // Top bar — matches GoalsScreen header style
+            Row(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .imePadding()
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.08f))
+                    .padding(start = 16.dp, top = 6.dp, end = 6.dp, bottom = 6.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                // Top bar — matches GoalsScreen header style
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.08f))
-                        .padding(start = 16.dp, top = 6.dp, end = 6.dp, bottom = 6.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
                     Text(
                         text = stringResource(R.string.goals_title),
                         style = MaterialTheme.typography.titleLarge,
@@ -642,29 +658,27 @@ fun GoalManagementSheet(
                             Text("+", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
                         }
                     }
+
                 } // end scrollable Column
 
-                // Save / Update button
-                Button(
-                    onClick = {
-                        val eid = editingGoalId
-                        if (eid != null) {
-                            onUpdateGoal(eid, selectedPeriod, targetCount, selectedTypeId, boundYearMonth, showOnHome)
-                            onDismiss()
-                        } else {
-                            onAddGoal(selectedPeriod, targetCount, selectedTypeId, boundYearMonth, showOnHome)
-                        }
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .navigationBarsPadding()
-                        .padding(horizontal = 20.dp)
-                        .padding(top = 12.dp, bottom = 12.dp),
-                    shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-                ) {
-                    Text(if (editingGoalId != null) stringResource(R.string.goals_update_btn) else stringResource(R.string.goals_add_btn))
-                }
+            Button(
+                onClick = {
+                    val eid = editingGoalId
+                    if (eid != null) {
+                        onUpdateGoal(eid, selectedPeriod, targetCount, selectedTypeId, boundYearMonth, showOnHome)
+                        onDismiss()
+                    } else {
+                        onAddGoal(selectedPeriod, targetCount, selectedTypeId, boundYearMonth, showOnHome)
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .padding(horizontal = 20.dp, vertical = 12.dp),
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+            ) {
+                Text(if (editingGoalId != null) stringResource(R.string.goals_update_btn) else stringResource(R.string.goals_add_btn))
             }
         }
     }

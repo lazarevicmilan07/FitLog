@@ -67,6 +67,7 @@ import kotlin.math.roundToInt
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.workoutlog.R
+import com.workoutlog.domain.model.GoalPeriod
 import com.workoutlog.ui.components.LoadingIndicator
 import com.workoutlog.ui.components.YearPickerDialog
 import com.workoutlog.ui.screens.home.GoalManagementSheet
@@ -585,7 +586,7 @@ private fun GoalHistoryList(
                                     .padding(start = 10.dp, end = 10.dp, top = 8.dp, bottom = 8.dp)
                             ) {
                                 Text(
-                                    text = periodGroup.periodLabel,
+                                    text = stringResource(if (periodGroup.period == GoalPeriod.MONTHLY) R.string.goals_period_monthly else R.string.goals_period_yearly),
                                     style = MaterialTheme.typography.labelMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = periodColor

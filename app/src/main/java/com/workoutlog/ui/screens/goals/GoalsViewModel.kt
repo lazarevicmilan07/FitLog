@@ -265,7 +265,7 @@ class GoalsViewModel @Inject constructor(
             )
             .map { g ->
                 val periodLabel = when (g.goal.period) {
-                    GoalPeriod.MONTHLY -> g.boundYM.format(monthFormatter)
+                    GoalPeriod.MONTHLY -> g.boundYM.format(monthFormatter).replaceFirstChar { it.uppercase() }
                     GoalPeriod.YEARLY  -> g.boundYM.year.toString()
                 }
                 PastGoalPeriod(
@@ -296,6 +296,7 @@ class GoalsViewModel @Inject constructor(
                                 val label = if (month != null)
                                     LocalDate.of(year, month, 1).month
                                         .getDisplayName(TextStyle.FULL, Locale.getDefault())
+                                        .replaceFirstChar { it.uppercase() }
                                 else ""
                                 HistoryMonthGroup(month = month, monthLabel = label, items = monthItems)
                             }

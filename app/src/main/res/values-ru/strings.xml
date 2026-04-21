@@ -5,6 +5,7 @@
 
     <string name="nav_home">Главная</string>
     <string name="nav_stats">Статистика</string>
+    <string name="nav_goals">Цели</string>
     <string name="nav_types">Типы</string>
     <string name="nav_settings">Настройки</string>
 
@@ -46,6 +47,26 @@
     <string name="goals_add_btn">Добавить цель</string>
     <string name="goals_target_progress">Цель %1$d  ·  %2$d/%3$d за этот период</string>
     <string name="goals_delete_cd">Удалить цель</string>
+    <string name="goals_stat_active">Активные</string>
+    <string name="goals_stat_completed">Выполненные</string>
+    <string name="goals_stat_total">Всего</string>
+    <string name="goals_stat_success_rate">Успешность</string>
+    <string name="goals_section_active">Активные цели</string>
+    <string name="goals_section_history">История</string>
+    <string name="goals_empty_active">Нет целей на этот период.\nНажмите +, чтобы создать.</string>
+    <string name="goals_empty_history">Пока нет прошлых периодов.</string>
+    <string name="goals_status_completed">Выполнено</string>
+    <string name="goals_status_on_track">По плану</string>
+    <string name="goals_status_at_risk">Под угрозой</string>
+    <string name="goals_status_failed">Не достигнуто</string>
+    <string name="goals_streak_label">%d подряд</string>
+    <string name="goals_history_item_hit">%1$d / %2$d</string>
+    <string name="goals_show_on_dashboard">Показать на панели</string>
+    <string name="goals_show_on_dashboard_subtitle">Отображать раздел целей на главном экране</string>
+    <string name="toggle_on">Вкл</string>
+    <string name="toggle_off">Выкл</string>
+    <string name="goals_for_label">Для</string>
+    <string name="goals_home_toggle">Главная</string>
 
     <string-array name="goal_completed_messages">
         <item>Цель достигнута! Продолжай в том же духе!</item>

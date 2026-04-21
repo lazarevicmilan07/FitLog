@@ -71,14 +71,22 @@ fun MonthlyGoalTypeCard(
     modifier: Modifier = Modifier
 ) {
     val activeSlot = group.months.firstOrNull { it.isActive && it.hasGoal }
+    val monthShortLabels = listOf(
+        stringResource(R.string.month_jan), stringResource(R.string.month_feb),
+        stringResource(R.string.month_mar), stringResource(R.string.month_apr),
+        stringResource(R.string.month_may), stringResource(R.string.month_jun),
+        stringResource(R.string.month_jul), stringResource(R.string.month_aug),
+        stringResource(R.string.month_sep), stringResource(R.string.month_oct),
+        stringResource(R.string.month_nov), stringResource(R.string.month_dec)
+    )
 
     GoalTypeCardShell(
-        typeName = group.workoutTypeName,
+        typeName = if (group.workoutTypeId == null) stringResource(R.string.goals_all_workouts) else group.workoutTypeName,
         accentColor = MonthlyAccent,
         periodBadge = "M",
         activeSlot = activeSlot?.let {
             ActiveSlotInfo(
-                label = Month.of(it.month).getDisplayName(TextStyle.FULL, Locale.getDefault()) + " ${group.year}",
+                label = Month.of(it.month).getDisplayName(TextStyle.FULL, Locale.getDefault()).replaceFirstChar { c -> c.uppercase() } + " ${group.year}",
                 achieved = it.achieved,
                 target = it.target
             )
@@ -91,7 +99,7 @@ fun MonthlyGoalTypeCard(
         SlotRow(
             slots = group.months.map { slot ->
                 SlotData(
-                    label = Month.of(slot.month).getDisplayName(TextStyle.SHORT, Locale.getDefault()).take(3),
+                    label = monthShortLabels[slot.month - 1],
                     hasGoal = slot.hasGoal,
                     isHit = slot.isHit,
                     isActive = slot.isActive
@@ -110,7 +118,7 @@ fun YearlyGoalTypeCard(
     val activeSlot = group.years.firstOrNull { it.isActive && it.hasGoal }
 
     GoalTypeCardShell(
-        typeName = group.workoutTypeName,
+        typeName = if (group.workoutTypeId == null) stringResource(R.string.goals_all_workouts) else group.workoutTypeName,
         accentColor = YearlyAccent,
         periodBadge = "Y",
         activeSlot = activeSlot?.let {

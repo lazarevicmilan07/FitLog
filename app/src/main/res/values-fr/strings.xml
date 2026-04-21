@@ -5,6 +5,7 @@
 
     <string name="nav_home">Accueil</string>
     <string name="nav_stats">Statistiques</string>
+    <string name="nav_goals">Objectifs</string>
     <string name="nav_types">Types</string>
     <string name="nav_settings">Paramètres</string>
 
@@ -46,6 +47,26 @@
     <string name="goals_add_btn">Ajouter un objectif</string>
     <string name="goals_target_progress">Objectif %1$d  ·  %2$d/%3$d sur cette période</string>
     <string name="goals_delete_cd">Supprimer l\'objectif</string>
+    <string name="goals_stat_active">Actifs</string>
+    <string name="goals_stat_completed">Atteints</string>
+    <string name="goals_stat_total">Total</string>
+    <string name="goals_stat_success_rate">Taux de réussite</string>
+    <string name="goals_section_active">Objectifs actifs</string>
+    <string name="goals_section_history">Historique</string>
+    <string name="goals_empty_active">Aucun objectif pour cette période.\nAppuie sur + pour en créer un.</string>
+    <string name="goals_empty_history">Aucune période passée pour l\'instant.</string>
+    <string name="goals_status_completed">Atteint</string>
+    <string name="goals_status_on_track">En bonne voie</string>
+    <string name="goals_status_at_risk">En danger</string>
+    <string name="goals_status_failed">Non atteint</string>
+    <string name="goals_streak_label">%d d\'affilée</string>
+    <string name="goals_history_item_hit">%1$d / %2$d</string>
+    <string name="goals_show_on_dashboard">Afficher sur le tableau de bord</string>
+    <string name="goals_show_on_dashboard_subtitle">Afficher la section objectifs sur l\'écran d\'accueil</string>
+    <string name="toggle_on">Oui</string>
+    <string name="toggle_off">Non</string>
+    <string name="goals_for_label">Pour</string>
+    <string name="goals_home_toggle">Accueil</string>
 
     <string-array name="goal_completed_messages">
         <item>Objectif atteint ! Garde cet élan !</item>

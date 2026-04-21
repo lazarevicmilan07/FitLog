@@ -5,6 +5,7 @@
 
     <string name="nav_home">Početna</string>
     <string name="nav_stats">Statistike</string>
+    <string name="nav_goals">Ciljevi</string>
     <string name="nav_types">Tipovi</string>
     <string name="nav_settings">Podešavanja</string>
 
@@ -46,6 +47,26 @@
     <string name="goals_add_btn">Dodaj cilj</string>
     <string name="goals_target_progress">Cilj %1$d  ·  %2$d/%3$d u ovom periodu</string>
     <string name="goals_delete_cd">Obriši cilj</string>
+    <string name="goals_stat_active">Aktivni</string>
+    <string name="goals_stat_completed">Ostvareni</string>
+    <string name="goals_stat_total">Ukupno</string>
+    <string name="goals_stat_success_rate">Stopa uspjeha</string>
+    <string name="goals_section_active">Aktivni ciljevi</string>
+    <string name="goals_section_history">Istorija</string>
+    <string name="goals_empty_active">Nema ciljeva za ovaj period.\nTapni + da kreiraš jedan.</string>
+    <string name="goals_empty_history">Još nema prošlih perioda.</string>
+    <string name="goals_status_completed">Ostvaren</string>
+    <string name="goals_status_on_track">Na dobrom putu</string>
+    <string name="goals_status_at_risk">Ugrožen</string>
+    <string name="goals_status_failed">Nije ostvaren</string>
+    <string name="goals_streak_label">%d zaredom</string>
+    <string name="goals_history_item_hit">%1$d / %2$d</string>
+    <string name="goals_show_on_dashboard">Prikaži na početnoj</string>
+    <string name="goals_show_on_dashboard_subtitle">Prikaži sekciju ciljeva na početnom ekranu</string>
+    <string name="toggle_on">Uklj</string>
+    <string name="toggle_off">Isklj</string>
+    <string name="goals_for_label">Za</string>
+    <string name="goals_home_toggle">Početna</string>
 
     <string-array name="goal_completed_messages">
         <item>Cilj ostvaren! Nastavi ovim tempom!</item>
