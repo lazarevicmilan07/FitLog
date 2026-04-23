@@ -346,7 +346,7 @@ fun HomeScreen(
                         // Goals section — above calendar (shown only if enabled in Goals screen)
                         if (state.showGoalsOnDashboard) {
                             GoalsSection(
-                                goals = state.goals,
+                                goals = state.goals.filter { it.goal.showOnDashboard },
                                 onManageClick = { editGoalId = null; showGoalSheet = true },
                                 onGoalClick = { id -> editGoalId = id; showGoalSheet = true }
                             )
@@ -461,7 +461,7 @@ fun HomeScreen(
     // Goal management bottom sheet
     if (showGoalSheet) {
         GoalManagementSheet(
-            goals = state.goals,
+            goals = state.goals.filter { it.goal.showOnDashboard },
             workoutTypes = state.workoutTypes,
             onAddGoal = { period, target, typeId, boundYM, showOnHome -> viewModel.addGoal(period, target, typeId, boundYM, showOnHome) },
             onUpdateGoal = { id, period, target, typeId, boundYM, showOnHome -> viewModel.updateGoal(id, period, target, typeId, boundYM, showOnHome) },

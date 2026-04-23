@@ -73,6 +73,7 @@ import androidx.compose.ui.res.stringResource
 import com.workoutlog.R
 import com.workoutlog.domain.model.GoalPeriod
 import com.workoutlog.domain.model.WorkoutType
+import com.workoutlog.ui.components.AnimatedProgressBar
 import com.workoutlog.ui.components.MonthYearPickerDialog
 import com.workoutlog.ui.components.YearPickerDialog
 import com.workoutlog.ui.screens.goals.HitColor
@@ -210,20 +211,11 @@ fun GoalProgressCard(
 
         // Single-block progress bar with percentage / checkmark at end
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .height(5.dp)
-                    .clip(RoundedCornerShape(3.dp))
-                    .background(accentColor.copy(alpha = 0.18f))
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .fillMaxWidth(fraction = progress.coerceIn(0f, 1f))
-                        .background(accentColor)
-                )
-            }
+            AnimatedProgressBar(
+                progress = progress.coerceIn(0f, 1f),
+                color = accentColor,
+                modifier = Modifier.weight(1f).height(7.dp)
+            )
             Spacer(Modifier.width(7.dp))
             when {
                 isComplete -> Icon(

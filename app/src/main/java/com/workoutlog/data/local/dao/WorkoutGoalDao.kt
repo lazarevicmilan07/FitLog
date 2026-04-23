@@ -15,7 +15,6 @@ interface WorkoutGoalDao {
     @Query("""
         SELECT * FROM workout_goals
         WHERE isActive = 1
-          AND showOnDashboard = 1
           AND boundYear = :year
           AND (period = 'YEARLY' OR boundMonth = :month)
         ORDER BY createdAt ASC

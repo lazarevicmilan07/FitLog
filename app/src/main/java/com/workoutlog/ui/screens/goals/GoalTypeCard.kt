@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.workoutlog.R
 import com.workoutlog.domain.model.GoalPeriod
+import com.workoutlog.ui.components.AnimatedProgressBar
 import java.time.Month
 import java.time.format.TextStyle
 import java.util.Locale
@@ -70,7 +71,7 @@ fun MonthlyGoalTypeCard(
     onToggleDashboard: (goalId: Long, show: Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val activeSlot = group.months.firstOrNull { it.isActive && it.hasGoal }
+    val activeSlot = group.months.firstOrNull { it.isOngoing && it.hasGoal }
     val monthShortLabels = listOf(
         stringResource(R.string.month_jan), stringResource(R.string.month_feb),
         stringResource(R.string.month_mar), stringResource(R.string.month_apr),
@@ -115,7 +116,7 @@ fun YearlyGoalTypeCard(
     onToggleDashboard: (goalId: Long, show: Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val activeSlot = group.years.firstOrNull { it.isActive && it.hasGoal }
+    val activeSlot = group.years.firstOrNull { it.isOngoing && it.hasGoal }
 
     GoalTypeCardShell(
         typeName = if (group.workoutTypeId == null) stringResource(R.string.goals_all_workouts) else group.workoutTypeName,
@@ -185,7 +186,7 @@ private fun GoalTypeCardShell(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { isCollapsed = !isCollapsed }
-                    .padding(start = 10.dp, top = 8.dp, bottom = 8.dp, end = 4.dp),
+                    .padding(start = 10.dp, top = 6.dp, bottom = 6.dp, end = 4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(
@@ -216,7 +217,7 @@ private fun GoalTypeCardShell(
                         modifier = Modifier
                             .clip(RoundedCornerShape(6.dp))
                             .background(accentColor.copy(alpha = 0.15f))
-                            .padding(horizontal = 8.dp, vertical = 5.dp)
+                            .padding(horizontal = 8.dp, vertical = 3.dp)
                     ) {
                         Text(
                             text = "${activeSlot.achieved}/${activeSlot.target}",
@@ -245,7 +246,7 @@ private fun GoalTypeCardShell(
                             else
                                 Modifier
                         )
-                        .padding(horizontal = 8.dp, vertical = 5.dp),
+                        .padding(horizontal = 8.dp, vertical = 3.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
@@ -281,13 +282,13 @@ private fun GoalTypeCardShell(
             }
 
             if (!isCollapsed) {
-                Column(modifier = Modifier.padding(start = 10.dp, end = 10.dp, bottom = 12.dp)) {
+                Column(modifier = Modifier.padding(start = 10.dp, end = 10.dp, bottom = 8.dp)) {
                     // Active progress bar
                     if (activeSlot != null) {
                         val progress = if (activeSlot.target > 0)
                             (activeSlot.achieved.toFloat() / activeSlot.target).coerceIn(0f, 1f)
                         else 0f
-                        val pct = (progress * 100).toInt()
+                        val pct = if (activeSlot.target > 0) activeSlot.achieved * 100 / activeSlot.target else 0
 
                         Text(
                             text = activeSlot.label,
@@ -295,22 +296,13 @@ private fun GoalTypeCardShell(
                             color = accentColor,
                             fontWeight = FontWeight.Medium
                         )
-                        Spacer(Modifier.height(4.dp))
+                        Spacer(Modifier.height(3.dp))
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Box(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(6.dp)
-                                    .clip(RoundedCornerShape(4.dp))
-                                    .background(accentColor.copy(alpha = 0.18f))
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxHeight()
-                                        .fillMaxWidth(fraction = progress)
-                                        .background(accentColor)
-                                )
-                            }
+                            AnimatedProgressBar(
+                                progress = progress,
+                                color = accentColor,
+                                modifier = Modifier.weight(1f).height(7.dp)
+                            )
                             Spacer(Modifier.width(6.dp))
                             Text(
                                 text = "$pct%",
@@ -320,7 +312,7 @@ private fun GoalTypeCardShell(
                                 lineHeight = 10.sp
                             )
                         }
-                        Spacer(Modifier.height(12.dp))
+                        Spacer(Modifier.height(8.dp))
                     }
 
                     content()
@@ -392,7 +384,7 @@ private fun SlotCell(
             isHit    -> SlotStatusDot(HitColor,        Icons.Default.Check,     Color.White)
             else     -> SlotStatusDot(MissColor.copy(alpha = 0.7f), Icons.Default.Close, Color.White)
         }
-        Spacer(Modifier.height(3.dp))
+        Spacer(Modifier.height(2.dp))
         Text(
             text = if (hasGoal) label else "",
             style = MaterialTheme.typography.labelSmall,

@@ -32,6 +32,7 @@ data class MonthSlot(
     val target: Int,
     val isHit: Boolean,
     val isActive: Boolean,
+    val isOngoing: Boolean,
     val hasGoal: Boolean
 )
 
@@ -50,6 +51,7 @@ data class YearSlot(
     val target: Int,
     val isHit: Boolean,
     val isActive: Boolean,
+    val isOngoing: Boolean,
     val hasGoal: Boolean
 )
 
@@ -194,11 +196,12 @@ class GoalsViewModel @Inject constructor(
                         target = slot.goal.targetCount,
                         isHit = slot.isHit,
                         isActive = !slot.isPast && !slot.isHit,
+                        isOngoing = !slot.isPast,
                         hasGoal = true
                     )
                 } else {
                     MonthSlot(month = m, achieved = 0, target = 0, isHit = false,
-                              isActive = false, hasGoal = false)
+                              isActive = false, isOngoing = false, hasGoal = false)
                 }
             }
             MonthlyGoalTypeGroup(
@@ -240,11 +243,12 @@ class GoalsViewModel @Inject constructor(
                         target = slot.goal.targetCount,
                         isHit = slot.isHit,
                         isActive = !slot.isPast && !slot.isHit,
+                        isOngoing = !slot.isPast,
                         hasGoal = true
                     )
                 } else {
                     YearSlot(year = y, achieved = 0, target = 0, isHit = false,
-                             isActive = false, hasGoal = false)
+                             isActive = false, isOngoing = false, hasGoal = false)
                 }
             }
             YearlyGoalTypeGroup(

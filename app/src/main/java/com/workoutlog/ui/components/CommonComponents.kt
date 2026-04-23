@@ -1,8 +1,12 @@
 package com.workoutlog.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,9 +27,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -221,5 +230,71 @@ fun AnimatedContent(
         modifier = modifier
     ) {
         content()
+    }
+}
+
+@Composable
+fun AnimatedProgressBar(
+    progress: Float,
+    color: Color,
+    modifier: Modifier = Modifier,
+    trackAlpha: Float = 0.18f,
+    fillAlpha: Float = 1f
+) {
+    val animatedProgress = remember(progress) { Animatable(0f) }
+    LaunchedEffect(progress) {
+        animatedProgress.snapTo(0f)
+        animatedProgress.animateTo(
+            targetValue = progress.coerceIn(0f, 1f),
+            animationSpec = tween(durationMillis = 700, easing = FastOutSlowInEasing)
+        )
+    }
+
+    Box(modifier = modifier.clip(RoundedCornerShape(50))) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val h = size.height
+            val w = size.width
+            val fillW = w * animatedProgress.value
+
+            // Track
+            drawRect(color = color.copy(alpha = trackAlpha))
+
+            if (fillW > 0f) {
+                // Gradient fill: lighter on the left, full color on the right
+                drawRect(
+                    brush = Brush.horizontalGradient(
+                        colors = listOf(
+                            color.copy(alpha = 0.6f * fillAlpha),
+                            color.copy(alpha = fillAlpha)
+                        ),
+                        startX = 0f,
+                        endX = fillW.coerceAtLeast(1f)
+                    ),
+                    size = Size(fillW, h)
+                )
+
+                // Top shine: white semi-transparent gradient over upper half
+                if (fillAlpha > 0.5f) {
+                    drawRect(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(Color.White.copy(alpha = 0.22f), Color.Transparent),
+                            startY = 0f,
+                            endY = h
+                        ),
+                        size = Size(fillW, h * 0.55f)
+                    )
+                }
+
+                // End glow: soft circle at the leading edge of the fill
+                if (fillAlpha > 0.5f && fillW > h) {
+                    drawCircle(
+                        color = color,
+                        radius = h * 1.15f,
+                        center = Offset(fillW, h / 2f),
+                        alpha = 0.30f
+                    )
+                }
+            }
+        }
     }
 }

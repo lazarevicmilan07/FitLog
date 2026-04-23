@@ -6,6 +6,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -77,6 +78,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.workoutlog.domain.model.MonthlyCountData
 import com.workoutlog.domain.model.WorkoutTypeCountData
+import com.workoutlog.ui.components.AnimatedProgressBar
 import com.workoutlog.ui.components.DashStatCard
 import com.workoutlog.ui.components.EmptyState
 import com.workoutlog.ui.components.LoadingIndicator
@@ -430,40 +432,35 @@ fun MonthlyReportContent(state: ReportsUiState) {
                                     modifier = Modifier.size(140.dp)
                                 )
                             }
+                            val restDayAccent = Color(0xFFE05252)
                             Row(
                                 modifier = Modifier
-                                    .padding(top = if (filteredCounts.isNotEmpty()) 24.dp else 0.dp)
-                                    .clickable(
-                                        interactionSource = remember { MutableInteractionSource() },
-                                        indication = null
-                                    ) { includeRestDays = !includeRestDays },
-                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                    .padding(top = if (filteredCounts.isNotEmpty()) 12.dp else 0.dp)
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .then(
+                                        if (includeRestDays)
+                                            Modifier.background(restDayAccent.copy(alpha = 0.15f))
+                                        else
+                                            Modifier.border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(10.dp))
+                                    )
+                                    .clickable { includeRestDays = !includeRestDays }
+                                    .padding(horizontal = 8.dp, vertical = 5.dp),
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
+                                Icon(
+                                    imageVector = Icons.Default.Hotel,
+                                    contentDescription = null,
+                                    tint = if (includeRestDays) restDayAccent else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+                                    modifier = Modifier.size(13.dp)
+                                )
                                 Text(
                                     text = stringResource(R.string.reports_rest_days_toggle),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    fontSize = 11.sp,
+                                    lineHeight = 11.sp,
+                                    fontWeight = if (includeRestDays) FontWeight.SemiBold else FontWeight.Normal,
+                                    color = if (includeRestDays) restDayAccent else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
                                 )
-                                Box(
-                                    modifier = Modifier
-                                        .size(width = 34.dp, height = 18.dp)
-                                        .clip(RoundedCornerShape(9.dp))
-                                        .background(
-                                            if (includeRestDays)
-                                                if (MaterialTheme.colorScheme.background.luminance() < 0.5f) Color(0xFF1D4ED8) else Color(0xFF93C5FD)
-                                            else if (MaterialTheme.colorScheme.background.luminance() < 0.5f) Color(0xFF1F2937) else Color(0xFFE5E7EB)
-                                        )
-                                        .padding(2.dp),
-                                    contentAlignment = if (includeRestDays) Alignment.CenterEnd else Alignment.CenterStart
-                                ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(14.dp)
-                                            .clip(CircleShape)
-                                            .background(Color.White)
-                                    )
-                                }
                             }
                         }
                         Spacer(Modifier.width(16.dp))
@@ -689,40 +686,35 @@ fun YearlyReportContent(state: ReportsUiState) {
                                     modifier = Modifier.size(140.dp)
                                 )
                             }
+                            val restDayAccent = Color(0xFFE05252)
                             Row(
                                 modifier = Modifier
-                                    .padding(top = if (filteredCounts.isNotEmpty()) 24.dp else 0.dp)
-                                    .clickable(
-                                        interactionSource = remember { MutableInteractionSource() },
-                                        indication = null
-                                    ) { includeRestDays = !includeRestDays },
-                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                    .padding(top = if (filteredCounts.isNotEmpty()) 12.dp else 0.dp)
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .then(
+                                        if (includeRestDays)
+                                            Modifier.background(restDayAccent.copy(alpha = 0.15f))
+                                        else
+                                            Modifier.border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(10.dp))
+                                    )
+                                    .clickable { includeRestDays = !includeRestDays }
+                                    .padding(horizontal = 8.dp, vertical = 5.dp),
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
+                                Icon(
+                                    imageVector = Icons.Default.Hotel,
+                                    contentDescription = null,
+                                    tint = if (includeRestDays) restDayAccent else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+                                    modifier = Modifier.size(13.dp)
+                                )
                                 Text(
                                     text = stringResource(R.string.reports_rest_days_toggle),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    fontSize = 11.sp,
+                                    lineHeight = 11.sp,
+                                    fontWeight = if (includeRestDays) FontWeight.SemiBold else FontWeight.Normal,
+                                    color = if (includeRestDays) restDayAccent else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
                                 )
-                                Box(
-                                    modifier = Modifier
-                                        .size(width = 34.dp, height = 18.dp)
-                                        .clip(RoundedCornerShape(9.dp))
-                                        .background(
-                                            if (includeRestDays)
-                                                if (MaterialTheme.colorScheme.background.luminance() < 0.5f) Color(0xFF1D4ED8) else Color(0xFF93C5FD)
-                                            else if (MaterialTheme.colorScheme.background.luminance() < 0.5f) Color(0xFF1F2937) else Color(0xFFE5E7EB)
-                                        )
-                                        .padding(2.dp),
-                                    contentAlignment = if (includeRestDays) Alignment.CenterEnd else Alignment.CenterStart
-                                ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(14.dp)
-                                            .clip(CircleShape)
-                                            .background(Color.White)
-                                    )
-                                }
                             }
                         }
                         Spacer(Modifier.width(16.dp))
@@ -945,22 +937,13 @@ fun DistributionLegend(
                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
                     )
                 }
-                // Mini progress bar
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(3.dp)
-                        .clip(RoundedCornerShape(2.dp))
-                        .background(item.workoutType.color.copy(alpha = if (dimmed) 0.07f else 0.15f))
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth(fraction)
-                            .fillMaxHeight()
-                            .clip(RoundedCornerShape(2.dp))
-                            .background(item.workoutType.color.copy(alpha = contentAlpha))
-                    )
-                }
+                AnimatedProgressBar(
+                    progress = fraction,
+                    color = item.workoutType.color,
+                    trackAlpha = if (dimmed) 0.07f else 0.15f,
+                    fillAlpha = contentAlpha,
+                    modifier = Modifier.fillMaxWidth().height(5.dp)
+                )
             }
         }
     }
