@@ -193,7 +193,7 @@ class GoalsViewModel @Inject constructor(
                         achieved = slot.achieved,
                         target = slot.goal.targetCount,
                         isHit = slot.isHit,
-                        isActive = !slot.isPast,
+                        isActive = !slot.isPast && !slot.isHit,
                         hasGoal = true
                     )
                 } else {
@@ -239,7 +239,7 @@ class GoalsViewModel @Inject constructor(
                         achieved = slot.achieved,
                         target = slot.goal.targetCount,
                         isHit = slot.isHit,
-                        isActive = !slot.isPast,
+                        isActive = !slot.isPast && !slot.isHit,
                         hasGoal = true
                     )
                 } else {
@@ -272,7 +272,7 @@ class GoalsViewModel @Inject constructor(
                     goal = g.goal,
                     achieved = g.achieved,
                     isHit = g.isHit,
-                    isInProgress = !g.isPast,
+                    isInProgress = !g.isPast && !g.isHit,
                     periodLabel = periodLabel,
                     year = g.boundYM.year,
                     month = if (g.goal.period == GoalPeriod.MONTHLY) g.boundYM.monthValue else null
