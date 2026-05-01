@@ -249,12 +249,8 @@ fun SettingsScreen(
                     .padding(top = 16.dp, bottom = 16.dp)
             ) {
             // Premium banner
-            val premiumToastMsg = stringResource(R.string.settings_premium_toast)
             if (!isPremium) {
-                PremiumBanner(onClick = {
-                    viewModel.setPremium(true)
-                    Toast.makeText(context, premiumToastMsg, Toast.LENGTH_SHORT).show()
-                })
+                PremiumBanner(onClick = { onShowPremium() })
                 Spacer(Modifier.height(20.dp))
             }
 

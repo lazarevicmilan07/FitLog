@@ -190,6 +190,7 @@ class MainActivity : ComponentActivity() {
             val themeMode by mainViewModel.themeMode.collectAsStateWithLifecycle()
             val onboardingCompleted by mainViewModel.onboardingCompleted.collectAsStateWithLifecycle()
             val isPremium by mainViewModel.isPremium.collectAsStateWithLifecycle()
+            val isStatsMonthly by mainViewModel.isStatsMonthly.collectAsStateWithLifecycle()
 
             WorkoutLogTheme(themeMode = themeMode) {
                 Surface(
@@ -202,6 +203,8 @@ class MainActivity : ComponentActivity() {
                             startDestination = if (onboardingCompleted == true)
                                 Screen.Home.route else Screen.Onboarding.route,
                             isPremium = isPremium,
+                            isStatsMonthly = isStatsMonthly,
+                            onStatsMonthlyChanged = mainViewModel::setStatsMonthly,
                             openSettings = openSettings
                         )
                     }
@@ -260,6 +263,8 @@ fun MainContent(
     activity: MainActivity,
     startDestination: String,
     isPremium: Boolean,
+    isStatsMonthly: Boolean,
+    onStatsMonthlyChanged: (Boolean) -> Unit,
     openSettings: MutableState<Boolean>
 ) {
     val navController = rememberNavController()
@@ -306,11 +311,9 @@ fun MainContent(
     val adRoutes = setOf(
         Screen.WorkoutTypes.route,
         Screen.Settings.route,
-        Screen.StatsMonthly.route
+        Screen.Stats.route
     )
-    // TODO: Restore for production release
-    // val showAd = !isPremium && currentRoute in adRoutes
-    val showAd = false
+    val showAd = !isPremium && currentRoute in adRoutes && !(currentRoute == Screen.Stats.route && !isStatsMonthly)
 
     val configuration = LocalConfiguration.current
     val screenWidthDp = configuration.screenWidthDp
@@ -389,7 +392,8 @@ fun MainContent(
             Box(modifier = Modifier.padding(innerPadding)) {
                 NavGraph(
                     navController = navController,
-                    startDestination = startDestination
+                    startDestination = startDestination,
+                    onStatsMonthlyChanged = onStatsMonthlyChanged
                 )
             }
         }

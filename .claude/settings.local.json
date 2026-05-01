@@ -81,7 +81,15 @@
       "PowerShell($env:JAVA_HOME = \"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\jbr\"; $env:PATH = \"$env:JAVA_HOME\\\\bin;$env:PATH\"; Set-Location C:\\\\SideProjects\\\\FitLog; .\\\\gradlew.bat :app:compileDebugKotlin 2>&1 | Select-Object -Last 20)",
       "PowerShell($env:JAVA_HOME = \"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\jbr\"; $env:PATH = \"$env:JAVA_HOME\\\\bin;$env:PATH\"; Set-Location C:\\\\SideProjects\\\\FitLog; .\\\\gradlew.bat :app:compileDebugKotlin 2>&1 | Select-Object -Last 10)",
       "Bash(JAVA_HOME=\"/c/Program Files/Android/Android Studio/jbr\" ./gradlew assembleDebug)",
-      "Bash(JAVA_HOME=\"/c/Program Files/Android/Android Studio/jbr\" grep *)"
+      "Bash(JAVA_HOME=\"/c/Program Files/Android/Android Studio/jbr\" grep *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\SideProjects\\\\FitLog\" -Recurse -Directory -Name)",
+      "Bash(Select-Object -First 30)",
+      "PowerShell(./gradlew assembleDebug 2>&1)",
+      "PowerShell($env:JAVA_HOME = \\(Get-ChildItem \"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\jbr\" -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty FullName\\); if \\(-not $env:JAVA_HOME\\) { Get-ChildItem \"C:\\\\Program Files\\\\Java\" -ErrorAction SilentlyContinue | Select-Object FullName })",
+      "PowerShell($env:JAVA_HOME = \"C:\\\\Program Files\\\\Android\\\\Android Studio\\\\jbr\"; $env:PATH = \"$env:JAVA_HOME\\\\bin;$env:PATH\"; .\\\\gradlew.bat assembleDebug 2>&1)",
+      "Bash(Get-ChildItem -Path C:\\\\SideProjects\\\\FitLog -Recurse -Force)",
+      "Bash(Select-Object -First 100)",
+      "Bash(Format-Table -AutoSize)"
     ]
   }
 }

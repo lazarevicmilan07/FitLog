@@ -49,6 +49,7 @@ data class HomeUiState(
     val workoutPercentage: Int = 0,
     val selectedFilters: Set<Long> = emptySet(),
     val goals: List<GoalWithProgress> = emptyList(),
+    val allGoals: List<GoalWithProgress> = emptyList(),
     val showGoalsOnDashboard: Boolean = true
 )
 
@@ -98,6 +99,27 @@ class HomeViewModel @Inject constructor(
                     isPast = endMillis < nowMillis
                 )
             }.sortedBy { it.goal.period.ordinal }
+        }
+    }
+
+    private val _allGoalsFlow = combine(
+        goalRepository.getAllGoalsFlow(),
+        typeRepository.getAllFlow(),
+        entryRepository.getAllFlow()
+    ) { goalEntities, typeEntities, entryEntities ->
+        val typeMap = typeEntities.associate { it.id to it.toDomain() }
+        val nowMillis = LocalDate.now().toEpochMilli()
+        goalEntities.map { goalEntity ->
+            val goal = goalEntity.toDomain(typeMap[goalEntity.workoutTypeId])
+            val boundYM = YearMonth.of(goalEntity.boundYear, goalEntity.boundMonth ?: 1)
+            val (startMs, endMs) = goal.period.getDateRangeForMonth(boundYM)
+            val count = entryEntities.count { entry ->
+                entry.date in startMs..endMs && when {
+                    goal.workoutTypeId != null -> entry.workoutTypeId == goal.workoutTypeId
+                    else -> typeMap[entry.workoutTypeId]?.isRestDay == false
+                }
+            }
+            GoalWithProgress(goal = goal, current = count, isPast = endMs < nowMillis)
         }
     }
 
@@ -151,10 +173,12 @@ class HomeViewModel @Inject constructor(
     }
 
     val uiState: StateFlow<HomeUiState> = combine(
-        _baseUiState,
-        settingsDataStore.showGoalsOnDashboard
-    ) { state, showGoals ->
-        state.copy(showGoalsOnDashboard = showGoals)
+        combine(_baseUiState, settingsDataStore.showGoalsOnDashboard) { state, showGoals ->
+            state.copy(showGoalsOnDashboard = showGoals)
+        },
+        _allGoalsFlow
+    ) { state, allGoals ->
+        state.copy(allGoals = allGoals)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), HomeUiState())
 
     init {

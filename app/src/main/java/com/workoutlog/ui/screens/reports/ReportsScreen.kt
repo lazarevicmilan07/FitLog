@@ -100,9 +100,15 @@ import kotlin.math.sqrt
 
 @Composable
 fun ReportsScreen(
+    onMonthlyChanged: (Boolean) -> Unit = {},
     viewModel: ReportsViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(state.isMonthly) {
+        onMonthlyChanged(state.isMonthly)
+    }
+
     var showPeriodPicker by remember { mutableStateOf(false) }
 
     LifecycleResumeEffect(Unit) {

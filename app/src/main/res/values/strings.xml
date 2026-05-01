@@ -73,6 +73,7 @@
     <string name="goals_delete_cd">Delete goal</string>
     <string name="goals_for_label">For</string>
     <string name="goals_home_toggle">Home</string>
+    <string name="goals_duplicate_error">A goal for this workout type and period already exists.</string>
 
     <!-- Goal Completion Messages (random motivational toasts) -->
     <string-array name="goal_completed_messages">

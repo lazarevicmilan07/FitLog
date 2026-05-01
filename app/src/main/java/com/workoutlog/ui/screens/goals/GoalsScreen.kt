@@ -231,7 +231,8 @@ fun GoalsScreen(
                                     state.monthlyGoalGroups.forEach { group ->
                                         MonthlyGoalTypeCard(
                                             group = group,
-                                            onToggleDashboard = { id, show -> viewModel.setGoalShowOnDashboard(id, show) }
+                                            onToggleDashboard = { id, show -> viewModel.setGoalShowOnDashboard(id, show) },
+                                            onEdit = { goalId -> editGoalId = goalId; showGoalSheet = true }
                                         )
                                     }
                                 }
@@ -302,7 +303,8 @@ fun GoalsScreen(
                                     state.yearlyGoalGroups.forEach { group ->
                                         YearlyGoalTypeCard(
                                             group = group,
-                                            onToggleDashboard = { id, show -> viewModel.setGoalShowOnDashboard(id, show) }
+                                            onToggleDashboard = { id, show -> viewModel.setGoalShowOnDashboard(id, show) },
+                                            onEdit = { goalId -> editGoalId = goalId; showGoalSheet = true }
                                         )
                                     }
                                 }

@@ -40,5 +40,6 @@ data class BackupWorkoutGoal(
     val isActive: Boolean = true,
     val createdAt: Long,
     val boundYear: Int = 0,
-    val boundMonth: Int? = null
+    val boundMonth: Int? = null,
+    val showOnDashboard: Boolean = true
 )

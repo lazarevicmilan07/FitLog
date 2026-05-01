@@ -21,6 +21,11 @@ A production-ready Android workout tracking app with offline-first architecture,
 - **Type-specific or all-types** - Target a specific workout type or count all non-rest workouts
 - **Live progress** - Progress bar and current/target count updated in real time on the home screen
 - Period badge (M / Y) with color-coded accent per goal type
+- **Home indicator** - Per-goal toggle to show/hide the goal on the home screen dashboard; goals with the indicator off are still fully managed in the Goals screen
+- **Duplicate prevention** - Adding a new goal is blocked (with an inline error banner) if a goal for the same period, workout type, and bound period already exists; check is skipped when editing an existing goal
+- **Goal management sheet modes**
+  - *Edit mode* (opened from a specific goal card): list at the top shows only that goal, form is pre-filled
+  - *Add mode* (opened from +): list shows all monthly and yearly goals scoped to the current viewed month/year; switching form focus between goals keeps the full list stable
 
 ### Stats & Reports
 - **Monthly Stats** - Bar chart of daily workout counts with period totals and type breakdown
@@ -34,7 +39,7 @@ A production-ready Android workout tracking app with offline-first architecture,
 
 ### Settings & Preferences
 - Dark, light, and system-aware theme
-- Backup & Restore — full data backup/restore via JSON file (includes workout types, entries, and goals)
+- Backup & Restore — full data backup/restore via JSON file (includes workout types, entries, and goals with all fields including `showOnDashboard`)
 - No login or account required
 
 ## Architecture
@@ -121,6 +126,7 @@ data class WorkoutGoal(
     val targetCount: Int,
     val workoutTypeId: Long?,       // Null = all non-rest-day types
     val isActive: Boolean,
+    val showOnDashboard: Boolean,   // Whether the goal appears on the home screen
     val createdAt: Long,
     val boundYear: Int,
     val boundMonth: Int?            // Null for YEARLY goals; set for MONTHLY goals

@@ -461,7 +461,7 @@ fun HomeScreen(
     // Goal management bottom sheet
     if (showGoalSheet) {
         GoalManagementSheet(
-            goals = state.goals.filter { it.goal.showOnDashboard },
+            goals = state.allGoals,
             workoutTypes = state.workoutTypes,
             onAddGoal = { period, target, typeId, boundYM, showOnHome -> viewModel.addGoal(period, target, typeId, boundYM, showOnHome) },
             onUpdateGoal = { id, period, target, typeId, boundYM, showOnHome -> viewModel.updateGoal(id, period, target, typeId, boundYM, showOnHome) },

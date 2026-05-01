@@ -31,7 +31,8 @@ private fun getNavIndex(route: String?): Int = when (route) {
 @Composable
 fun NavGraph(
     navController: NavHostController,
-    startDestination: String
+    startDestination: String,
+    onStatsMonthlyChanged: (Boolean) -> Unit = {}
 ) {
     NavHost(
         navController = navController,
@@ -74,7 +75,7 @@ fun NavGraph(
         }
 
         composable(Screen.Stats.route) {
-            ReportsScreen()
+            ReportsScreen(onMonthlyChanged = onStatsMonthlyChanged)
         }
 
         composable(Screen.Goals.route) {

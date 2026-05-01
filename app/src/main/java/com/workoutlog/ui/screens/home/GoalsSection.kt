@@ -34,6 +34,7 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ModalBottomSheet
@@ -266,8 +267,8 @@ fun GoalManagementSheet(
     var showOnHome by remember { mutableStateOf(true) }
     var showBoundPicker by remember { mutableStateOf(false) }
 
-    LaunchedEffect(editingGoalId) {
-        val eg = goals.find { it.goal.id == editingGoalId }
+    LaunchedEffect(Unit) {
+        val eg = goals.find { it.goal.id == initialEditGoalId }
         if (eg != null) {
             selectedPeriod = eg.goal.period
             selectedTypeId = eg.goal.workoutTypeId
@@ -278,13 +279,6 @@ fun GoalManagementSheet(
                 eg.goal.boundYear.takeIf { it > 0 } ?: YearMonth.now().year,
                 eg.goal.boundMonth ?: 1
             )
-        } else {
-            selectedPeriod = GoalPeriod.MONTHLY
-            selectedTypeId = null
-            targetCount = 3
-            targetText = "3"
-            boundYearMonth = initialBoundYearMonth
-            showOnHome = true
         }
     }
 
@@ -297,16 +291,31 @@ fun GoalManagementSheet(
         GoalPeriod.YEARLY  -> boundYearMonth.year.toString()
     }
 
-    val displayedGoals = remember(goals, boundYearMonth, selectedPeriod) {
-        goals.filter { gwp ->
-            when (gwp.goal.period) {
-                GoalPeriod.MONTHLY ->
-                    selectedPeriod == GoalPeriod.MONTHLY &&
-                    gwp.goal.boundYear == boundYearMonth.year &&
-                    gwp.goal.boundMonth == boundYearMonth.monthValue
-                GoalPeriod.YEARLY ->
-                    gwp.goal.boundYear == boundYearMonth.year
+    val isEditMode = remember { initialEditGoalId != null }
+
+    val displayedGoals = remember(goals, editingGoalId) {
+        if (isEditMode && editingGoalId != null) {
+            goals.filter { it.goal.id == editingGoalId }
+        } else {
+            goals.filter { gwp ->
+                when (gwp.goal.period) {
+                    GoalPeriod.MONTHLY ->
+                        gwp.goal.boundYear == initialBoundYearMonth.year &&
+                        gwp.goal.boundMonth == initialBoundYearMonth.monthValue
+                    GoalPeriod.YEARLY ->
+                        gwp.goal.boundYear == initialBoundYearMonth.year
+                }
             }
+        }
+    }
+
+    val isDuplicate = remember(goals, selectedPeriod, selectedTypeId, boundYearMonth, editingGoalId) {
+        goals.any { gwp ->
+            gwp.goal.id != editingGoalId &&
+            gwp.goal.period == selectedPeriod &&
+            gwp.goal.workoutTypeId == selectedTypeId &&
+            gwp.goal.boundYear == boundYearMonth.year &&
+            (selectedPeriod == GoalPeriod.YEARLY || gwp.goal.boundMonth == boundYearMonth.monthValue)
         }
     }
 
@@ -384,7 +393,18 @@ fun GoalManagementSheet(
                                         if (isEditing) goalAccent.copy(alpha = 0.08f)
                                         else Color.Transparent
                                     )
-                                    .clickable { editingGoalId = gp.goal.id }
+                                    .clickable {
+                                        editingGoalId = gp.goal.id
+                                        selectedPeriod = gp.goal.period
+                                        selectedTypeId = gp.goal.workoutTypeId
+                                        targetCount = gp.goal.targetCount
+                                        targetText = gp.goal.targetCount.toString()
+                                        showOnHome = gp.goal.showOnDashboard
+                                        boundYearMonth = YearMonth.of(
+                                            gp.goal.boundYear.takeIf { it > 0 } ?: YearMonth.now().year,
+                                            gp.goal.boundMonth ?: 1
+                                        )
+                                    }
                                     .padding(vertical = 6.dp, horizontal = 4.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
@@ -447,7 +467,15 @@ fun GoalManagementSheet(
                             fontWeight = FontWeight.SemiBold
                         )
                         if (editingGoalId != null) {
-                            TextButton(onClick = { editingGoalId = null }) {
+                            TextButton(onClick = {
+                                editingGoalId = null
+                                selectedPeriod = GoalPeriod.MONTHLY
+                                selectedTypeId = null
+                                targetCount = 3
+                                targetText = "3"
+                                boundYearMonth = initialBoundYearMonth
+                                showOnHome = true
+                            }) {
                                 Text(stringResource(R.string.goals_new_btn), style = MaterialTheme.typography.labelMedium)
                             }
                         }
@@ -653,6 +681,31 @@ fun GoalManagementSheet(
 
                 } // end scrollable Column
 
+            if (isDuplicate) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 4.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(Color(0xFFEF4444).copy(alpha = 0.15f))
+                        .padding(horizontal = 12.dp, vertical = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Info,
+                        contentDescription = null,
+                        tint = Color(0xFFEF4444),
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Text(
+                        text = stringResource(R.string.goals_duplicate_error),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
+
             Button(
                 onClick = {
                     val eid = editingGoalId
@@ -663,6 +716,7 @@ fun GoalManagementSheet(
                         onAddGoal(selectedPeriod, targetCount, selectedTypeId, boundYearMonth, showOnHome)
                     }
                 },
+                enabled = !isDuplicate,
                 modifier = Modifier
                     .fillMaxWidth()
                     .navigationBarsPadding()

@@ -59,7 +59,8 @@ object BackupUtil {
                     isActive = goal.isActive,
                     createdAt = goal.createdAt,
                     boundYear = goal.boundYear,
-                    boundMonth = goal.boundMonth
+                    boundMonth = goal.boundMonth,
+                    showOnDashboard = goal.showOnDashboard
                 )
             }
         )
@@ -135,7 +136,8 @@ object BackupUtil {
                 isActive = bg.isActive,
                 createdAt = bg.createdAt,
                 boundYear = bg.boundYear,
-                boundMonth = bg.boundMonth
+                boundMonth = bg.boundMonth,
+                showOnDashboard = bg.showOnDashboard
             )
         }
         goalRepository.insertAll(goalEntities)

@@ -69,6 +69,7 @@ internal fun GoalPeriod.letter(): String = when (this) {
 fun MonthlyGoalTypeCard(
     group: MonthlyGoalTypeGroup,
     onToggleDashboard: (goalId: Long, show: Boolean) -> Unit,
+    onEdit: (goalId: Long?) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val activeSlot = group.months.firstOrNull { it.isOngoing && it.hasGoal }
@@ -95,6 +96,7 @@ fun MonthlyGoalTypeCard(
         activeGoalId = group.activeGoalId,
         activeShowOnDashboard = group.activeShowOnDashboard,
         onToggleDashboard = onToggleDashboard,
+        onEdit = onEdit,
         modifier = modifier
     ) {
         SlotRow(
@@ -114,6 +116,7 @@ fun MonthlyGoalTypeCard(
 fun YearlyGoalTypeCard(
     group: YearlyGoalTypeGroup,
     onToggleDashboard: (goalId: Long, show: Boolean) -> Unit,
+    onEdit: (goalId: Long?) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val activeSlot = group.years.firstOrNull { it.isOngoing && it.hasGoal }
@@ -132,6 +135,7 @@ fun YearlyGoalTypeCard(
         activeGoalId = group.activeGoalId,
         activeShowOnDashboard = group.activeShowOnDashboard,
         onToggleDashboard = onToggleDashboard,
+        onEdit = onEdit,
         modifier = modifier
     ) {
         SlotRow(
@@ -159,6 +163,7 @@ private fun GoalTypeCardShell(
     activeGoalId: Long?,
     activeShowOnDashboard: Boolean,
     onToggleDashboard: (goalId: Long, show: Boolean) -> Unit,
+    onEdit: (goalId: Long?) -> Unit = {},
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
@@ -282,7 +287,11 @@ private fun GoalTypeCardShell(
             }
 
             if (!isCollapsed) {
-                Column(modifier = Modifier.padding(start = 10.dp, end = 10.dp, bottom = 8.dp)) {
+                Column(
+                    modifier = Modifier
+                        .clickable { onEdit(activeGoalId) }
+                        .padding(start = 10.dp, end = 10.dp, bottom = 8.dp)
+                ) {
                     // Active progress bar
                     if (activeSlot != null) {
                         val progress = if (activeSlot.target > 0)
