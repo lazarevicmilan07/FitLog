@@ -32,6 +32,7 @@ class SettingsDataStore @Inject constructor(
     private val showCaloriesKey = booleanPreferencesKey("show_calories")
     private val showDurationKey = booleanPreferencesKey("show_duration")
     private val isPremiumKey = booleanPreferencesKey("is_premium")
+    private val isBackupRestoreUnlockedKey = booleanPreferencesKey("is_backup_restore_unlocked")
     private val showGoalsOnDashboardKey = booleanPreferencesKey("show_goals_on_dashboard")
 
     val themeMode: Flow<ThemeMode> = context.dataStore.data.map { prefs ->
@@ -52,6 +53,10 @@ class SettingsDataStore @Inject constructor(
 
     val isPremium: Flow<Boolean> = context.dataStore.data.map { prefs ->
         prefs[isPremiumKey] ?: false
+    }
+
+    val isBackupRestoreUnlocked: Flow<Boolean> = context.dataStore.data.map { prefs ->
+        prefs[isBackupRestoreUnlockedKey] ?: false
     }
 
     val showGoalsOnDashboard: Flow<Boolean> = context.dataStore.data.map { prefs ->
@@ -76,6 +81,10 @@ class SettingsDataStore @Inject constructor(
 
     suspend fun setPremium(isPremium: Boolean) {
         context.dataStore.edit { it[isPremiumKey] = isPremium }
+    }
+
+    suspend fun setBackupRestoreUnlocked(unlocked: Boolean) {
+        context.dataStore.edit { it[isBackupRestoreUnlockedKey] = unlocked }
     }
 
     suspend fun setShowGoalsOnDashboard(show: Boolean) {

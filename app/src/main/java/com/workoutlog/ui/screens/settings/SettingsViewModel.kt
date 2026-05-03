@@ -74,6 +74,9 @@ class SettingsViewModel @Inject constructor(
     val isPremium: StateFlow<Boolean> = settingsDataStore.isPremium
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
+    val isBackupRestoreUnlocked: StateFlow<Boolean> = settingsDataStore.isBackupRestoreUnlocked
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
     val reminderEnabled: StateFlow<Boolean> = reminderPreferences.isEnabled
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
@@ -100,6 +103,12 @@ class SettingsViewModel @Inject constructor(
     fun setPremium(isPremium: Boolean) {
         viewModelScope.launch {
             settingsDataStore.setPremium(isPremium)
+        }
+    }
+
+    fun unlockBackupRestore(code: String) {
+        if (code == "unlock-backup-restore") {
+            viewModelScope.launch { settingsDataStore.setBackupRestoreUnlocked(true) }
         }
     }
 
@@ -167,7 +176,7 @@ class SettingsViewModel @Inject constructor(
 
     fun backup(uri: Uri, isMonthly: Boolean, months: List<YearMonth>, years: List<Int>) {
         viewModelScope.launch {
-            if (!settingsDataStore.isPremium.first()) {
+            if (!settingsDataStore.isPremium.first() && !settingsDataStore.isBackupRestoreUnlocked.first()) {
                 _events.emit(SettingsEvent.ShowPremiumRequired)
                 return@launch
             }
@@ -202,7 +211,7 @@ class SettingsViewModel @Inject constructor(
 
     fun restore(uri: Uri) {
         viewModelScope.launch {
-            if (!settingsDataStore.isPremium.first()) {
+            if (!settingsDataStore.isPremium.first() && !settingsDataStore.isBackupRestoreUnlocked.first()) {
                 _events.emit(SettingsEvent.ShowPremiumRequired)
                 return@launch
             }

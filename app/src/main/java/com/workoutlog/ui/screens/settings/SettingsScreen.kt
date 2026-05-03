@@ -10,6 +10,9 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -61,6 +64,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -93,6 +97,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.Alignment
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import androidx.compose.ui.Modifier
@@ -127,6 +132,7 @@ fun SettingsScreen(
     val context = LocalContext.current
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val isPremium by viewModel.isPremium.collectAsStateWithLifecycle()
+    val isBackupRestoreUnlocked by viewModel.isBackupRestoreUnlocked.collectAsStateWithLifecycle()
     val reminderEnabled by viewModel.reminderEnabled.collectAsStateWithLifecycle()
     val reminderTime by viewModel.reminderTime.collectAsStateWithLifecycle()
     val backupReminderSettings by viewModel.backupReminderSettings.collectAsStateWithLifecycle()
@@ -178,6 +184,7 @@ fun SettingsScreen(
 
     // Restore confirmation dialog state
     var showRestoreConfirmDialog by remember { mutableStateOf(false) }
+    var showUnlockCodeDialog by remember { mutableStateOf(false) }
 
     // Launchers
     val backupLauncher = rememberLauncherForActivityResult(
@@ -382,17 +389,18 @@ fun SettingsScreen(
                         icon = Icons.Default.Backup,
                         iconTint = MaterialTheme.colorScheme.primary,
                         title = stringResource(R.string.settings_backup),
-                        subtitle = if (isPremium) stringResource(R.string.settings_backup_subtitle) else stringResource(R.string.settings_premium_feature),
+                        subtitle = if (isPremium || isBackupRestoreUnlocked) stringResource(R.string.settings_backup_subtitle) else stringResource(R.string.settings_premium_feature),
                         isLoading = state.isBackingUp,
-                        isPremiumLocked = !isPremium,
+                        isPremiumLocked = !isPremium && !isBackupRestoreUnlocked,
                         onClick = {
-                            if (isPremium) {
+                            if (isPremium || isBackupRestoreUnlocked) {
                                 pendingExportFormat = "backup"
                                 showExportDialog = true
                             } else {
                                 onShowPremium()
                             }
-                        }
+                        },
+                        onLongClick = { if (!isPremium && !isBackupRestoreUnlocked) showUnlockCodeDialog = true }
                     )
                     HorizontalDivider(
                         modifier = Modifier.padding(start = 58.dp),
@@ -402,13 +410,14 @@ fun SettingsScreen(
                         icon = Icons.Default.Restore,
                         iconTint = MaterialTheme.colorScheme.primary,
                         title = stringResource(R.string.settings_restore),
-                        subtitle = if (isPremium) stringResource(R.string.settings_restore_subtitle) else stringResource(R.string.settings_premium_feature),
+                        subtitle = if (isPremium || isBackupRestoreUnlocked) stringResource(R.string.settings_restore_subtitle) else stringResource(R.string.settings_premium_feature),
                         isLoading = state.isRestoring,
-                        isPremiumLocked = !isPremium,
+                        isPremiumLocked = !isPremium && !isBackupRestoreUnlocked,
                         onClick = {
-                            if (isPremium) showRestoreConfirmDialog = true
+                            if (isPremium || isBackupRestoreUnlocked) showRestoreConfirmDialog = true
                             else onShowPremium()
-                        }
+                        },
+                        onLongClick = { if (!isPremium && !isBackupRestoreUnlocked) showUnlockCodeDialog = true }
                     )
                 }
             }
@@ -1074,6 +1083,37 @@ fun SettingsScreen(
             }
         )
     }
+
+    if (showUnlockCodeDialog) {
+        var unlockCode by remember { mutableStateOf("") }
+        AlertDialog(
+            onDismissRequest = { showUnlockCodeDialog = false },
+            title = { Text("Enter unlock code") },
+            text = {
+                OutlinedTextField(
+                    value = unlockCode,
+                    onValueChange = { unlockCode = it },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions(onDone = {
+                        viewModel.unlockBackupRestore(unlockCode)
+                        showUnlockCodeDialog = false
+                    })
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.unlockBackupRestore(unlockCode)
+                    showUnlockCodeDialog = false
+                }) { Text("Unlock") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showUnlockCodeDialog = false }) {
+                    Text(stringResource(R.string.btn_cancel))
+                }
+            }
+        )
+    }
 }
 
 @Composable
@@ -1299,12 +1339,35 @@ private fun SettingsActionRow(
     subtitle: String,
     isLoading: Boolean,
     onClick: () -> Unit,
-    isPremiumLocked: Boolean = false
+    isPremiumLocked: Boolean = false,
+    onLongClick: (() -> Unit)? = null
 ) {
+    var suppressNextClick by remember { mutableStateOf(false) }
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(enabled = !isLoading, onClick = onClick)
+            .then(
+                if (onLongClick != null) {
+                    Modifier.pointerInput(onLongClick) {
+                        coroutineScope {
+                            while (true) {
+                                awaitPointerEventScope { awaitFirstDown(requireUnconsumed = false) }
+                                val job = launch {
+                                    delay(5000L)
+                                    suppressNextClick = true
+                                    onLongClick()
+                                }
+                                awaitPointerEventScope { waitForUpOrCancellation() }
+                                job.cancel()
+                            }
+                        }
+                    }
+                } else Modifier
+            )
+            .clickable(enabled = !isLoading) {
+                if (suppressNextClick) suppressNextClick = false
+                else onClick()
+            }
             .padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
